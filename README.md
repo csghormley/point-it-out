@@ -15,15 +15,30 @@ Linux server administration, Django, Python, and Postgres. All the
 information you will need is available on the internet, but it will
 take some extra time to find the answer to your questions.
 
+## Orientation
+
+* `collector` is the Django project directory
+* `docker-stack` contains files to manage the docker-compose configuration
+* `nginx` contains files most likely to be found in /etc/nginx in production
+* `postgis_data/pgdata` is the folder where the postgres container's data folder will be located by default
+* `scripts` contains some useful scripts
+* `systemd` contains some unit configuration files
+
 ## Setting Up
 
 Clone the project into a folder. Here I have been using
 /opt/mapsurvey. Make that folder your working directory.
 
-Run the build-docker.sh script. It will download the docker images and
+Run the build-docker.sh script.
+
+`./scripts/build-docker.sh`
+
+Provided docker is installed, this will download the docker images and
 install the required software.
 
-If setting up a webserver facing the internet,
+If setting up a webserver facing the internet, do the following -
+these are strongly recommended but out of the scope of this document.
+
  * install a firewall and secure your Docker installation against outside access (e.g., ufw-docker)
  * install Nginx with config files in ./nginx as an example (your configuration probably will be different!)
  * set up LetsEncrypt to automate security certificate installation
