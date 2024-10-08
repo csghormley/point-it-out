@@ -1,0 +1,215 @@
+Things that got interesting results:
+
+$ cat docker-compose.yml | docker stack deploy --compose-file - teststack
+
+VERY quickly runs up the services described in the docker compose file.
+
+Dockerfiles pulled into the Docker desktop ARE NOT on the local machine!
+
+You have to clone the existing repo and make local changes, then
+(somehow - still not sure how to pull them into the app) - or possibly
+just use the command line to rebuild the image and start a container.
+
+For postgres I'm going to need nonvolatile storage for the database files.
+
+How widely is postgrest used? Is it an alternative to other bindings
+like psycopg2?
+
+NEW TOOL fzf - junegunn choi - fuzzy history search
+
+** docker scout **
+
+Updated to 1.20 by copying new binary from github into the cli plugins
+directory.
+
+Used `docker scout recommendations` to get a breakdown of alternatives. In this case I think it was telling me to use another base image (not debian 11.8 but 12 or 12-slim). But when I modified the Dockerfile I copied from the postgres standard Dockerfile set, the image wouldn't build.
+
+Going to try the prebuilt dockerfile for debian 12 bookworm.
+
+* syntax to get recommendations for local image *
+docker scout recommendations local://csghor/postgres:bl16
+
+WOOT changing baseimage to stable-slim as recommended worked! eliminated critical CVEs.
+
+* bootstrap *
+
+1. clone the Dockerfile (git clone from docker library)
+2. build selected dockerfile, e.g.
+
+   docker build -t csghor/postgres:latest .
+
+3. check for vulns
+
+   docker scout recommendations csghor/postgres:latest
+
+4. push (probably not necessary, but it makes the images available elsewhere)
+
+   docker push csghor/postgres:latest
+   - or -
+
+   docker push -a csghor/postgres // push all tags
+
+5. run a stack, including a simple admin console:
+
+---- docker-compose.yml ----
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: csghor/postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mysecret
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+----
+
+   cat docker-compose.yml | docker stack deploy --compose-file - teststack
+
+6. shut down the test stack
+
+   docker stack rm teststack
+
+7. start it back up again
+
+   cat docker-compose.yml | docker stack deploy --compose-file - teststack
+
+   No persistence!
+
+https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes
+
+Getting bind volume to run using docker stack - only apparently works
+in "short" format. This:
+
+      - "./data:/data"
+
+But not this:
+
+      - type: bind
+        source: ./data
+        target: /data
+        name: mydata
+
+More on how to set up volumes
+https://docs.docker.com/compose/compose-file/compose-file-v3/#volumes
+
+11/28/23
+
+How I solved persistence with my postgresql test stack:
+https://gruchalski.com/posts/2021-07-12-postgres-in-docker-with-persistent-storage/
+
+Background on how networking is supposed to work with docker:
+https://blog.alexellis.io/docker-stacks-attachable-networks/
+
+Somehow in fiddling with network config I broke it.
+
+Things I did:
+
+       set explicit port mapping on db server (but I thought it
+       was working then) - disabled and still not working
+
+       messed with postgresql.conf logging config - but I put it back!
+
+Weird: rogue copy of the stack was running. When I deleted it, the DB
+process still wouldn't run. So I have the admin console but not the backend.
+
+12/4/2023
+
+Rebuilt postgres image with Debian Bookworm, enabled port mapping
+5433:5432, and now I can access the db instance from pgadmin on the
+local machine! And the databases are still there!
+
+12/5/2023
+
+Can I skip over the part where I reimplement CartoDB? Yes.
+
+https://github.com/CartoDB/carto-selfhosted
+
+But you still need a license. Student accounts and academic pricing available.
+
+https://docs.carto.com/faqs/carto-for-education#how-can-i-get-a-student-account-in-carto
+
+1/23/2024
+
+Don't know what happened, but adminer isn't connecting to the
+database, and pgadmin won't run (as a container - it runs fine when
+installed as an app).
+
+Right now all I really need is a Docker-portable postgres instance
+that I can run a database and install postgis on.
+
+Referencing the container ID returned from
+
+     docker ps | grep postgres | cut -f1 -d" "
+
+I can run
+
+     docker exec 0f6fca2e1632 createdb -U postgres mydb
+
+to create a database, or even
+
+     docker exec -it 0f6fca2e1632 psql -U postgres -d mydb
+
+to open an interactive shell on that database. To install postgis we
+need to use a different image:
+
+     https://registry.hub.docker.com/r/postgis/postgis/tags?page=1&name=16-3.4
+
+Steps to build an image:
+
+      cd ~/prj
+      git clone https://github.com/postgis/docker-postgis.git
+      cd docker-postgis/16-3.4/alpine
+      docker build -t csghor/postgis-alpine:16-3.4 .
+
+Add this to the docker-compose file:
+
+  postgis:
+    image: csghor/postgis-alpine:16-3.4
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: secret
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5434:5432 // use a unique port to differentiate
+    volumes:
+      - "./postgis_data:/var/lib/postgresql/data"
+
+Start the stack:
+
+    cat docker-compose.yml | docker stack deploy --compose-file - teststack
+    
+Create the database in the running container, and enable postGIS:
+
+    % CONTID=`docker ps | grep postgis | cut -f1 -d" "`
+    % docker exec $CONTID createdb -U postgres mapbe
+    % docker exec $CONTID psql -U postgres -d mapbe -c "create extension postgis;"
+    % docker exec $CONTID psql -U postgres -d mapbe -c "select PostGIS_version();"
+
+
+    % docker exec $CONTID psql -U postgres -d mapbe -c
+      "create user geodjango password 'secret';""
+
+      CREATE ROLE
+
+    % docker exec $CONTID psql -U postgres -d postgres -c
+      "create database mapbe owner geodjango;"
+
+      CREATE DATABASE
+
+    % docker exec $CONTID psql -U postgres -d mapbe -c
+      "create extension postgis;"        
+
+      CREATE EXTENSION
+
+And then - holy moly, you can have ./manage.py ogrinspect create the model for you:
+
+    % python manage.py ogrinspect pio/features.json SurveyPoints --srid=4326 --mapping
+
+This looks pretty good, except it doesn't suss out the field lengths.

@@ -1,0 +1,34 @@
+wheel
+
+Django==5.1.1
+django-environ
+#GDAL==3.8.3
+GDAL==3.4.1
+GEOS
+PROJ
+
+# required for 2FA
+phonenumbers
+webauthn
+django-formtools
+django-otp
+django-otp-yubikey
+
+django-debug-toolbar
+
+# security
+django-csp
+django-registration
+
+psycopg>=3.0
+django-extensions
+djangorestframework
+djangorestframework-gis
+django-leaflet
+django-two-factor-auth
+#django-rest-knox
+markdown
+django-filter
+gunicorn
+tzdata
+geoip2

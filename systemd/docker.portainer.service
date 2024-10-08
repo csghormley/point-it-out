@@ -1,0 +1,23 @@
+# original command line:
+# docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+
+
+[Unit]
+Description=Portainer
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker exec %n stop
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull portainer/portainer-ce:latest
+ExecStart=/usr/bin/docker run --rm --name %n \
+    -v portainer_data:/data \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -p 9443:9443 \
+    portainer/portainer-ce:latest
+
+[Install]
+WantedBy=default.target

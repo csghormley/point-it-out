@@ -1,0 +1,111 @@
+{% load static %}<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Wildfire Risk Management System Survey</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <!--		<script src="{% static 'pio/lib/jquery.min.js' %}"></script> -->
+		<script src="{% static 'pio/lib/jquery-3.7.1.js' %}"></script>
+		<script src="{% static 'pio/lib/userBehaviour.js' %}"></script>
+		{# inject map configuration object in a script tag #}
+		{# not executed inline so not subject to content security policy! #}
+		{{ mapconfig|json_script:"mapconfig-data"}}
+
+		<script nonce="{{CSP_NONCE}}">// associate preloaded jquery with the window object, so new bootstrap can detect it
+			window.jQuery = window.$ = jQuery;
+			const context = {
+				responseid: "{{ responseid|default_if_none:0 }}",
+				projectid: "{{ projectid|default_if_none:0 }}",
+                ip_address: "{{ ip|default_if_none:'' }}",
+                country: "{{ country }}",
+                city: "{{ city }}"
+		                    }
+		</script>
+		<script src="{% static 'pio/lib/bootstrap.bundle.min.js' %}"></script>
+		<link rel="stylesheet" href="{% static 'pio/lib/bootstrap.min.css' %}">
+<!--		<link rel="stylesheet" href="{% static 'pio/lib/jquery-ui.css' %}"> -->
+
+		<script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
+
+		<link rel="stylesheet" href="{% static 'pio/css/map.css' %}">
+<!--		<link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+
+	</head>
+<body>
+{% csrf_token %}
+<div class="hidden" id="static_img_base">{% static 'pio/img/' %}</div>
+<div class="hidden" id="static_json_base">{% static 'pio/geojson/' %}</div>
+<div class="container-xl">
+
+	<div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer"></a>
+        <div id="popup-content"></div>
+    </div>
+    <!--
+		<div style="position:absolute; z-index:1; left:45px; top:45px">
+			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#howtoModal">Help</button>
+		</div>
+	-->
+	<div id="map" class="map">
+	</div>
+	<div class="float-right" id="map_status2"><span class="md-bold" id="map_title"></span><span> </span><span class="md-bold" id="map_info"></span></div>
+<!--	<div class="float-right sm-bold"><span id="responseid">empty</span><span>"; point counts = &#123;</span><span id="pointcount">empty</span><span>&#125;</span></div> -->
+</div>
+
+<!-- Intro howto Modal -->
+<div id="howtoModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><b>Tips for using the map</b></h4>
+      </div>
+      <div class="modal-body">
+        <p>This map is used for collecting information about <span id="site_purpose">wildfire resilience and vulnerability</span> in the area surrounding <span id="site_description"></span>. Here are a few tips for how to interact with the map.</p>
+
+		<div class="float-right">
+				<div class="pad-25">
+				<img src="{% static 'pio/img/zoom_scroll.gif' %}">
+				<p class="sm-bold">Panning and zooming</p>
+				</br>
+
+				<img class="float-right" src="{% static 'pio/img/area_painting.gif' %}">
+				<p class="sm-bold">Pointing out areas</p>
+			</div>
+		</div>
+		<div class="pad-25">
+			<p><u>Move the map</u></p>
+			<ul>
+				<li>Pan the map by clicking and dragging with the mouse.</li>
+				<li>Zoom the map by using the mouse scroll-wheel.</li>
+			</ul>
+		<p><u>Point out locations</u></p>
+			<ul>
+				<li>Click once to place a point on the map.</li>
+				<li>The size of the point matches the colored circle surrounding the cursor.</li>
+				<li>Zooming-in lets you mark locations in more detail while zooming-out is useful for marking general areas.</li>
+			</ul>
+		</p>
+		<p><u>Modify points</u></p>
+			<ul>
+				<li>Mark the checkboxes to describe the location.</li>
+				<li>Delete a point by clicking on the delete button.</li>
+			</ul>
+		</div>
+
+	  <button class="btn btn-success" data-dismiss="modal" style="margin-left:40%; margin-bottom:20px">Return to map</button>
+
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'pio/lib/js.cookie.min.js' %}"></script>
+<script src="{% static 'pio/js/misc.js' %}"></script>
+<script src="{% static 'pio/js/map.js' %}"></script>
+
+</body>
+</html>

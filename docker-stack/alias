@@ -1,0 +1,31 @@
+# define some useful aliases for working with containers
+
+# pull the first matching container ID from running container lists
+get_container_id() { if [ -n "$1" ]; then docker ps | grep "$1" | head -1 | cut -d" " -f1; fi }
+
+# pull the first matching image ID from local images
+get_image_id() { if [ -n "$1" ]; then docker image ls | grep "$1" | head -1 | cut -d" " -f1; fi }
+
+# run a command in the named running container
+docker_exec() { if [ -n "$1" ]; then echo "Looking for container matching '$1'..."; docker ps | grep "$1" | sed "s/  //g" | cut -d" " -f1,2 ; CONT_ID=$(get_container_id "$1"); if [ -n "$CONT_ID" ] && [ -n "$2" ]; then docker exec -it "$CONT_ID" $2; else echo "container '$1' not found"; fi; fi }
+
+# run a command in the named running container, as specified user
+# synopsis: su_docker_exec CONTAINER USER COMMAND
+su_docker_exec() { if [ -n "$1" ]; then echo "Looking for container matching '$1'..."; docker ps | grep "$1" | sed "s/  //g" | cut -d" " -f1,2 ; CONT_ID=$(get_container_id "$1"); if [ -n "$CONT_ID" ] && [ -n "$3" ]; then docker exec -it -u $2 "$CONT_ID" $3; else echo "container '$1' not found"; fi; fi }
+
+# open a bash shell to the named running container
+docker_shell() { if [ -n "$1" ]; then echo "Looking for container matching '$1'..."; docker ps | grep "$1" | sed "s/  //g" | cut -d" " -f1,2 ; CONT_ID=$(get_container_id "$1"); if [ -n "$CONT_ID" ]; then docker exec -it "$CONT_ID" bash; else echo "container '$1' not found"; fi; fi }
+
+# copy a file to the named running container
+# synopsis: docker_cp NAME src dst
+docker_cp() { if [ -n "$1" ]; then echo "Looking for container matching '$1'..."; docker ps | grep "$1" | sed "s/  //g" | cut -d" " -f1,2 ; CONT_ID=$(get_container_id "$1"); if [ -n "$CONT_ID" ] && [ -n "$2" ]; then docker cp $2 "$CONT_ID":$3; else echo "container '$1' not found"; fi; fi }
+
+# follow logs from the named running container
+docker_logs() { if [ -n "$1" ]; then echo "Looking for container matching '$1'..."; docker ps | grep "$1" | sed "s/  //g" | cut -d" " -f1,2 ; CONT_ID=$(get_container_id "$1"); if [ -n "$CONT_ID" ]; then docker logs -f "$CONT_ID"; else echo "container '$1' not found"; fi; fi }
+
+compose_down() { docker compose -f docker-stack/docker-compose.yml stop; }
+compose_up() { docker compose -f docker-stack/docker-compose.yml up -d; }
+compose_up_fg() { docker compose -f docker-stack/docker-compose.yml up; }
+
+alias buildrun='./docker-stack/build-django.sh && compose_down && compose_up'
+#alias downreset='compose_down && rm -r postgis_data/pgdata && mkdir postgis_data/pgdata'

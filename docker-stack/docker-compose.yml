@@ -1,0 +1,87 @@
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+#version: '3.8'
+
+services:
+
+  # notes on environment variables:
+  # https://hub.docker.com/_/postgres
+  # changing the variables only affects an empty data directory!
+  # pass an explicit UID and GID from systemd to allow non-root access for pg_hba.conf in git
+  postgis:
+    image: postgis/postgis:16-3.4
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/root_db_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    user: "${UID_GID}"
+    ports:
+      - 5432:5432
+    volumes:
+      - /opt/mapsurvey/postgis_data:/var/lib/postgresql/data
+      - /opt/mapsurvey:/opt/mapsurvey
+    secrets:
+      - root_db_password
+
+  nginx:
+    image: csghor/nginx:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    ports:
+    # use host nginx to proxy to ssl
+      - 8888:8888
+    volumes:
+      - ../collector/app_staticfiles:/home/app/web/staticfiles
+      - /opt/mapsurvey:/opt/mapsurvey
+    depends_on:
+      - django
+
+  # the port in command has to line up with the second port under ports!
+  django:
+    image: csghor/mapsurvey-app:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command: gunicorn collector.wsgi:application --bind 0.0.0.0:8000
+    environment:
+      APP_DB_NAME: mapbe
+      APP_DB_PORT: 5433
+      APP_DB_USER: geodjango
+      APP_DB_PASSWORD_FILE: /run/secrets/app_db_password
+      ROOT_DB_PASSWORD_FILE: /run/secrets/root_db_password
+      EMAIL_HOST_PASSWORD_FILE: /run/secrets/email_host_password
+      SECRET_KEY_FILE: /run/secrets/secret_key
+    ports:
+    # use host nginx to proxy to ssl
+      - 8000:8000
+    volumes:
+      - ../collector/app_staticfiles:/home/app/web/staticfiles
+      - /opt/mapsurvey:/opt/mapsurvey
+    secrets:
+      - app_db_password
+      - root_db_password
+      - secret_key
+      - email_host_password
+    depends_on:
+      - postgis
+
+secrets:
+  root_db_password:
+    file: secrets/root_db_password.txt
+  app_db_password:
+    file: secrets/app_db_password.txt
+  email_host_password:
+    file: secrets/email_host_password.txt
+  secret_key:
+    file: secrets/django_secret_key.txt

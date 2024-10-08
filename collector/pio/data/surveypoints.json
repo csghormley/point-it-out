@@ -1,0 +1,4793 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -123.129272,
+                    43.925594
+                ]
+            },
+            "properties": {
+                "cartodb_id": 78,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.204.151.230",
+                "timestamp": "Wed Apr 27 2022 16:53:09 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_29hRolubrlROQqi"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.437622,
+                    44.43378
+                ]
+            },
+            "properties": {
+                "cartodb_id": 80,
+                "description": "rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.246",
+                "timestamp": "Thu Apr 28 2022 09:42:06 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_28Su4Esol3fGY51"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.904541,
+                    44.437702
+                ]
+            },
+            "properties": {
+                "cartodb_id": 81,
+                "description": "rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.246",
+                "timestamp": "Thu Apr 28 2022 09:42:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_28Su4Esol3fGY51"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.992432,
+                    44.380803
+                ]
+            },
+            "properties": {
+                "cartodb_id": 82,
+                "description": "mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.246",
+                "timestamp": "Thu Apr 28 2022 09:43:10 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_28Su4Esol3fGY51"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.398926,
+                    44.000718
+                ]
+            },
+            "properties": {
+                "cartodb_id": 98,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.113.52",
+                "timestamp": "Thu Apr 28 2022 11:02:30 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_qK6i6icsm0mKJKV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.322266,
+                    44.304196
+                ]
+            },
+            "properties": {
+                "cartodb_id": 99,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.113.52",
+                "timestamp": "Thu Apr 28 2022 11:03:01 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_qK6i6icsm0mKJKV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.384222,
+                    44.056356
+                ]
+            },
+            "properties": {
+                "cartodb_id": 92,
+                "description": "rxfire,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "72.35.156.38",
+                "timestamp": "Thu Apr 28 2022 10:04:33 GMT-0700 (PDT)",
+                "radius": "1371.0268928381047",
+                "responseid": "R_1imkux796lIhgVh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.338743,
+                    44.091428
+                ]
+            },
+            "properties": {
+                "cartodb_id": 95,
+                "description": "defense,harden,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "72.35.156.38",
+                "timestamp": "Thu Apr 28 2022 10:05:39 GMT-0700 (PDT)",
+                "radius": "1467.3626959072749",
+                "responseid": "R_1imkux796lIhgVh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.372495,
+                    44.014002
+                ]
+            },
+            "properties": {
+                "cartodb_id": 83,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "72.35.156.38",
+                "timestamp": "Thu Apr 28 2022 10:01:41 GMT-0700 (PDT)",
+                "radius": "1044.9964114964794",
+                "responseid": "R_1imkux796lIhgVh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.356197,
+                    44.020016
+                ]
+            },
+            "properties": {
+                "cartodb_id": 93,
+                "description": "defense,harden,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "72.35.156.38",
+                "timestamp": "Thu Apr 28 2022 10:05:04 GMT-0700 (PDT)",
+                "radius": "671.030995837086",
+                "responseid": "R_1imkux796lIhgVh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.361328,
+                    43.989788
+                ]
+            },
+            "properties": {
+                "cartodb_id": 88,
+                "description": "response,defense,harden,outreach,",
+                "datatype": "2",
+                "ipaddress": "72.35.156.38",
+                "timestamp": "Thu Apr 28 2022 10:03:28 GMT-0700 (PDT)",
+                "radius": "2974.355862454858",
+                "responseid": "R_1imkux796lIhgVh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.607666,
+                    44.315988
+                ]
+            },
+            "properties": {
+                "cartodb_id": 97,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.113.52",
+                "timestamp": "Thu Apr 28 2022 11:01:48 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_qK6i6icsm0mKJKV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.636505,
+                    44.478871
+                ]
+            },
+            "properties": {
+                "cartodb_id": 101,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Thu Apr 28 2022 11:12:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_2CEysWYe3MY4T53"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.545181,
+                    44.288961
+                ]
+            },
+            "properties": {
+                "cartodb_id": 102,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Thu Apr 28 2022 11:12:44 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_2CEysWYe3MY4T53"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.585693,
+                    44.314023
+                ]
+            },
+            "properties": {
+                "cartodb_id": 103,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Thu Apr 28 2022 11:12:58 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1910.9257071294064",
+                "responseid": "R_2CEysWYe3MY4T53"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.606636,
+                    44.293138
+                ]
+            },
+            "properties": {
+                "cartodb_id": 104,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Thu Apr 28 2022 11:13:17 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1910.9257071294064",
+                "responseid": "R_2CEysWYe3MY4T53"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.476517,
+                    44.344476
+                ]
+            },
+            "properties": {
+                "cartodb_id": 105,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Thu Apr 28 2022 11:13:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_2CEysWYe3MY4T53"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.374207,
+                    43.939439
+                ]
+            },
+            "properties": {
+                "cartodb_id": 106,
+                "description": "rxfire,mech,defense,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Thu Apr 28 2022 16:49:53 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2Tn864k9wDcHjoM"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.48407,
+                    43.828583
+                ]
+            },
+            "properties": {
+                "cartodb_id": 107,
+                "description": "rxfire,mech,defense,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Thu Apr 28 2022 16:50:16 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2Tn864k9wDcHjoM"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.418152,
+                    44.06588
+                ]
+            },
+            "properties": {
+                "cartodb_id": 108,
+                "description": "response,mech,defense,natres,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Thu Apr 28 2022 16:50:33 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2Tn864k9wDcHjoM"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.539001,
+                    44.249134
+                ]
+            },
+            "properties": {
+                "cartodb_id": 110,
+                "description": "rxfire,mech,defense,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Thu Apr 28 2022 16:51:11 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2Tn864k9wDcHjoM"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.624146,
+                    44.319918
+                ]
+            },
+            "properties": {
+                "cartodb_id": 111,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.96.67",
+                "timestamp": "Fri Apr 29 2022 13:06:29 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2SvlphguWs3aDTa"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.442871,
+                    44.028371
+                ]
+            },
+            "properties": {
+                "cartodb_id": 112,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.96.67",
+                "timestamp": "Fri Apr 29 2022 13:06:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2SvlphguWs3aDTa"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.278076,
+                    43.925594
+                ]
+            },
+            "properties": {
+                "cartodb_id": 113,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.96.67",
+                "timestamp": "Fri Apr 29 2022 13:07:09 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2SvlphguWs3aDTa"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.448364,
+                    43.897892
+                ]
+            },
+            "properties": {
+                "cartodb_id": 114,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.96.67",
+                "timestamp": "Fri Apr 29 2022 13:07:25 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2SvlphguWs3aDTa"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.487061,
+                    44.390617
+                ]
+            },
+            "properties": {
+                "cartodb_id": 115,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.96.67",
+                "timestamp": "Fri Apr 29 2022 13:07:55 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2SvlphguWs3aDTa"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.892212,
+                    44.747514
+                ]
+            },
+            "properties": {
+                "cartodb_id": 116,
+                "description": "outreach,",
+                "datatype": "2",
+                "ipaddress": "159.121.202.140",
+                "timestamp": "Fri Apr 29 2022 13:41:49 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3EEehxGUrFjcJv9"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.694458,
+                    44.750634
+                ]
+            },
+            "properties": {
+                "cartodb_id": 117,
+                "description": "outreach,",
+                "datatype": "2",
+                "ipaddress": "159.121.202.140",
+                "timestamp": "Fri Apr 29 2022 13:42:11 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3EEehxGUrFjcJv9"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.322021,
+                    44.563077
+                ]
+            },
+            "properties": {
+                "cartodb_id": 118,
+                "description": "response,rxfire,defense,",
+                "datatype": "2",
+                "ipaddress": "38.87.96.13",
+                "timestamp": "Fri Apr 29 2022 14:16:33 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1jCDXaqx5e6lWOs"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.470337,
+                    44.582643
+                ]
+            },
+            "properties": {
+                "cartodb_id": 119,
+                "description": "response,rxfire,",
+                "datatype": "2",
+                "ipaddress": "38.87.96.13",
+                "timestamp": "Fri Apr 29 2022 14:17:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1jCDXaqx5e6lWOs"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.311035,
+                    44.500423
+                ]
+            },
+            "properties": {
+                "cartodb_id": 120,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "38.87.96.13",
+                "timestamp": "Fri Apr 29 2022 14:17:27 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1jCDXaqx5e6lWOs"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.437378,
+                    44.488668
+                ]
+            },
+            "properties": {
+                "cartodb_id": 121,
+                "description": "response,",
+                "datatype": "2",
+                "ipaddress": "38.87.96.13",
+                "timestamp": "Fri Apr 29 2022 14:17:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1jCDXaqx5e6lWOs"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.778198,
+                    43.893934
+                ]
+            },
+            "properties": {
+                "cartodb_id": 75,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "71.34.88.209",
+                "timestamp": "Mon Apr 25 2022 17:35:10 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.11853,
+                    44.323848
+                ]
+            },
+            "properties": {
+                "cartodb_id": 122,
+                "description": "other,",
+                "datatype": "2",
+                "ipaddress": "38.87.96.13",
+                "timestamp": "Fri Apr 29 2022 14:17:53 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1jCDXaqx5e6lWOs"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.452484,
+                    44.056341
+                ]
+            },
+            "properties": {
+                "cartodb_id": 124,
+                "description": "response,rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:24:23 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.263885,
+                    43.927242
+                ]
+            },
+            "properties": {
+                "cartodb_id": 125,
+                "description": "rxfire,mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:24:40 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.615906,
+                    43.737368
+                ]
+            },
+            "properties": {
+                "cartodb_id": 126,
+                "description": "rxfire,mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:25:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.508102,
+                    43.883872
+                ]
+            },
+            "properties": {
+                "cartodb_id": 127,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:25:17 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.497345,
+                    43.962838
+                ]
+            },
+            "properties": {
+                "cartodb_id": 129,
+                "description": "rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:26:50 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.135254,
+                    44.649116
+                ]
+            },
+            "properties": {
+                "cartodb_id": 130,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "199.48.41.62",
+                "timestamp": "Mon May 02 2022 09:01:39 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_25X9jNsWmoB1GsZ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.300049,
+                    44.568948
+                ]
+            },
+            "properties": {
+                "cartodb_id": 131,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "199.48.41.62",
+                "timestamp": "Mon May 02 2022 09:02:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_25X9jNsWmoB1GsZ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.639252,
+                    44.469071
+                ]
+            },
+            "properties": {
+                "cartodb_id": 132,
+                "description": "rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.48.41.62",
+                "timestamp": "Mon May 02 2022 09:03:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_25X9jNsWmoB1GsZ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.356354,
+                    44.462211
+                ]
+            },
+            "properties": {
+                "cartodb_id": 133,
+                "description": "response,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.48.41.62",
+                "timestamp": "Mon May 02 2022 09:03:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_25X9jNsWmoB1GsZ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.59668,
+                    44.559163
+                ]
+            },
+            "properties": {
+                "cartodb_id": 134,
+                "description": "response,rxfire,mech,natres,dev,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.48.41.62",
+                "timestamp": "Mon May 02 2022 09:03:48 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_25X9jNsWmoB1GsZ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.437378,
+                    44.056012
+                ]
+            },
+            "properties": {
+                "cartodb_id": 135,
+                "description": "rxfire,mech,defense,natres,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.230",
+                "timestamp": "Mon May 02 2022 09:32:11 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_0p6FZIIPDZNWS7n"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.521149,
+                    43.956248
+                ]
+            },
+            "properties": {
+                "cartodb_id": 136,
+                "description": "rxfire,mech,defense,natres,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.230",
+                "timestamp": "Mon May 02 2022 09:32:50 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_0p6FZIIPDZNWS7n"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.582947,
+                    43.848394
+                ]
+            },
+            "properties": {
+                "cartodb_id": 137,
+                "description": "rxfire,mech,defense,natres,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.230",
+                "timestamp": "Mon May 02 2022 09:33:18 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_0p6FZIIPDZNWS7n"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.628265,
+                    44.276671
+                ]
+            },
+            "properties": {
+                "cartodb_id": 138,
+                "description": "rxfire,mech,defense,natres,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.230",
+                "timestamp": "Mon May 02 2022 09:33:45 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_0p6FZIIPDZNWS7n"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.640625,
+                    43.724467
+                ]
+            },
+            "properties": {
+                "cartodb_id": 139,
+                "description": "rxfire,mech,defense,natres,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.76.230",
+                "timestamp": "Mon May 02 2022 09:34:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_0p6FZIIPDZNWS7n"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.382446,
+                    44.06588
+                ]
+            },
+            "properties": {
+                "cartodb_id": 141,
+                "description": "rxfire,mech,defense,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "72.0.163.195",
+                "timestamp": "Mon May 02 2022 10:15:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1exX4qBm1qHgvWN"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.378784,
+                    44.003352
+                ]
+            },
+            "properties": {
+                "cartodb_id": 142,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.68.205.51",
+                "timestamp": "Mon May 02 2022 10:48:59 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2A0hgOL770qKgfH"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.56189,
+                    44.281915
+                ]
+            },
+            "properties": {
+                "cartodb_id": 143,
+                "description": "response,rxfire,mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.68.205.51",
+                "timestamp": "Mon May 02 2022 10:49:49 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2A0hgOL770qKgfH"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.216747,
+                    44.050937
+                ]
+            },
+            "properties": {
+                "cartodb_id": 144,
+                "description": "response,mech,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.122.60",
+                "timestamp": "Mon May 02 2022 11:36:47 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1oAQF7jtZxMVUke"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.366612,
+                    43.951818
+                ]
+            },
+            "properties": {
+                "cartodb_id": 145,
+                "description": "response,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.122.60",
+                "timestamp": "Mon May 02 2022 11:37:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1oAQF7jtZxMVUke"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.513067,
+                    44.28835
+                ]
+            },
+            "properties": {
+                "cartodb_id": 146,
+                "description": "response,rxfire,mech,defense,natres,dev,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "66.220.122.60",
+                "timestamp": "Mon May 02 2022 11:37:34 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1oAQF7jtZxMVUke"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.18746,
+                    44.426366
+                ]
+            },
+            "properties": {
+                "cartodb_id": 147,
+                "description": "response,rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.122.60",
+                "timestamp": "Mon May 02 2022 11:37:58 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1oAQF7jtZxMVUke"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.46024,
+                    43.726557
+                ]
+            },
+            "properties": {
+                "cartodb_id": 148,
+                "description": "response,rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.122.60",
+                "timestamp": "Mon May 02 2022 11:38:12 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1oAQF7jtZxMVUke"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.111908,
+                    44.633482
+                ]
+            },
+            "properties": {
+                "cartodb_id": 150,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.59.66.209",
+                "timestamp": "Wed May 04 2022 11:00:28 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3g1MSkEjW4qjjCz"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.176453,
+                    44.568948
+                ]
+            },
+            "properties": {
+                "cartodb_id": 151,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.59.66.209",
+                "timestamp": "Wed May 04 2022 11:00:33 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3g1MSkEjW4qjjCz"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.195679,
+                    44.649116
+                ]
+            },
+            "properties": {
+                "cartodb_id": 152,
+                "description": "response,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.59.66.209",
+                "timestamp": "Wed May 04 2022 11:00:37 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3g1MSkEjW4qjjCz"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.05011,
+                    44.559163
+                ]
+            },
+            "properties": {
+                "cartodb_id": 153,
+                "description": "response,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.59.66.209",
+                "timestamp": "Wed May 04 2022 11:01:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3g1MSkEjW4qjjCz"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.237427,
+                    43.958818
+                ]
+            },
+            "properties": {
+                "cartodb_id": 154,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "166.6.84.107",
+                "timestamp": "Wed May 04 2022 16:03:49 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1Ok9wvFbOCaxStq"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.44191,
+                    44.038738
+                ]
+            },
+            "properties": {
+                "cartodb_id": 155,
+                "description": "rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.84.107",
+                "timestamp": "Wed May 04 2022 16:04:04 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1Ok9wvFbOCaxStq"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.581436,
+                    44.515408
+                ]
+            },
+            "properties": {
+                "cartodb_id": 156,
+                "description": "rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.84.107",
+                "timestamp": "Wed May 04 2022 16:04:28 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1Ok9wvFbOCaxStq"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.531448,
+                    44.293876
+                ]
+            },
+            "properties": {
+                "cartodb_id": 157,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:58:13 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.577454,
+                    44.331216
+                ]
+            },
+            "properties": {
+                "cartodb_id": 158,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:58:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.587067,
+                    44.291418
+                ]
+            },
+            "properties": {
+                "cartodb_id": 159,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:59:14 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.774292,
+                    43.748612
+                ]
+            },
+            "properties": {
+                "cartodb_id": 128,
+                "description": "rxfire,natres,",
+                "datatype": "2",
+                "ipaddress": "170.144.112.121",
+                "timestamp": "Fri Apr 29 2022 15:26:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2f7Dp6z3eKN5Jxf"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.519089,
+                    44.33269
+                ]
+            },
+            "properties": {
+                "cartodb_id": 160,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:59:38 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.552734,
+                    44.252085
+                ]
+            },
+            "properties": {
+                "cartodb_id": 161,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:59:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.493683,
+                    44.257003
+                ]
+            },
+            "properties": {
+                "cartodb_id": 162,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.173",
+                "timestamp": "Thu May 05 2022 09:59:59 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_1OkT3NOEjB9AECG"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.47583,
+                    43.633093
+                ]
+            },
+            "properties": {
+                "cartodb_id": 163,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "208.100.140.152",
+                "timestamp": "Thu May 05 2022 12:07:46 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_Zge7bqWomYHG0Sd"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.549988,
+                    43.715038
+                ]
+            },
+            "properties": {
+                "cartodb_id": 164,
+                "description": "mech,defense,outreach,",
+                "datatype": "2",
+                "ipaddress": "208.100.140.152",
+                "timestamp": "Thu May 05 2022 12:08:04 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_Zge7bqWomYHG0Sd"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.378841,
+                    44.074514
+                ]
+            },
+            "properties": {
+                "cartodb_id": 165,
+                "description": "rxfire,mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.129.127.46",
+                "timestamp": "Thu May 05 2022 12:08:10 GMT-0700 (Pacific Daylight Time)",
+                "radius": "955.4628535647032",
+                "responseid": "R_b49Q0yV39FTlg7D"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.19688,
+                    44.024422
+                ]
+            },
+            "properties": {
+                "cartodb_id": 166,
+                "description": "mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.129.127.46",
+                "timestamp": "Thu May 05 2022 12:08:38 GMT-0700 (Pacific Daylight Time)",
+                "radius": "955.4628535647032",
+                "responseid": "R_b49Q0yV39FTlg7D"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.209755,
+                    43.978487
+                ]
+            },
+            "properties": {
+                "cartodb_id": 167,
+                "description": "defense,harden,outreach,",
+                "datatype": "2",
+                "ipaddress": "208.100.140.152",
+                "timestamp": "Thu May 05 2022 12:08:40 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1910.9257071294064",
+                "responseid": "R_Zge7bqWomYHG0Sd"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.313696,
+                    44.085982
+                ]
+            },
+            "properties": {
+                "cartodb_id": 168,
+                "description": "mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.129.127.46",
+                "timestamp": "Thu May 05 2022 12:08:59 GMT-0700 (Pacific Daylight Time)",
+                "radius": "477.7314267823516",
+                "responseid": "R_b49Q0yV39FTlg7D"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.421242,
+                    44.307635
+                ]
+            },
+            "properties": {
+                "cartodb_id": 169,
+                "description": "mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "208.100.140.152",
+                "timestamp": "Thu May 05 2022 12:09:12 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1910.9257071294064",
+                "responseid": "R_Zge7bqWomYHG0Sd"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.327944,
+                    44.095599
+                ]
+            },
+            "properties": {
+                "cartodb_id": 170,
+                "description": "rxfire,mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.129.127.46",
+                "timestamp": "Thu May 05 2022 12:09:25 GMT-0700 (Pacific Daylight Time)",
+                "radius": "477.7314267823516",
+                "responseid": "R_b49Q0yV39FTlg7D"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.58844,
+                    44.300264
+                ]
+            },
+            "properties": {
+                "cartodb_id": 171,
+                "description": "defense,harden,outreach,",
+                "datatype": "2",
+                "ipaddress": "208.100.140.152",
+                "timestamp": "Thu May 05 2022 12:09:45 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_Zge7bqWomYHG0Sd"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.329832,
+                    44.033092
+                ]
+            },
+            "properties": {
+                "cartodb_id": 172,
+                "description": "mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.129.127.46",
+                "timestamp": "Thu May 05 2022 12:09:55 GMT-0700 (Pacific Daylight Time)",
+                "radius": "238.8657133911758",
+                "responseid": "R_b49Q0yV39FTlg7D"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.287231,
+                    44.099421
+                ]
+            },
+            "properties": {
+                "cartodb_id": 173,
+                "description": "response,rxfire,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:00:34 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.437879,
+                    44.092176
+                ]
+            },
+            "properties": {
+                "cartodb_id": 174,
+                "description": "response,rxfire,mech,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:01:12 GMT-0700 (Pacific Daylight Time)",
+                "radius": "5708.158255252064",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.402092,
+                    44.008755
+                ]
+            },
+            "properties": {
+                "cartodb_id": 175,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:01:35 GMT-0700 (Pacific Daylight Time)",
+                "radius": "5746.65947546517",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.490196,
+                    44.017665
+                ]
+            },
+            "properties": {
+                "cartodb_id": 176,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:03:25 GMT-0700 (Pacific Daylight Time)",
+                "radius": "5746.65947546517",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.502585,
+                    43.946841
+                ]
+            },
+            "properties": {
+                "cartodb_id": 177,
+                "description": "response,rxfire,mech,defense,harden,relationships,",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:03:40 GMT-0700 (Pacific Daylight Time)",
+                "radius": "5746.65947546517",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.26856,
+                    43.969633
+                ]
+            },
+            "properties": {
+                "cartodb_id": 178,
+                "description": "response,rxfire,mech,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "216.228.166.253",
+                "timestamp": "Fri May 06 2022 10:04:00 GMT-0700 (Pacific Daylight Time)",
+                "radius": "5746.65947546517",
+                "responseid": "R_2wyMJ3T473Sq93Y"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.551361,
+                    44.290763
+                ]
+            },
+            "properties": {
+                "cartodb_id": 179,
+                "description": "mech,defense,harden,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.103.164",
+                "timestamp": "Mon May 09 2022 11:40:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3k658RaoR6SIeu6"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.306915,
+                    44.06884
+                ]
+            },
+            "properties": {
+                "cartodb_id": 180,
+                "description": "mech,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.103.164",
+                "timestamp": "Mon May 09 2022 11:40:57 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3k658RaoR6SIeu6"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.272713,
+                    44.277871
+                ]
+            },
+            "properties": {
+                "cartodb_id": 181,
+                "description": "response,mech,defense,harden,dev,relationships,",
+                "datatype": "2",
+                "ipaddress": "66.220.103.164",
+                "timestamp": "Mon May 09 2022 11:42:08 GMT-0700 (Pacific Daylight Time)",
+                "radius": "4996.835340528363",
+                "responseid": "R_3k658RaoR6SIeu6"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.030884,
+                    44.453389
+                ]
+            },
+            "properties": {
+                "cartodb_id": 182,
+                "description": "response,dev,",
+                "datatype": "2",
+                "ipaddress": "192.163.0.22",
+                "timestamp": "Mon May 09 2022 15:25:52 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_aibSQLZMXzxykwh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.519775,
+                    44.288469
+                ]
+            },
+            "properties": {
+                "cartodb_id": 183,
+                "description": "defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.59.68.130",
+                "timestamp": "Mon May 09 2022 16:03:31 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_OIE9i7Z5EmXPrOx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.539001,
+                    44.30223
+                ]
+            },
+            "properties": {
+                "cartodb_id": 184,
+                "description": "response,defense,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.21.26.238",
+                "timestamp": "Tue May 10 2022 08:28:48 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_31jfA2SwvJib2CE"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.665344,
+                    44.508259
+                ]
+            },
+            "properties": {
+                "cartodb_id": 185,
+                "description": "defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:42:24 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.301422,
+                    44.060946
+                ]
+            },
+            "properties": {
+                "cartodb_id": 186,
+                "description": "response,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:43:06 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.165466,
+                    44.058972
+                ]
+            },
+            "properties": {
+                "cartodb_id": 187,
+                "description": "response,defense,harden,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:43:30 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.430511,
+                    44.059959
+                ]
+            },
+            "properties": {
+                "cartodb_id": 188,
+                "description": "response,rxfire,mech,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:43:53 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.365967,
+                    43.973052
+                ]
+            },
+            "properties": {
+                "cartodb_id": 189,
+                "description": "response,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:44:20 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.306915,
+                    44.161519
+                ]
+            },
+            "properties": {
+                "cartodb_id": 190,
+                "description": "response,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:44:46 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.228638,
+                    43.971075
+                ]
+            },
+            "properties": {
+                "cartodb_id": 191,
+                "description": "response,defense,harden,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "98.142.36.35",
+                "timestamp": "Tue May 10 2022 09:44:58 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1pxQH7rUevNI23p"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.662087,
+                    44.356055
+                ]
+            },
+            "properties": {
+                "cartodb_id": 192,
+                "description": "relationships,",
+                "datatype": "2",
+                "ipaddress": "67.204.186.246",
+                "timestamp": "Tue May 10 2022 11:36:23 GMT-0700 (Pacific Daylight Time)",
+                "radius": "119.4328566955879",
+                "responseid": "R_1mCOIpYU7WeE9bA"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.685978,
+                    44.383772
+                ]
+            },
+            "properties": {
+                "cartodb_id": 193,
+                "description": "mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.204.186.246",
+                "timestamp": "Tue May 10 2022 11:37:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "955.4628535647032",
+                "responseid": "R_1mCOIpYU7WeE9bA"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.628025,
+                    44.344697
+                ]
+            },
+            "properties": {
+                "cartodb_id": 194,
+                "description": "outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "67.204.186.246",
+                "timestamp": "Tue May 10 2022 11:37:53 GMT-0700 (Pacific Daylight Time)",
+                "radius": "955.4628535647032",
+                "responseid": "R_1mCOIpYU7WeE9bA"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.67882,
+                    44.358924
+                ]
+            },
+            "properties": {
+                "cartodb_id": 196,
+                "description": "response,mech,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.204.186.246",
+                "timestamp": "Tue May 10 2022 11:39:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "477.7314267823516",
+                "responseid": "R_1mCOIpYU7WeE9bA"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.673859,
+                    44.338976
+                ]
+            },
+            "properties": {
+                "cartodb_id": 197,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "67.204.186.246",
+                "timestamp": "Tue May 10 2022 11:40:03 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1mCOIpYU7WeE9bA"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.223389,
+                    44.308127
+                ]
+            },
+            "properties": {
+                "cartodb_id": 199,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Tue May 10 2022 12:55:09 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_30hHZMWMjsbsfwn"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.712036,
+                    44.296333
+                ]
+            },
+            "properties": {
+                "cartodb_id": 200,
+                "description": "rxfire,mech,defense,harden,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Tue May 10 2022 12:55:22 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_30hHZMWMjsbsfwn"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.279449,
+                    44.376877
+                ]
+            },
+            "properties": {
+                "cartodb_id": 201,
+                "description": "mech,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Tue May 10 2022 12:56:21 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_30hHZMWMjsbsfwn"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.708374,
+                    44.51087
+                ]
+            },
+            "properties": {
+                "cartodb_id": 202,
+                "description": "response,rxfire,mech,natres,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:53:34 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.583862,
+                    44.348732
+                ]
+            },
+            "properties": {
+                "cartodb_id": 203,
+                "description": "response,rxfire,mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:53:50 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.664428,
+                    44.262249
+                ]
+            },
+            "properties": {
+                "cartodb_id": 204,
+                "description": "response,rxfire,mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:54:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.554565,
+                    44.183517
+                ]
+            },
+            "properties": {
+                "cartodb_id": 205,
+                "description": "response,rxfire,mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:54:12 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.353149,
+                    43.883377
+                ]
+            },
+            "properties": {
+                "cartodb_id": 206,
+                "description": "response,rxfire,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:54:20 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.455688,
+                    44.0889
+                ]
+            },
+            "properties": {
+                "cartodb_id": 207,
+                "description": "response,rxfire,mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "166.6.23.92",
+                "timestamp": "Wed May 11 2022 07:54:30 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_yZR4DdfRsRNS88N"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.371247,
+                    44.73253
+                ]
+            },
+            "properties": {
+                "cartodb_id": 208,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.16.108.234",
+                "timestamp": "Wed May 11 2022 08:18:49 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_SC4S7ldnVHfpnLX"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.531546,
+                    44.904691
+                ]
+            },
+            "properties": {
+                "cartodb_id": 209,
+                "description": "response,rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.16.108.234",
+                "timestamp": "Wed May 11 2022 08:19:13 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_SC4S7ldnVHfpnLX"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.451657,
+                    44.393443
+                ]
+            },
+            "properties": {
+                "cartodb_id": 212,
+                "description": "response,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed May 11 2022 08:30:46 GMT-0700 (Pacific Daylight Time)",
+                "radius": "955.4628535647032",
+                "responseid": "R_2WwIsnM1XKuE8PC"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.372602,
+                    44.555375
+                ]
+            },
+            "properties": {
+                "cartodb_id": 213,
+                "description": "response,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed May 11 2022 08:31:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_2WwIsnM1XKuE8PC"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.652011,
+                    44.31194
+                ]
+            },
+            "properties": {
+                "cartodb_id": 214,
+                "description": "response,outreach,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed May 11 2022 08:31:37 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2WwIsnM1XKuE8PC"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.839437,
+                    44.390838
+                ]
+            },
+            "properties": {
+                "cartodb_id": 215,
+                "description": "response,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed May 11 2022 08:32:02 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_2WwIsnM1XKuE8PC"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.497682,
+                    43.702369
+                ]
+            },
+            "properties": {
+                "cartodb_id": 216,
+                "description": "response,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed May 11 2022 08:32:24 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2WwIsnM1XKuE8PC"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.431885,
+                    43.886016
+                ]
+            },
+            "properties": {
+                "cartodb_id": 217,
+                "description": "rxfire,mech,defense,natres,dev,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Wed May 11 2022 14:55:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1HhRvSZzD7eHEQj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.404419,
+                    44.0718
+                ]
+            },
+            "properties": {
+                "cartodb_id": 218,
+                "description": "response,mech,defense,harden,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Wed May 11 2022 14:56:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1HhRvSZzD7eHEQj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.294556,
+                    43.988862
+                ]
+            },
+            "properties": {
+                "cartodb_id": 219,
+                "description": "response,mech,defense,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Wed May 11 2022 14:56:25 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1HhRvSZzD7eHEQj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.541748,
+                    44.276671
+                ]
+            },
+            "properties": {
+                "cartodb_id": 220,
+                "description": "rxfire,defense,natres,dev,outreach,",
+                "datatype": "2",
+                "ipaddress": "205.220.212.140",
+                "timestamp": "Wed May 11 2022 14:56:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1HhRvSZzD7eHEQj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.46759,
+                    44.352332
+                ]
+            },
+            "properties": {
+                "cartodb_id": 221,
+                "description": "mech,",
+                "datatype": "2",
+                "ipaddress": "159.121.119.8",
+                "timestamp": "Thu May 12 2022 07:10:13 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3FJuB5MMDc32FfX"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.552734,
+                    44.781835
+                ]
+            },
+            "properties": {
+                "cartodb_id": 222,
+                "description": "rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "159.121.119.8",
+                "timestamp": "Thu May 12 2022 07:10:38 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3FJuB5MMDc32FfX"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.426392,
+                    44.793531
+                ]
+            },
+            "properties": {
+                "cartodb_id": 223,
+                "description": "mech,",
+                "datatype": "2",
+                "ipaddress": "159.121.119.8",
+                "timestamp": "Thu May 12 2022 07:10:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3FJuB5MMDc32FfX"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.479278,
+                    44.062075
+                ]
+            },
+            "properties": {
+                "cartodb_id": 227,
+                "description": "response,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:39:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.625846,
+                    44.442831
+                ]
+            },
+            "properties": {
+                "cartodb_id": 226,
+                "description": "rxfire,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:39:07 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.383217,
+                    44.040312
+                ]
+            },
+            "properties": {
+                "cartodb_id": 228,
+                "description": "response,rxfire,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:39:44 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.079389,
+                    44.259517
+                ]
+            },
+            "properties": {
+                "cartodb_id": 229,
+                "description": "response,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:39:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.358976,
+                    43.76066
+                ]
+            },
+            "properties": {
+                "cartodb_id": 230,
+                "description": "response,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:40:23 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.366501,
+                    43.657994
+                ]
+            },
+            "properties": {
+                "cartodb_id": 231,
+                "description": "response,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:40:29 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.235112,
+                    44.443539
+                ]
+            },
+            "properties": {
+                "cartodb_id": 232,
+                "description": "rxfire,",
+                "datatype": "2",
+                "ipaddress": "67.204.187.147",
+                "timestamp": "Fri May 13 2022 10:40:47 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_qEgnaSSeZLOC7JL"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.524719,
+                    43.66668
+                ]
+            },
+            "properties": {
+                "cartodb_id": 234,
+                "description": "response,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:31:46 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.397278,
+                    44.110071
+                ]
+            },
+            "properties": {
+                "cartodb_id": 233,
+                "description": "response,mech,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:31:17 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.555481,
+                    44.306947
+                ]
+            },
+            "properties": {
+                "cartodb_id": 235,
+                "description": "response,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:32:14 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.815002,
+                    44.376091
+                ]
+            },
+            "properties": {
+                "cartodb_id": 236,
+                "description": "response,defense,natres,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:32:34 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.395081,
+                    44.547029
+                ]
+            },
+            "properties": {
+                "cartodb_id": 237,
+                "description": "mech,defense,natres,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:32:49 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.678772,
+                    44.299085
+                ]
+            },
+            "properties": {
+                "cartodb_id": 238,
+                "description": "response,mech,defense,natres,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:33:04 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.524963,
+                    44.152652
+                ]
+            },
+            "properties": {
+                "cartodb_id": 239,
+                "description": "mech,natres,outreach,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Fri May 13 2022 14:33:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_9XdFIBgV6lfxRmh"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.35498,
+                    44.056012
+                ]
+            },
+            "properties": {
+                "cartodb_id": 240,
+                "description": "relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Tue May 17 2022 09:34:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_2f0wWxdNSfm6QHt"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.47377,
+                    44.3349
+                ]
+            },
+            "properties": {
+                "cartodb_id": 241,
+                "description": "relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Tue May 17 2022 09:35:22 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1910.9257071294064",
+                "responseid": "R_2f0wWxdNSfm6QHt"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.434631,
+                    43.888986
+                ]
+            },
+            "properties": {
+                "cartodb_id": 247,
+                "description": "mech,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "69.128.129.131",
+                "timestamp": "Wed May 25 2022 15:00:52 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_2xWOIylBNQPacGy"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.591431,
+                    44.424627
+                ]
+            },
+            "properties": {
+                "cartodb_id": 248,
+                "description": "rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.110.221",
+                "timestamp": "Thu May 26 2022 11:20:06 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1OpK4xUGU1yDU62"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.50354,
+                    44.052064
+                ]
+            },
+            "properties": {
+                "cartodb_id": 249,
+                "description": "response,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.110.221",
+                "timestamp": "Thu May 26 2022 11:20:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1OpK4xUGU1yDU62"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.280151,
+                    44.257003
+                ]
+            },
+            "properties": {
+                "cartodb_id": 250,
+                "description": "rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "170.144.110.221",
+                "timestamp": "Thu May 26 2022 11:21:29 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_1OpK4xUGU1yDU62"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.112457,
+                    44.535087
+                ]
+            },
+            "properties": {
+                "cartodb_id": 256,
+                "description": "response,rxfire,",
+                "datatype": "2",
+                "ipaddress": "170.144.85.10",
+                "timestamp": "Fri May 27 2022 16:21:14 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3kb8sZ4k1qImR3l"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.745514,
+                    44.391598
+                ]
+            },
+            "properties": {
+                "cartodb_id": 257,
+                "description": "rxfire,mech,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.85.10",
+                "timestamp": "Fri May 27 2022 16:21:48 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3kb8sZ4k1qImR3l"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.74881,
+                    44.506104
+                ]
+            },
+            "properties": {
+                "cartodb_id": 258,
+                "description": "response,rxfire,mech,outreach,",
+                "datatype": "2",
+                "ipaddress": "170.144.85.10",
+                "timestamp": "Fri May 27 2022 16:22:07 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3kb8sZ4k1qImR3l"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.208557,
+                    44.43731
+                ]
+            },
+            "properties": {
+                "cartodb_id": 259,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.85.10",
+                "timestamp": "Fri May 27 2022 16:23:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3kb8sZ4k1qImR3l"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.681763,
+                    44.264871
+                ]
+            },
+            "properties": {
+                "cartodb_id": 260,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "170.144.85.10",
+                "timestamp": "Fri May 27 2022 16:23:39 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3kb8sZ4k1qImR3l"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.219162,
+                    44.175868
+                ]
+            },
+            "properties": {
+                "cartodb_id": 264,
+                "description": "response,defense,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:34:34 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.405211,
+                    43.937101
+                ]
+            },
+            "properties": {
+                "cartodb_id": 266,
+                "description": "response,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:35:26 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.531642,
+                    43.678586
+                ]
+            },
+            "properties": {
+                "cartodb_id": 267,
+                "description": "response,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:35:38 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.737461,
+                    44.967037
+                ]
+            },
+            "properties": {
+                "cartodb_id": 262,
+                "description": "response,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:34:18 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.590175,
+                    44.913561
+                ]
+            },
+            "properties": {
+                "cartodb_id": 268,
+                "description": "relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:36:08 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.425112,
+                    45.150173
+                ]
+            },
+            "properties": {
+                "cartodb_id": 269,
+                "description": "response,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:36:28 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.263562,
+                    45.026198
+                ]
+            },
+            "properties": {
+                "cartodb_id": 270,
+                "description": "response,defense,relationships,",
+                "datatype": "2",
+                "ipaddress": "24.21.132.93",
+                "timestamp": "Sat May 28 2022 13:36:36 GMT-0700 (PDT)",
+                "radius": "8500",
+                "responseid": "R_2xynJIDGO501tfo"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.427765,
+                    44.052459
+                ]
+            },
+            "properties": {
+                "cartodb_id": 271,
+                "description": "rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.101.143",
+                "timestamp": "Mon May 30 2022 19:32:47 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3KPnTyt4GnLChAW"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.297028,
+                    43.943395
+                ]
+            },
+            "properties": {
+                "cartodb_id": 272,
+                "description": "rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.101.143",
+                "timestamp": "Mon May 30 2022 19:33:10 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3KPnTyt4GnLChAW"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.389313,
+                    43.866614
+                ]
+            },
+            "properties": {
+                "cartodb_id": 273,
+                "description": "rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.101.143",
+                "timestamp": "Mon May 30 2022 19:33:40 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3KPnTyt4GnLChAW"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.394806,
+                    43.663501
+                ]
+            },
+            "properties": {
+                "cartodb_id": 274,
+                "description": "rxfire,mech,defense,harden,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.101.143",
+                "timestamp": "Mon May 30 2022 19:34:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3KPnTyt4GnLChAW"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.639801,
+                    43.755622
+                ]
+            },
+            "properties": {
+                "cartodb_id": 275,
+                "description": "rxfire,mech,defense,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.101.143",
+                "timestamp": "Mon May 30 2022 19:34:23 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3KPnTyt4GnLChAW"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.551361,
+                    44.27831
+                ]
+            },
+            "properties": {
+                "cartodb_id": 276,
+                "description": "response,rxfire,mech,defense,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "158.68.192.174",
+                "timestamp": "Wed Jun 08 2022 15:45:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_tDlcX8iPNKQgKBj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.568756,
+                    44.201569
+                ]
+            },
+            "properties": {
+                "cartodb_id": 277,
+                "description": "response,rxfire,mech,relationships,",
+                "datatype": "2",
+                "ipaddress": "158.68.192.174",
+                "timestamp": "Wed Jun 08 2022 15:46:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_tDlcX8iPNKQgKBj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.660309,
+                    44.344476
+                ]
+            },
+            "properties": {
+                "cartodb_id": 278,
+                "description": "response,rxfire,mech,defense,relationships,",
+                "datatype": "2",
+                "ipaddress": "158.68.192.174",
+                "timestamp": "Wed Jun 08 2022 15:46:41 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_tDlcX8iPNKQgKBj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.560974,
+                    44.551987
+                ]
+            },
+            "properties": {
+                "cartodb_id": 279,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "158.68.192.174",
+                "timestamp": "Wed Jun 08 2022 15:47:03 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_tDlcX8iPNKQgKBj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.67038,
+                    44.470051
+                ]
+            },
+            "properties": {
+                "cartodb_id": 280,
+                "description": "response,rxfire,mech,defense,relationships,",
+                "datatype": "2",
+                "ipaddress": "158.68.192.174",
+                "timestamp": "Wed Jun 08 2022 15:47:24 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_tDlcX8iPNKQgKBj"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.517029,
+                    43.773077
+                ]
+            },
+            "properties": {
+                "cartodb_id": 282,
+                "description": "response,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.91.226.38",
+                "timestamp": "Mon Jun 20 2022 15:37:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3oLPHIAklRvPt8C"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.569214,
+                    43.616194
+                ]
+            },
+            "properties": {
+                "cartodb_id": 283,
+                "description": "response,mech,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.91.226.38",
+                "timestamp": "Mon Jun 20 2022 15:38:01 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3oLPHIAklRvPt8C"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.497803,
+                    43.673832
+                ]
+            },
+            "properties": {
+                "cartodb_id": 284,
+                "description": "response,defense,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.91.226.38",
+                "timestamp": "Mon Jun 20 2022 15:38:31 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3oLPHIAklRvPt8C"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.563721,
+                    43.719505
+                ]
+            },
+            "properties": {
+                "cartodb_id": 285,
+                "description": "response,defense,harden,outreach,",
+                "datatype": "2",
+                "ipaddress": "199.91.226.38",
+                "timestamp": "Mon Jun 20 2022 15:38:50 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3oLPHIAklRvPt8C"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.459351,
+                    43.616194
+                ]
+            },
+            "properties": {
+                "cartodb_id": 286,
+                "description": "response,mech,defense,harden,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "199.91.226.38",
+                "timestamp": "Mon Jun 20 2022 15:39:05 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3oLPHIAklRvPt8C"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.36322,
+                    43.753241
+                ]
+            },
+            "properties": {
+                "cartodb_id": 287,
+                "description": "response,mech,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:16:17 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.81366,
+                    43.512705
+                ]
+            },
+            "properties": {
+                "cartodb_id": 288,
+                "description": "mech,natres,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:17:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.478577,
+                    44.545463
+                ]
+            },
+            "properties": {
+                "cartodb_id": 289,
+                "description": "response,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:17:41 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.294556,
+                    44.061933
+                ]
+            },
+            "properties": {
+                "cartodb_id": 290,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:17:57 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.607666,
+                    44.229457
+                ]
+            },
+            "properties": {
+                "cartodb_id": 291,
+                "description": "response,mech,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:18:48 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.665344,
+                    44.514135
+                ]
+            },
+            "properties": {
+                "cartodb_id": 292,
+                "description": "rxfire,",
+                "datatype": "2",
+                "ipaddress": "136.228.204.135",
+                "timestamp": "Wed Jun 22 2022 13:19:03 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3efvJdq8f9O8c3f"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.373657,
+                    43.996766
+                ]
+            },
+            "properties": {
+                "cartodb_id": 293,
+                "description": "defense,",
+                "datatype": "2",
+                "ipaddress": "138.43.104.23",
+                "timestamp": "Thu Jun 30 2022 17:22:00 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_vrfbQlMs5HrnKAV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.982544,
+                    44.356064
+                ]
+            },
+            "properties": {
+                "cartodb_id": 294,
+                "description": "defense,",
+                "datatype": "2",
+                "ipaddress": "138.43.104.23",
+                "timestamp": "Thu Jun 30 2022 17:22:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_vrfbQlMs5HrnKAV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.489563,
+                    43.653963
+                ]
+            },
+            "properties": {
+                "cartodb_id": 295,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "138.43.104.23",
+                "timestamp": "Thu Jun 30 2022 17:23:07 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_vrfbQlMs5HrnKAV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.437653,
+                    43.883047
+                ]
+            },
+            "properties": {
+                "cartodb_id": 296,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "138.43.104.23",
+                "timestamp": "Thu Jun 30 2022 17:25:25 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_vrfbQlMs5HrnKAV"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.783447,
+                    43.460894
+                ]
+            },
+            "properties": {
+                "cartodb_id": 297,
+                "description": "rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "166.6.14.229",
+                "timestamp": "Fri Jul 01 2022 08:20:45 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3HhUKw9RPux8nyS"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.591187,
+                    43.448931
+                ]
+            },
+            "properties": {
+                "cartodb_id": 298,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "166.6.14.229",
+                "timestamp": "Fri Jul 01 2022 08:20:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3HhUKw9RPux8nyS"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.931763,
+                    43.460894
+                ]
+            },
+            "properties": {
+                "cartodb_id": 299,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.14.229",
+                "timestamp": "Fri Jul 01 2022 08:21:04 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_3HhUKw9RPux8nyS"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.419525,
+                    43.446937
+                ]
+            },
+            "properties": {
+                "cartodb_id": 300,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "166.6.14.229",
+                "timestamp": "Fri Jul 01 2022 08:21:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3HhUKw9RPux8nyS"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.473083,
+                    43.98491
+                ]
+            },
+            "properties": {
+                "cartodb_id": 301,
+                "description": "response,rxfire,mech,defense,",
+                "datatype": "2",
+                "ipaddress": "166.6.14.229",
+                "timestamp": "Fri Jul 01 2022 08:21:40 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3HhUKw9RPux8nyS"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.533508,
+                    43.789933
+                ]
+            },
+            "properties": {
+                "cartodb_id": 302,
+                "description": "mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "208.100.164.133",
+                "timestamp": "Fri Jul 29 2022 15:00:26 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3fTddVQuxgLPclQ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.47171,
+                    43.670852
+                ]
+            },
+            "properties": {
+                "cartodb_id": 303,
+                "description": "mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "208.100.164.133",
+                "timestamp": "Fri Jul 29 2022 15:00:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3fTddVQuxgLPclQ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.526642,
+                    43.569447
+                ]
+            },
+            "properties": {
+                "cartodb_id": 304,
+                "description": "rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "208.100.164.133",
+                "timestamp": "Fri Jul 29 2022 15:00:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3fTddVQuxgLPclQ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.688934,
+                    44.075747
+                ]
+            },
+            "properties": {
+                "cartodb_id": 305,
+                "description": "mech,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "208.100.164.133",
+                "timestamp": "Fri Jul 29 2022 15:01:16 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_3fTddVQuxgLPclQ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.290436,
+                    44.246183
+                ]
+            },
+            "properties": {
+                "cartodb_id": 306,
+                "description": "rxfire,mech,defense,natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "208.100.164.133",
+                "timestamp": "Fri Jul 29 2022 15:01:42 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_3fTddVQuxgLPclQ"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.553298,
+                    44.288239
+                ]
+            },
+            "properties": {
+                "cartodb_id": 307,
+                "description": "response,rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "216.228.190.39",
+                "timestamp": "Fri Jul 29 2022 18:21:27 GMT-0700 (PDT)",
+                "radius": "835.6255594964753",
+                "responseid": "R_2xEFhgGX3qRpUnw"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.610395,
+                    44.357341
+                ]
+            },
+            "properties": {
+                "cartodb_id": 308,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "216.228.190.39",
+                "timestamp": "Fri Jul 29 2022 18:21:48 GMT-0700 (PDT)",
+                "radius": "1026.651179167446",
+                "responseid": "R_2xEFhgGX3qRpUnw"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.657739,
+                    44.390153
+                ]
+            },
+            "properties": {
+                "cartodb_id": 309,
+                "description": "natres,",
+                "datatype": "2",
+                "ipaddress": "216.228.190.39",
+                "timestamp": "Fri Jul 29 2022 18:22:10 GMT-0700 (PDT)",
+                "radius": "8051.430876669982",
+                "responseid": "R_2xEFhgGX3qRpUnw"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.477401,
+                    44.428252
+                ]
+            },
+            "properties": {
+                "cartodb_id": 310,
+                "description": "rxfire,mech,natres,",
+                "datatype": "2",
+                "ipaddress": "216.228.190.39",
+                "timestamp": "Fri Jul 29 2022 18:22:35 GMT-0700 (PDT)",
+                "radius": "4766.544381266831",
+                "responseid": "R_2xEFhgGX3qRpUnw"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.590544,
+                    44.163672
+                ]
+            },
+            "properties": {
+                "cartodb_id": 311,
+                "description": "response,rxfire,mech,",
+                "datatype": "2",
+                "ipaddress": "216.228.190.39",
+                "timestamp": "Fri Jul 29 2022 18:23:19 GMT-0700 (PDT)",
+                "radius": "1863.1659326630295",
+                "responseid": "R_2xEFhgGX3qRpUnw"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.419769,
+                    44.413183
+                ]
+            },
+            "properties": {
+                "cartodb_id": 312,
+                "description": "response,rxfire,mech,defense,relationships,",
+                "datatype": "2",
+                "ipaddress": "166.6.86.97",
+                "timestamp": "Sun Jul 31 2022 17:22:43 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1kFRUWYeHvxY0Cg"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.230255,
+                    44.41024
+                ]
+            },
+            "properties": {
+                "cartodb_id": 314,
+                "description": "response,rxfire,relationships,",
+                "datatype": "2",
+                "ipaddress": "166.6.86.97",
+                "timestamp": "Sun Jul 31 2022 18:15:35 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1kFRUWYeHvxY0Cg"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.826263,
+                    44.447507
+                ]
+            },
+            "properties": {
+                "cartodb_id": 315,
+                "description": "response,rxfire,mech,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "166.6.86.97",
+                "timestamp": "Sun Jul 31 2022 18:16:06 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_1kFRUWYeHvxY0Cg"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.27121,
+                    43.944384
+                ]
+            },
+            "properties": {
+                "cartodb_id": 316,
+                "description": "response,rxfire,mech,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.100.176",
+                "timestamp": "Mon Aug 01 2022 07:32:57 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_ZKPmEdN3a0nHcSB"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.446991,
+                    44.045154
+                ]
+            },
+            "properties": {
+                "cartodb_id": 317,
+                "description": "response,rxfire,mech,natres,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.100.176",
+                "timestamp": "Mon Aug 01 2022 07:33:22 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_ZKPmEdN3a0nHcSB"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.390686,
+                    43.664891
+                ]
+            },
+            "properties": {
+                "cartodb_id": 318,
+                "description": "response,rxfire,mech,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.100.176",
+                "timestamp": "Mon Aug 01 2022 07:33:46 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_ZKPmEdN3a0nHcSB"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.543121,
+                    43.825115
+                ]
+            },
+            "properties": {
+                "cartodb_id": 319,
+                "description": "response,rxfire,mech,defense,dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.100.176",
+                "timestamp": "Mon Aug 01 2022 07:34:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_ZKPmEdN3a0nHcSB"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.5905,
+                    44.265855
+                ]
+            },
+            "properties": {
+                "cartodb_id": 320,
+                "description": "response,rxfire,mech,defense,natres,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "170.144.100.176",
+                "timestamp": "Mon Aug 01 2022 07:34:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3821.851414258813",
+                "responseid": "R_ZKPmEdN3a0nHcSB"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.517666,
+                    43.85403
+                ]
+            },
+            "properties": {
+                "cartodb_id": 321,
+                "description": "relationships,other,",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:04:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "3369.662304519401",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.278063,
+                    43.933571
+                ]
+            },
+            "properties": {
+                "cartodb_id": 322,
+                "description": "natres,relationships,other,",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:05:50 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1427.4590050289544",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.419405,
+                    44.000631
+                ]
+            },
+            "properties": {
+                "cartodb_id": 323,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:15 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1974.9171533739293",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.447316,
+                    44.017584
+                ]
+            },
+            "properties": {
+                "cartodb_id": 324,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:16 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1974.9171533739293",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.32715,
+                    44.012481
+                ]
+            },
+            "properties": {
+                "cartodb_id": 325,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:17 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1974.9171533739293",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.485424,
+                    43.969997
+                ]
+            },
+            "properties": {
+                "cartodb_id": 326,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:32 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2352.3534355668503",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.447257,
+                    43.932595
+                ]
+            },
+            "properties": {
+                "cartodb_id": 327,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:41 GMT-0700 (Pacific Daylight Time)",
+                "radius": "6627.434184382345",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.509831,
+                    44.037566
+                ]
+            },
+            "properties": {
+                "cartodb_id": 328,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:06:43 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.559945,
+                    44.45048
+                ]
+            },
+            "properties": {
+                "cartodb_id": 329,
+                "description": "natres,relationships,",
+                "datatype": "2",
+                "ipaddress": "73.96.237.205",
+                "timestamp": "Mon Aug 01 2022 17:07:18 GMT-0700 (Pacific Daylight Time)",
+                "radius": "7643.702828517626",
+                "responseid": "R_Bst31VsmwvAsBqx"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.003418,
+                    44.592423
+                ]
+            },
+            "properties": {
+                "cartodb_id": 347,
+                "description": "mech,defense,natres,",
+                "datatype": "2",
+                "ipaddress": "67.245.239.0",
+                "timestamp": "Mon Dec 05 2022 08:43:36 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.942993,
+                    43.887996
+                ]
+            },
+            "properties": {
+                "cartodb_id": 348,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.245.239.0",
+                "timestamp": "Mon Dec 05 2022 08:43:55 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.640625,
+                    44.490628
+                ]
+            },
+            "properties": {
+                "cartodb_id": 349,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.245.239.0",
+                "timestamp": "Mon Dec 05 2022 08:43:58 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -118.646851,
+                    44.494546
+                ]
+            },
+            "properties": {
+                "cartodb_id": 350,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.245.239.0",
+                "timestamp": "Mon Dec 05 2022 08:43:59 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.019897,
+                    43.210869
+                ]
+            },
+            "properties": {
+                "cartodb_id": 343,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.125.7",
+                "timestamp": "Fri Oct 21 2022 12:30:56 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.464844,
+                    44.211741
+                ]
+            },
+            "properties": {
+                "cartodb_id": 346,
+                "description": "dev,outreach,relationships,",
+                "datatype": "2",
+                "ipaddress": "67.245.239.0",
+                "timestamp": "Mon Dec 05 2022 08:43:28 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.976196,
+                    45.388806
+                ]
+            },
+            "properties": {
+                "cartodb_id": 352,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:16 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.668579,
+                    44.549378
+                ]
+            },
+            "properties": {
+                "cartodb_id": 353,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:21 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -117.680054,
+                    44.70185
+                ]
+            },
+            "properties": {
+                "cartodb_id": 354,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:22 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -118.383179,
+                    45.307734
+                ]
+            },
+            "properties": {
+                "cartodb_id": 355,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:23 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -118.932495,
+                    45.327048
+                ]
+            },
+            "properties": {
+                "cartodb_id": 356,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:24 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.399414,
+                    45.028892
+                ]
+            },
+            "properties": {
+                "cartodb_id": 357,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:24 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.437866,
+                    44.455349
+                ]
+            },
+            "properties": {
+                "cartodb_id": 358,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:25 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.580688,
+                    44.306161
+                ]
+            },
+            "properties": {
+                "cartodb_id": 359,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:26 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -119.723511,
+                    43.578401
+                ]
+            },
+            "properties": {
+                "cartodb_id": 360,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:27 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -118.520508,
+                    42.708678
+                ]
+            },
+            "properties": {
+                "cartodb_id": 361,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:28 GMT-0500 (Eastern Standard Time)",
+                "radius": "8500",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.454987,
+                    44.836882
+                ]
+            },
+            "properties": {
+                "cartodb_id": 363,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "170.144.65.27",
+                "timestamp": "Mon Dec 05 2022 11:29:32 GMT-0500 (Eastern Standard Time)",
+                "radius": "7643.702828517626",
+                "responseid": "-999"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.641195,
+                    44.3327
+                ]
+            },
+            "properties": {
+                "cartodb_id": 366,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:36:51 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2001.301262223473",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.636459,
+                    44.316855
+                ]
+            },
+            "properties": {
+                "cartodb_id": 367,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:36:54 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2001.301262223473",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.636858,
+                    44.357679
+                ]
+            },
+            "properties": {
+                "cartodb_id": 368,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:36:55 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2001.301262223473",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.673411,
+                    44.348388
+                ]
+            },
+            "properties": {
+                "cartodb_id": 369,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:36:57 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2556.6801587175655",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.678763,
+                    44.322868
+                ]
+            },
+            "properties": {
+                "cartodb_id": 370,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:36:58 GMT-0700 (Pacific Daylight Time)",
+                "radius": "2556.6801587175655",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.622946,
+                    44.34414
+                ]
+            },
+            "properties": {
+                "cartodb_id": 371,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:03 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.58117,
+                    44.304528
+                ]
+            },
+            "properties": {
+                "cartodb_id": 372,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:07 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.591853,
+                    44.31651
+                ]
+            },
+            "properties": {
+                "cartodb_id": 373,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:08 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.602769,
+                    44.326251
+                ]
+            },
+            "properties": {
+                "cartodb_id": 374,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:08 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.617343,
+                    44.33109
+                ]
+            },
+            "properties": {
+                "cartodb_id": 375,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:10 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.616958,
+                    44.317527
+                ]
+            },
+            "properties": {
+                "cartodb_id": 376,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:13 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1138.8715380481588",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.52076,
+                    44.327463
+                ]
+            },
+            "properties": {
+                "cartodb_id": 381,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "131.252.52.225",
+                "timestamp": "Thu May 11 2023 17:37:43 GMT-0700 (Pacific Daylight Time)",
+                "radius": "1807.8458775542927",
+                "responseid": "R_2t5luGpl0hWrNzr"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -123.604624,
+                    44.910937
+                ]
+            },
+            "properties": {
+                "cartodb_id": 392,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Tue Oct 17 2023 08:42:52 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.566545,
+                    43.54116
+                ]
+            },
+            "properties": {
+                "cartodb_id": 395,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Tue Oct 17 2023 08:43:19 GMT-0700 (Pacific Daylight Time)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.372727,
+                    44.24887
+                ]
+            },
+            "properties": {
+                "cartodb_id": 397,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Wed Jan 17 2024 18:41:59 GMT-0800 (Pacific Standard Time)",
+                "radius": "4651.2065998798935",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.372139,
+                    44.300649
+                ]
+            },
+            "properties": {
+                "cartodb_id": 399,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Wed Jan 17 2024 18:42:23 GMT-0800 (Pacific Standard Time)",
+                "radius": "4651.2065998798935",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -121.650646,
+                    45.523067
+                ]
+            },
+            "properties": {
+                "cartodb_id": 401,
+                "description": "",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Wed Jan 17 2024 23:14:59 GMT-0800 (Pacific Standard Time)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -120.21075,
+                    45.056849
+                ]
+            },
+            "properties": {
+                "cartodb_id": 412,
+                "description": "outreach,other,",
+                "datatype": "2",
+                "ipaddress": "67.171.156.78",
+                "timestamp": "Tue Jan 23 2024 16:26:32 GMT-0800 (Pacific Standard Time)",
+                "radius": "8500",
+                "responseid": "null"
+            }
+        }
+    ]
+}

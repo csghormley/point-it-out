@@ -1,0 +1,24 @@
+# IMPORTANT: set the Environment variable UID_GID to the UID of a non-root user (default 1000)
+# this makes the docker container run as that user
+[Unit]
+Description=docker.mapsurvey
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+User=root
+Group=docker
+TimeoutStopSec=15
+WorkingDirectory=/opt/mapsurvey/docker-stack
+# pass an explicit UID and GID to allow non-root access for pg_hba.conf in git
+Environment="UID_GID=1000:1000"
+# Shutdown container (if running) when unit is started
+ExecStartPre=/usr/bin/docker compose -f docker-compose.yml down
+# Start container when unit is started
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up
+# Stop container when unit is stopped
+ExecStop=/usr/bin/docker compose -f docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target

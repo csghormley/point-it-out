@@ -1,0 +1,40 @@
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+version: '3.8'
+
+services:
+
+  # notes on environment variables:
+  # https://hub.docker.com/_/postgres
+  # changing the variables only affects an empty data directory!
+  postgis:
+    image: csghor/postgis-alpine:16-3.4
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      POSTGRES_PASSWORD: secret2
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - "./postgis_data:/var/lib/postgresql/data"
+
+  # the port in command has to line up with the second port under ports!
+  django:
+    image: csghor/mapsurvey-app:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command: python manage.py runserver 0.0.0.0:8080
+    ports:
+      - 8080:8080
+    volumes:
+      - ./django_data/:/usr/src/app/
+    depends_on:
+      - postgis
