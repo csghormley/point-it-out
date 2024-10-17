@@ -8,12 +8,13 @@ another website such as Qualtrics.
 
 This application is not designed to stand on its own facing the
 internet, either. It should normally be set up behind a web proxy
-suchas nginx.
+such as nginx.
 
 It will be much easier if you have a little background in Docker,
 Linux server administration, Django, Python, and Postgres. All the
 information you will need is available on the internet, but it will
-take some extra time to find the answer to your questions.
+take extra time to resolve problems that come up without previous
+experience.
 
 ## Orientation
 
@@ -72,7 +73,7 @@ cd docker-stack && docker compose -f docker-compose.yml up
 
 Database bootstrapping
 Django dependency issues
- * libgdal on the Docker container has to match the Python gdal library called out in requirements.txt 
+ * libgdal on the Docker container has to match the Python gdal library called out in requirements.txt
 
 ## Resources
 
@@ -126,7 +127,7 @@ and that the systemd service is installed.
    This makes the change available within the running container.
 
    % ./build_docker.sh && systemctl restart docker.mapsurvey.service
-   
+
 2. Open a shell to the Django container, with
    % docker_shell django
 
