@@ -1,6 +1,6 @@
 wheel
 
-Django==5.1.1
+Django==5.1.5
 django-environ
 #GDAL==3.8.3
 GDAL==3.4.1
