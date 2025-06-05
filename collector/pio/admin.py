@@ -61,7 +61,7 @@ class GeoJSONLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug', 'geojson',]
     actions = ["export_as_csv"]
-    
+
 @admin.register(VisitorBehavior)
 class VisitorBehaviorAdmin(admin.ModelAdmin, ExportCsvMixin):
     fields = ['responseid', 'timestamp_add', 'logdata',]
