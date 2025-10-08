@@ -6,11 +6,10 @@ import os
 from pathlib import Path
 from .localsettings import DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, DB_SERVER
 
-# these settings are platform-specific and may not be present
-try:
-    from .localsettings import GDAL_LIBRARY_PATH, GEOS_LIBRARY_PATH
-except:
-    pass
+from csp.constants import SELF, NONCE, UNSAFE_HASHES, UNSAFE_INLINE
+
+# these settings are only needed on Macs
+#from .localsettings import GDAL_LIBRARY_PATH, GEOS_LIBRARY_PATH
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +28,7 @@ env = environ.FileAwareEnv(
     DEBUG=(bool, False),
     APP_DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),
-    EMAIL_HOST_PASSWORD=(str, 'secret'),
+    EMAIL_HOST_PASSWORD=(str, 'none'), # use this as a sentinel to trigger lookup in localsettings
     SECRET_KEY=(str, 'secret'),
 )
 
@@ -39,68 +38,87 @@ env = environ.FileAwareEnv(
 # echo "SECRET_KEY='$(./manage.py generate_secret_key)'" > localsettings.py
 SECRET_KEY=env("SECRET_KEY")
 
-# DEBUG and ALLOWED_HOSTS should also be defined in localsettings.py
-## DEBUG=False
-## ALLOWED_HOSTS=[]
+# DEBUG and ALLOWED_HOSTS should be defined in localsettings.py
+# DEBUG=False
+# ALLOWED_HOSTS=['pointitout.app',
+#               '.localhost',
+#               '127.0.0.1',
+#               '[::1]',
+#               '172.232.170.62',]
 
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
+#    'debug_toolbar',
     'django.contrib.auth',
+    'django.contrib.messages',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'djgeojson',
+    'django_json_widget',
     'csp', # content security policy
-    'django_registration',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.mfa',
+    'django.contrib.humanize',
+
     'geoip2',
     'leaflet',
-    'debug_toolbar',
     'django_extensions',
     'rest_framework',
     'rest_framework_gis',
     'pio',
-    'django_otp',
-    'django_otp.plugins.otp_static',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_email',  # <- if you want email capability.
-    'otp_yubikey',
-    'two_factor',
-    'two_factor.plugins.phonenumber',  # <- if you want phone number capability.
-    'two_factor.plugins.email',  # <- if you want email capability.
-    'two_factor.plugins.webauthn',
-    'two_factor.plugins.yubikey',  # <- for yubikey capability.
 ]
 
 MIDDLEWARE = [
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
+#    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'collector.urls'
-LOGIN_URL = 'two_factor:login'
-LOGIN_REDIRECT_URL = 'two_factor:profile'
+LOGIN_URL = 'allauth:login'
+LOGIN_REDIRECT_URL = 'admin:index'
 
 TWO_FACTOR_WEBAUTHN_RP_NAME = 'mapsurvey'
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 86400*14
 
+# ALLAUTH settings
+ACCOUNT_CHANGE_EMAIL=True
+ACCOUNT_CONFIRM_EMAIL_ON_GET=True
+
+MFA_SUPPORTED_TYPES = ["totp", "webauthn", "recovery_codes"]
+MFA_PASSKEY_LOGIN_ENABLED = True
+MFA_TRUST_ENABLED = True
+
 ACCOUNT_ACTIVATION_DAYS = 2
 
-INTERNAL_IPS = ['127.0.0.1',]
+# 24.21.163.40 is dev IP - remove when done
+# 172.19.0.1 is docker network gateway IP - setting this here should enable debug everywhere.
+INTERNAL_IPS = ['127.0.0.1','24.21.163.40','172.19.0.1',]
+
+def callback(request):
+    return True
 
 # enable SMTP if password is present
 try:
     EMAIL_HOST_PASSWORD=env("EMAIL_HOST_PASSWORD")
-    from .localsettings import EMAIL_HOST_PASSWORD
+
+    if (EMAIL_HOST_PASSWORD=='none'):
+        from .localsettings import EMAIL_HOST_PASSWORD
 
     # use SMTP
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -116,32 +134,42 @@ except ImportError:
 
 
 # Content Security Policy
-CSP_FONT_SRC = ("'self'", 
-                "https://fonts.googleapis.com", 
-                "https://fonts.gstatic.com", 
-                "https://cdnjs.cloudflare.com",)
-CSP_FRAME_ANCESTORS = ("https://portlandstate.yul1.qualtrics.com/", "https://portlandstate.qualtrics.com/",)
-CSP_IMG_SRC = ("'self'",
-               'https://cdn.jsdelivr.net',
-               'https://basemap.nationalmap.gov',
-               'https://server.arcgisonline.com',
-               'http://*.tile.openstreetmap.org',) # admin uses http: when running the test server on localhost
-CSP_INCLUDE_NONCE_IN = ['script-src',]
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-hashes'", "'unsafe-inline'",
-                  'https://cdn.jsdelivr.net',
-                  )
-CSP_STYLE_SRC = ("'self'", 
-                 "'unsafe-inline'", 
-                 'https://cdn.jsdelivr.net',
-                 'https://cdnjs.cloudflare.com',
-                 'https://fonts.googleapis.com/css',
-                 )
-CSP_STYLE_SRC_ELEM = ("'self'",
-                      'http://cdnjs.cloudflare.com',
-                      "https://fonts.googleapis.com", 
-                      'https://cdn.jsdelivr.net',
-                  )
-CSP_WORKER_SRC = ("'self'", "blob:", "data:")
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        'connect-src':      [SELF,
+                             'https://cdn.jsdelivr.net'],
+        'font-src':        [SELF,
+                            "https://fonts.googleapis.com",
+                            "https://fonts.gstatic.com",
+                            "https://cdnjs.cloudflare.com"],
+        'frame-ancestors': ["https://portlandstate.yul1.qualtrics.com/",
+                            "https://portlandstate.qualtrics.com/"],
+        'img-src':         [SELF,
+                            'data:', # allow inline svg
+                            'https://cdn.jsdelivr.net',
+                            'https://basemap.nationalmap.gov',
+                            'https://server.arcgisonline.com',
+                            # admin uses http: when running
+                            # the test server on localhost
+                          'http://*.tile.openstreetmap.org'],
+        'script-src':      [SELF,
+                            NONCE,
+                            UNSAFE_HASHES,
+                            UNSAFE_INLINE,
+                            'https://cdn.jsdelivr.net'],
+        'style-src':       [SELF,
+                            UNSAFE_INLINE,
+                            'https://cdn.jsdelivr.net',
+                            'https://cdnjs.cloudflare.com',
+                            'https://fonts.googleapis.com/css'],
+        'style-src-elem':  [SELF,
+                            'http://cdnjs.cloudflare.com',
+                            "https://fonts.googleapis.com",
+                            'https://cdn.jsdelivr.net'],
+        'worker-src':      [SELF, "blob:", "data:"]
+    }
+}
+
 
 yubico_u2f_ca = """-----BEGIN CERTIFICATE-----
 MIIDHjCCAgagAwIBAgIEG0BT9zANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZ
@@ -170,17 +198,25 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+#                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'csp.context_processors.nonce',
+
+                # `allauth` needs this from django
+                'django.template.context_processors.request',
             ],
-            'libraries': {
-                #'csp': 'csp.templatetags.csp',
-            }
         },
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 WSGI_APPLICATION = 'collector.wsgi.application'
@@ -203,6 +239,10 @@ DATABASES = {
         'HOST': DB_SERVER,
         'PORT': 5432,
     },
+}
+
+SERIALIZATION_MODULES = {
+    'geojson' : 'djgeojson.serializers'
 }
 
 """
@@ -261,7 +301,7 @@ LANGUAGE_CODE = 'en-us'
 
 try:
     from .localsettings import TIME_ZONE, USE_TZ
-except:
+except ImportError:
     TIME_ZONE = 'UTC'
     USE_TZ = False
 
@@ -299,6 +339,17 @@ REST_FRAMEWORK = {
 
     # consider using django-knox for authenticated API calls
     #'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+
+    # Rate limiting - NO DEFAULT_THROTTLE_CLASSES (explicit per endpoint)
+    # Throttle classes are applied individually to each viewset
+    'DEFAULT_THROTTLE_RATES': {
+        'survey_points_anon': '20/min',      # Anonymous survey submissions
+        'survey_points_auth': '100/min',     # Authenticated survey submissions
+        'map_layers': '500/hour',             # Map layer data (read-only)
+        'mapconfigs': '200/hour',             # Map configurations (read-only)
+        'feature_layers': '500/hour',         # GeoJSON feature layers (read-only)
+        'visitor_behavior': '100/hour',       # Visitor behavior logging
+    }
 }
 
 LOGGING = {
@@ -331,7 +382,12 @@ LOGGING = {
         },
         "django.request": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.template": {
+            "handlers": ["console"],
+            "level": "INFO",
             "propagate": False,
         },
         'django.db.backends': {

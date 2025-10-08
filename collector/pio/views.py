@@ -251,6 +251,7 @@ class SurveyPointViewSet(viewsets.ModelViewSet):
 
     serializer_class = SurveyPointSerializer
     permission_classes = (SurveyPointPermission,)
+    throttle_classes = [SurveyPointAnonThrottle, SurveyPointAuthThrottle]
 
     def get_queryset(self):
             """
@@ -327,6 +328,7 @@ class VisitorBehaviorViewSet(viewsets.ModelViewSet):
 
     serializer_class = VisitorBehaviorSerializer
     permission_classes = (VisitorBehaviorPermission,)
+    throttle_classes = [VisitorBehaviorThrottle]
 
     queryset = VisitorBehavior.objects.none()
 
