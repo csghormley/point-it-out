@@ -87,6 +87,8 @@ Baby steps: You're going to need a running postgres to do much with
 Django. Fortunately that container runs a recent stock version of the
 database server so this is a low barrier to entry.
 
+
+
 Activate the venv:
 
     % source mapbe/bin/activate
