@@ -1,34 +1,43 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.contrib.gis.geoip2 import GeoIP2, GeoIP2Exception
+from django.contrib.gis.geoip2 import GeoIP2
 from django.core.exceptions import ObjectDoesNotExist
 
 from geoip2.errors import AddressNotFoundError
 
-from rest_framework import routers, serializers, viewsets, status
+from rest_framework import serializers, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
-#from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 # use local version
-from .serializers import GeoFeatureModelSerializer
+##from .serializers import GeoFeatureModelSerializer
 
-from .models import MapConfig, SurveyPoint, VisitorBehavior
-from .permissions import SurveyPointPermission, VisitorBehaviorPermission
-
-import json
+from .models import FeatureLayer, MapLayer, MapConfig, SurveyPoint, VisitorBehavior
+from .permissions import FeatureLayerPermission, MapLayerPermission, SurveyPointPermission, VisitorBehaviorPermission
+from .throttles import (
+    SurveyPointAnonThrottle,
+    SurveyPointAuthThrottle,
+    MapLayerThrottle,
+    MapConfigThrottle,
+    FeatureLayerThrottle,
+    VisitorBehaviorThrottle,
+)
 
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# placeholder
-def index(request, slug='default'):
+# main map view:
+# uses index.html as default template
+def index(request, slug='default', template_name='pio/index.html'):
 
     # values from the URL passed in (from the enclosing app, if any)
     if 'id' in request.GET:
         responseid = request.GET['id']
     else:
         responseid = None
+
     if 'proj_id' in request.GET:
         projectid = request.GET['proj_id']
     else:
@@ -38,8 +47,8 @@ def index(request, slug='default'):
     try:
         mapconfig = MapConfig.objects.get(slug=slug)
     except ObjectDoesNotExist:
-        # this object must exist, otherwise all is lost!
         logger.error(f"The mapconfig with slug '{slug}' does not exist. Using 'default'.")
+        # the 'default' object must exist
         mapconfig = MapConfig.objects.get(slug='default')
 
     # geolocate the request
@@ -61,17 +70,172 @@ def index(request, slug='default'):
 
     logger.info(f"geolocated {ip} to city <{location_city}> in country <{location_country}>")
     context = {'mapconfig': mapconfig.config,
+               'mapconfigid': mapconfig.pk,
                'responseid': responseid,
                'projectid': projectid,
                'ip': ip,
                'country': location_country,
-               'city': location_city,}
+               'city': location_city,
+               'maplayers': mapconfig.maplayer_set.all()
+               }
 
-    return render(request, "pio/index.html", context)
+    return render(request, template_name, context)
 
 def demo(request):
     context = {}
     return render(request, "pio/demo.html", context)
+
+def version(request):
+    context = {}
+    return render(request, "pio/version.txt", context)
+
+
+class MapLayerSerializer(serializers.ModelSerializer):
+
+    # related object details to reduce API calls
+    mapconfig_name = serializers.CharField(source='mapconfig.name', read_only=True)
+    layer_name = serializers.CharField(source='layer.name', read_only=True)
+    layer_slug = serializers.CharField(source='layer.slug', read_only=True)
+    layer_features = serializers.JSONField(source='layer.geojson', read_only=True)
+
+    class Meta:
+        model = MapLayer
+        fields = [
+            'id', 'z_order', 'config', 'mapconfig', 'mapconfig_name',
+            'layer', 'layer_name', 'layer_slug', 'layer_features'
+        ]
+
+class NestedMapLayerSerializer(serializers.ModelSerializer):
+
+    # Simplified version for nesting - excludes mapconfig to avoid redundancy
+    # Pull related FeatureLayer properties
+    layer_name = serializers.CharField(source='layer.name', read_only=True)
+    layer_slug = serializers.CharField(source='layer.slug', read_only=True)
+    layer_features = serializers.JSONField(source='layer.geojson', read_only=True)
+
+    class Meta:
+        model = MapLayer
+        fields = [
+            'id', 'z_order', 'config', 'layer', 'layer_name', 'layer_slug', 'layer_features'
+        ]
+
+# Serializers define the API representation.
+class MapConfigSerializer(serializers.ModelSerializer):
+
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MapConfig
+        fields = ['id', 'url', 'name', 'slug', 'config']
+
+    def get_url(self, obj):
+        request = self.context.get('request')
+        if request:
+            return reverse('MapConfig-detail', kwargs={'pk': obj.pk}, request=request)
+        return None
+
+class MapConfigDetailSerializer(MapConfigSerializer):
+    """Extended serializer with full layer details for detail views"""
+    map_layers = NestedMapLayerSerializer(
+        source='maplayer_set',
+        many=True,
+        read_only=True
+    )
+
+    class Meta(MapConfigSerializer.Meta):
+        fields = MapConfigSerializer.Meta.fields + ['map_layers']
+
+class FeatureLayerSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = FeatureLayer
+        #geo_field = "geojson"
+        id_field = 'id'
+
+class MapConfigViewSet(viewsets.ModelViewSet):
+
+    queryset = MapConfig.objects.all()
+    throttle_classes = [MapConfigThrottle]
+
+    def get_serializer_class(self):
+        """Use different serializers for different actions"""
+        if self.action == 'retrieve':
+            # For detail view, include full layer information
+            return MapConfigDetailSerializer
+        elif self.action == 'list':
+            # For list view, you can choose lighter or full depending on needs
+            # Option 1: Light version for faster list loading
+            return MapConfigSerializer
+            # Option 2: Full version if you always need layer info
+            # return MapConfigWithLayersSerializer
+        else:
+            # For create/update operations, use basic serializer
+            return MapConfigSerializer
+
+    @action(detail=True, methods=['get'])
+    def layers(self, request, pk=None):
+        """Get layers in z-order for this map config"""
+        map_config = self.get_object()
+
+        logger.info(map_config)
+
+        ordered_layers = MapLayer.objects.filter(
+            mapconfig=map_config.pk
+        ).order_by('z_order').select_related('layer')
+
+        logger.info(ordered_layers)
+
+        serializer = MapLayerSerializer(ordered_layers, many=True)
+        return Response(serializer.data)
+
+# Define a viewset for the SurveyPoint model
+# this API is only valid for a specific response ID
+class FeatureLayerViewSet(viewsets.ModelViewSet):
+
+    serializer_class = FeatureLayerSerializer
+    throttle_classes = [FeatureLayerThrottle]
+    #permission_classes = (FeatureLayerPermission,)
+
+    def get_queryset(self):
+            """
+            Filters selection based on requested MapConfig.
+            """
+
+            mapconfigid = self.request.query_params.get('mapconfigid')
+
+            if mapconfigid is not None:
+                self.request.session['mapconfigid'] = mapconfigid
+                queryset = FeatureLayer.objects.filter(
+                    featurelayerorder__mapconfig_id=mapconfigid
+                    ).distinct()
+            else:
+                queryset = FeatureLayer.objects.all()
+
+            logger.info(f"mapconfigid: {mapconfigid}, queryset count: {queryset.count()}")
+            return queryset
+
+class MapLayerViewSet(viewsets.ModelViewSet):
+    serializer_class = MapLayerSerializer
+    permission_classes = (MapLayerPermission,)
+    throttle_classes = [MapLayerThrottle]
+
+    def get_queryset(self):
+        """
+        Optionally filter by mapconfig or layer
+        """
+        queryset = MapLayer.objects.all().select_related('mapconfig', 'layer')
+
+        # Filter by mapconfig if provided
+        mapconfig_id = self.request.query_params.get('mapconfig')
+        if mapconfig_id is not None:
+            queryset = queryset.filter(mapconfig_id=mapconfig_id)
+
+        # Filter by layer if provided
+        layer_id = self.request.query_params.get('layer')
+        if layer_id is not None:
+            queryset = queryset.filter(layer_id=layer_id)
+
+        return queryset.order_by('mapconfig', 'z_order')
 
 # Serializers define the API representation.
 class SurveyPointSerializer(GeoFeatureModelSerializer):
@@ -120,8 +284,9 @@ class SurveyPointViewSet(viewsets.ModelViewSet):
     # use responseid from the session (set in the get_queryset method) to cross-check the pk
     def destroy(self, request, pk=None):
 
-        if (pk==None):
-            return Response("FAILED: pk missing", status=status.HTTP_400_BAD_REQUEST)
+        if (pk is None):
+            return Response("FAILED: pk missing",
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # get the corresponding response ID, either from cookies or built into the session
@@ -140,7 +305,7 @@ class SurveyPointViewSet(viewsets.ModelViewSet):
             sp.save()
 
             return Response({'deleted': pk})
-        
+
         except Exception as e:
             logger.exception(f'exception in view logic: {e}')
             return Response(f"FAILED {pk}:", status=status.HTTP_400_BAD_REQUEST)

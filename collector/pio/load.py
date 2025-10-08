@@ -38,5 +38,5 @@ surveypoint_mapping = {
 surveypoint_json = Path(__file__).resolve().parent / "data" / "surveypoints.json"
 
 def surveypoint_mapping_run(verbose=True):
-    lm = LayerMapping(SurveyPoint, surveypoints_json, surveypoint_mapping, transform=False)
+    lm = LayerMapping(SurveyPoint, surveypoint_json, surveypoint_mapping, transform=False)
     lm.save(strict=True, verbose=verbose)

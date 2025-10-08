@@ -10,6 +10,10 @@ from rest_framework.serializers import (
     ModelSerializer,
 )
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 from rest_framework_gis.fields import GeometryField, GeometrySerializerMethodField  # noqa
 
 
@@ -121,6 +125,7 @@ class GeoFeatureModelSerializer(ModelSerializer):
 
         # optional id attribute
         if self.Meta.id_field:
+            logger.info("self.Meta.id_field", self.Meta.id_field)
             field = self.fields[self.Meta.id_field]
             value = field.get_attribute(instance)
             feature["id"] = field.to_representation(value)

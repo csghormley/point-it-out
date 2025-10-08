@@ -16,20 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from two_factor.urls import urlpatterns as tf_urls
-from pio.models import SurveyPoint
 
-admin.site.site_header = "Wildfire Risk Management Survey Admin"
-admin.site.site_title = "Wildfire Risk Management Survey Admin Portal"
-admin.site.index_title = "Welcome to Wildfire Risk Management Survey Portal"
+admin.site.site_header = "MapSurvey Admin"
+admin.site.site_title = "MapSurvey Admin Portal"
+admin.site.index_title = "Welcome to MapSurvey Portal"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('__debug__/', include('debug_toolbar.urls')),
-
-    path('accounts/', include('django_registration.backends.activation.urls')),
-
-    path('', include(tf_urls)),
-
+    path('accounts/', include('allauth.urls')),
     path('', include("pio.urls")),
 ]

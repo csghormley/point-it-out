@@ -8,7 +8,8 @@ from django.utils.safestring import mark_safe
 from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
-from .models import SurveyPoint, MapConfig, GeoJSONLayer, VisitorBehavior, ResponseSummary
+from .models import SurveyPoint, MapConfig, FeatureLayer, MapLayer, \
+VisitorBehavior, ResponseSummary
 
 from django_json_widget.widgets import JSONEditorWidget
 
@@ -38,14 +39,33 @@ class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin):
     search_fields = ['surveyid', 'ipaddress', 'radius', 'responseid', 'geom']
     actions = ["export_as_csv"]
 
+class MapLayerInline(admin.TabularInline):
+    model = MapLayer
+    extra = 1
+    fields = ('layer', 'config', 'z_order')
+    ordering = ('z_order',)
+
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})}
+    }
+
+    # TODO: style the inline form to give more room to the text editor
+    # and less to the related object widget.
+    # https://stackoverflow.com/questions/910169/resize-fields-in-django-admin
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('layer')
+
 @admin.register(MapConfig)
 class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
-    fields = ['name', 'slug', 'config', 'layers',]
+    fields = ['id', 'name', 'slug', 'config',]
     list_display = ('name', 'map_link',)
     prepopulated_fields = {"slug": ("name",)}
-    readonly_fields = ['map_link',]
+    readonly_fields = ['id', 'map_link',]
     search_fields = ['name', 'slug', 'config',]
     actions = ["export_as_csv"]
+
+    inlines = [MapLayerInline]
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})},
@@ -55,12 +75,17 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
         return mark_safe(f'<a target="_" href="{ reverse("site_index", args=[obj.slug,]) }">{ obj.name }')
     map_link.short_description = 'map link'
 
-@admin.register(GeoJSONLayer)
-class GeoJSONLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
-    fields = ['name', 'slug', 'geojson',]
+@admin.register(FeatureLayer)
+class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
+    fields = ['id', 'name', 'slug', 'geojson',]
     prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['id',]
     search_fields = ['name', 'slug', 'geojson',]
     actions = ["export_as_csv"]
+
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})},
+    }
 
 @admin.register(VisitorBehavior)
 class VisitorBehaviorAdmin(admin.ModelAdmin, ExportCsvMixin):
@@ -69,7 +94,7 @@ class VisitorBehaviorAdmin(admin.ModelAdmin, ExportCsvMixin):
     readonly_fields = fields # treat all as raw - not necessary to edit
     list_filter = ['responseid',]
     search_fields = ['responseid', 'logdata',]
-    
+
     actions = ["export_as_csv"]
 
 @admin.register(ResponseSummary)
@@ -79,6 +104,5 @@ class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
     readonly_fields = fields # this is a view - read only
     list_filter = ['surveyid', 'responseid', 'ipaddr',]
     search_fields = ['surveyid', 'responseid', 'ipaddr',]
-    
-    actions = ["export_as_csv"]
 
+    actions = ["export_as_csv"]
