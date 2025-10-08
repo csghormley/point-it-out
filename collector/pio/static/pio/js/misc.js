@@ -52,12 +52,20 @@ const ub_config = {
 userBehaviour.config(ub_config);
 userBehaviour.start();
 
+/*
 const showHelp = $.urlParam('showHelp');
 const showTutorial = parseInt($.urlParam('showTutorial'));
 const showInfo = $.urlParam('showInfo');
 
 if (showHelp == 1){
-	$('#howtoModal').modal('show');
+	$('#howtoModal').dialog({
+      modal: true,
+      buttons: {
+        Ok: function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
 };
 
 if (showTutorial == 1){
@@ -67,3 +75,4 @@ if (showTutorial == 1){
 if (showInfo == 1){
   $('#showInfo').css('display','inline');
 }
+*/

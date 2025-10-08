@@ -1,1179 +1,1891 @@
-/* see the template for map config
-const config = {
-	map_center: [-121.3, 44.1],
-	extent: [-122, 43.4, -120.385, 44.824],
-	boundary: [-123, 41.9, -119.385, 46.324],
-	src_proj: 'EPSG:4326', // wgs84
-	dest_proj: 'EPSG:3857', // web mercator
-	api_url: '/api/surveypoints/',
-	zoom: 4,
-	max_zoom: 16,
-	min_zoom: 4,
-	max_res: 170,
-	edit_worktype: false,
-	verbose: true
-};
-*/
-const config = JSON.parse(document.getElementById('mapconfig-data').textContent);
-
-// check for missing default config values
-// the only required values are map_center, boundary, and extent
-if (config.api_url == undefined) config.api_url="/api/surveypoints/";
-if (config.dest_proj == undefined) config.dest_proj="EPSG:3857"; // web mercator
-if (config.edit_worktype == undefined) config.edit_worktype=false;
-if (config.max_res == undefined) config.max_res=800; // absolute limit of map scale for data entry
-if (config.initial_zoom == undefined) config.initial_zoom=4;
-if (config.max_zoom == undefined) config.max_zoom=16;
-if (config.src_proj == undefined) config.src_proj="EPSG:4326"; // wgs84
-if (config.show_overview == undefined) config.show_overview=true;
-if (config.verbose == undefined) config.verbose=false;
-if (config.max_diameter == undefined) config.max_diameter=16093.4; // meters; 10mi
-if (config.min_diameter == undefined) config.min_diameter=804.67; // meters; 0.5mi
-
-if (config.site_description == undefined) config.site_description="region near the map center";
-if (config.site_purpose == undefined) config.site_purpose="wildfire resilience and vulnerability";
-
-// multiplier makes displayed vectors appear the right size on basemap
-// adjusts for the size of the cursor image in use
-const scl_const = 1.234567;
-const meters_per_mile = 1609.34;
-
-// update the display with config info
-$('#site_purpose').text(config.site_purpose);
-$('#site_description').text(config.site_description);
-$('#map_title').text(config.site_description);
-
-let csrftoken = null;
-//let cursor_txt = 'Work location';
-const img_url = $('#static_img_base').text();
-const json_url = $('#static_json_base').text();
-
-// ---------------------------------------------------------------------
-// DEFINE MAP TILE LAYERS -----------------------
-// ---------------------------------------------------------------------
-
-const tile_xyz = 'MapServer/tile/{z}/{y}/{x}';
-
-// AGOL layers
-const agol_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
-const layer_base_topo = makexyzlayer(agol_url, 'World_Topo_Map');
-const layer_base_natgeo = makexyzlayer(agol_url, 'NatGeo_World_Map');
-const layer_base_natgeo_ov = makexyzlayer(agol_url, 'NatGeo_World_Map');
-const layer_base_terrain = makexyzlayer(agol_url, 'World_Terrain_Base');
-const layer_base_reference = makexyzlayer(agol_url, 'Reference/World_Reference_Overlay');
-
-// national map layers
-const natlmap_url = 'https://basemap.nationalmap.gov/arcgis/rest/services/';
-const layer_base_usgstopo = makexyzlayer(natlmap_url, 'USGSTopo');
-const layer_base_usgstopo_ov = makexyzlayer(natlmap_url, 'USGSTopo');
-const layer_base_usgsimagerytopo = makexyzlayer(natlmap_url, 'USGSImageryTopo');
-
-const layer_wms_fireshed = new ol.layer.Tile({
-	source: new ol.source.TileWMS({url: 
-		'https://apps.fs.usda.gov/arcx/services/EDW/EDW_FireshedRegistry_01/MapServer/WMSServer'
-	})});
-
-const layer_osm = new ol.layer.Tile({
-    source: new ol.source.OSM(),
-});
-
-// trying to display firesheds
-const fsVectorLayer = new ol.layer.Vector({
-    background: '#1a2b39',
-    source: new ol.source.Vector({
-//        url: 'https://services1.arcgis.com/gGHDlz6USftL5Pau/arcgis/rest/services/Fireshed_Registry_Data_(v3)/FeatureServer/3',
-        //url: 'https://services1.arcgis.com/gGHDlz6USftL5Pau/ArcGIS/rest/services/Fireshed_Registry_Data_(v3)/FeatureServer/1/query?where=1%3D1&f=pgeojson',
-		url: 'https://services1.arcgis.com/gGHDlz6USftL5Pau/ArcGIS/rest/services/Fireshed_Registry_Data_(v3)/FeatureServer/0/query?where=1%3D1&f=pgeojson',
-        format: new ol.format.EsriJSON(),
-    }),
-    style: {
-        'fill-color': ['string', ['get', 'COLOR'], '#eee'],
-    },
-});
-
-// polygons:	https://services1.arcgis.com/gGHDlz6USftL5Pau/arcgis/rest/services/Fireshed_Registry_Data_(v3)/FeatureServer
-// https://apps.fs.usda.gov/arcx/services/EDW/EDW_FireshedRegistry_01/MapServer/WMSServer?request=GetCapabilities&service=WMS
-
-function makexyzlayer(baseurl, servicename) {
-    return new ol.layer.Tile({ source: new ol.source.XYZ({url: `${baseurl}${servicename}/${tile_xyz}`})	});
-}
-
-// convenience function to enable or disable all logging
-function verbose_log(logmsg, override=false) {
-	if(config.verbose || override) console.log(logmsg);
-}
-
-/*
-// Set base layer
-const baseLayer = new ol.layer.Tile({
-    source: new ol.source.OSM(),
-});
-
-// Setup transportation layer (unused)
-const transportation = new ol.layer.Tile({
-  source: new ol.source.TileArcGISRest({
-    url: 'https://services.nationalmap.gov/arcgis/rest/services/transportation/MapServer',
-	params: {
-		'LAYERS': 'show:25,26,27'
-	}
-  }),
-  maxResolution: 100,
-	opacity: 1,
-  visible: true,
-});
-*/
-
-// GET request sets the context for server interaction
-let responseid = $.urlParam('id');
-let projectid = StrToInt($.urlParam('proj_id'));
-
-$("#projectid").val(projectid);
-
-verbose_log(`survey id = ${responseid}\nproject id = ${projectid}`);
-
-// filter by ID if it exists, otherwise return all records
-// this is governed by internal server logic, depends on login state
-function getDataUrl() {
-
-	let url_txt = config.api_url;
-
-	if(responseid != null) {
-
-		url_txt += '?responseid=' + responseid;
-
-		if (isValidProjID(projectid)) {
-			url_txt += '&projectid=' + projectid;
-		}
-	}
-
-	return url_txt;
-}
-
-// a valid project ID is a positive integer
-// consider: https://validatejs.org/#validators-numericality
-function isValidProjID(projid) {
-
-	if (typeof projid === 'string') int_projectid = StrToInt(projid);
-	if (typeof projid === 'number') int_projectid = projid;
-	return (Number.isInteger(int_projectid) && int_projectid > 0);
-}
-
-// enable editing if both response id and project id are specified
-function editingEnabled(coordinate) {
-
-	// don't allow editing within 2km of the edge
-	// hack to prevent undeleteable points
-	let bias = 2000;
-	if (coordinate!=null) {
-		if ((coordinate[0] < boundary[0]+bias || coordinate[1] < boundary[1]+bias
-		    || coordinate[0] > boundary[2]-bias || coordinate[1] > boundary[3]-bias)) {
-            
-			return false;
-		}
-	}
-
-	return (responseid!=null && isValidProjID(projectid));
-};
-
-// count points from each project type
-// may not be useful atm
-function countPoints() {
-
-	let p1 = 0;
-	let p2 = 0;
-	let p3 = 0;
-	let p4 = 0;
-
-	points_source.getFeatures().forEach(function(f) {
-		if(f.get('projectid') == 1) { p1 += 1; }
-		if(f.get('projectid') == 2) { p2 += 1; }
-		if(f.get('projectid') == 3) { p3 += 1; }
-		if(f.get('projectid') == 4) { p4 += 1; }
-	});
-
-	$("#responseid").text(responseid)
-	$("#pointcount").text(`p1 = ${p1} p2 = ${p2} p3 = ${p3} p4 = ${p4}`)
-
-	verbose_log(`p1 = ${p1} p2 = ${p2} p3 = ${p3} p4 = ${p4}`);
-};
-
-// hide the features not matching current project id
-function hideFeatures() {
-
-	points_source.getFeatures().forEach(function(f) {
-		if (isValidProjID(projectid) && f.get('projectid') != projectid){
-			f.setStyle(new ol.style.Style({}));
-		} else {
-			f.setStyle(mapMarkerStyleFunction);
-		};
-	});
-}
-
-// animate tour of preset points, for training simulation
-// code adapted from OpenLayers examples
-function flyTo(location, done) {
-	const duration = 2000;
-	const zoom = view.getZoom();
-	let parts = 2;
-	let called = false;
-	function callback(complete) {
-	  --parts;
-	  if (called) {
-		return;
-	  }
-	  if (parts === 0 || !complete) {
-		called = true;
-		done(complete);
-	  }
-	}
-	view.animate(
-	  {
-		center: location,
-		duration: duration,
-	  },
-	  callback,
-	);
-	view.animate(
-	  {
-		zoom: zoom - 1,
-		duration: duration / 2,
-	  },
-	  {
-		zoom: zoom,
-		duration: duration / 2,
-	  },
-	  callback,
-	);
-  }
-
-function tour() {
-	const locations = points_source.getFeatures();
-	let index = -1;
-	let coords = null;
-	function next(more) {
-	  if (more) {
-		++index;
-		if (index < locations.length) {
-		  const delay = index === 0 ? 0 : 750;
-		  setTimeout(function () {
-			coords = locations[index].getGeometry().getExtent();
-			verbose_log(`flying to ${coords}`);
-			flyTo(coords, next);
-		  }, delay);
-		}
-	  }
-	}
-	next(true);
-  }
-
-// show all features regardless of data type/project id
-// TODO this function isn't called from anywhere
-function showFeatures() {
-	points_source.getFeatures().forEach(function(f) {
-		f.setStyle(mapMarkerStyleFunction);
-	});
-}
-
-// ---------------------------------------------------------------------
-// DEFINE SOURCE VECTOR OBJECT -----------------------------------------
-// ---------------------------------------------------------------------
-
-// library of points
-// define the source separately so we can manipulate it later
-let points_source = new ol.source.Vector();
-let points_vector = new ol.layer.Vector({
-	source: points_source,
-	updateWhileAnimating: true,
-    updateWhileInteracting: true,
-    style: mapMarkerStyleFunction
-});
-
-// download data from server
-// define the source separately so we can manipulate it later
-let stored_vector_source = new ol.source.Vector({
-	format: new ol.format.GeoJSON(),
-	url: getDataUrl()
-});
-
-let stored_vector_layer = new ol.layer.Vector({
-	source: stored_vector_source,
-	updateWhileAnimating: true,
-	updateWhileInteracting: true,
-	style: new ol.style.Style({
-	})
-});
-
-// if config specifies a set of geojson layers, load them in
-// [{"name": "<filename>.geojson", "stroke_color": "#0000d080", "stroke_width": 2}]
-let layer_colormap = ['#ffffd4','#fed98e','#fe9929','#cc4c02'];
-
-let overlay_geojson = [];
-if (config.layers!=undefined) {
-	config.layers.forEach(function(lyr, index) {
-		let layer = new ol.layer.Vector({
-			source: new ol.source.Vector({
-				format: new ol.format.GeoJSON(),
-				url: json_url + lyr.name
-			}),
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-					color: 'rgba(0, 0, 0, 0)'  // Default fill color (black with transparency)
-				  }),
-				  stroke: new ol.style.Stroke({
-					color: lyr.stroke_color || layer_colormap[index],
-					width: lyr.stroke_width || 2
-				  })
-
-				})
-		});
-		// add to the array
-		overlay_geojson.push(layer);
-	});
-}  
-
-// run this function on any change to stored_vector_source
-// transfer features from points_source to points_vector?
-function updateCartoStyle() {
-
-	stored_vector_source.addEventListener("change", updateCartoStyle);
-
-	let features = points_source.getFeatures()
-
-	for(let i=0; i < features.length; i++) {
-		if(features[i].getProperties()['status'] == 0){
-			points_source.removeFeature(features[i]);
-		}
-	}
-
-	// Load previously uploaded data from server and transfer those features into the points_vector layer.
-	stored_vector_source.forEachFeature(function(feature){
-		let coordinate = feature.getGeometry().getCoordinates()
-		let radius = Number(feature.get('radius'))
-
-		// adjust displayed radius using scale constant
-		let feature2 = new ol.Feature(new ol.geom.Circle(coordinate, radius*scl_const));
-
-		feature2.setProperties({
-			'id': feature.get('id'),
-			'description': feature.get('description'),
-			'radius': radius,
-			'projectid': feature.get('projectid'),
-			'status':1,  // 1==on the server
-			'label':'.'
-		})
-
-		feature2.set('label','')
-		feature2.setStyle(mapMarkerStyleFunction);
-
-		points_source.addFeature(feature2);
-	})
-
-	// show only current projectid (do we still need this?)
-	hideFeatures();
-	countPoints();
-}
-
-// ---------------------------------------------------------------------
-// CREATE BOX AROUND STUDY AREA -----------------------
-// ---------------------------------------------------------------------
-
-// 'extent' is shown as a box on the map; 'boundary' bounds the area shown by the map
-const extent = ol.proj.transformExtent(config.extent, config.src_proj, config.dest_proj);
-const boundary = ol.proj.transformExtent(config.boundary, config.src_proj, config.dest_proj);
-
-const box_coords = [
-	[extent[0], extent[1]], [extent[0], extent[3]],
-	[extent[2], extent[3]], [extent[2], extent[1]],
-	[extent[0], extent[1]]
-];
-
-// draw a box around the study extent, and embed it in a vector layer
-let vectorSource = new ol.source.Vector();
-vectorSource.addFeature(new ol.Feature(new ol.geom.LineString(box_coords)));
-
-const study_area_layer = new ol.layer.Vector({
-  source: vectorSource,
-  style: new ol.style.Style({
-    stroke: new ol.style.Stroke({
-        color: '#EF535099',
-        width: 4
-    }),
-  })
-});
-
-// ------------------------------------------------------
-// DEFINE MAP OBJECT -----------------------
-// ------------------------------------------------------
-
-const viewport = document.getElementById('map');
-
-// allow for adjusting zoom level when window changes size
-function getMinZoom() {
-	const width = viewport.clientWidth;
-	return Math.ceil(Math.LOG2E * Math.log(width / 256));
-}
-  
-const initialZoom = Math.max(getMinZoom(), config.initial_zoom);
-  
-window.addEventListener('resize', function () {
-	const minZoom = getMinZoom();
-	if (minZoom !== view.getMinZoom()) {
-		verbose_log('resizing: min zoom = ' + minZoom);
-        view.setMinZoom(minZoom);
-	}
-});
-
-// scale line
-// units in [degrees, imperial, us, nautical, metric]
-// type in [line, bar]
-function scaleControl() {
-	const bar = false;
-	const units = 'us';
-	const steps = 4;
-	const show_text = false;
-	const min_width = 140;
-
-	if (bar === false) {
-	  control = new ol.control.ScaleLine({
-		units: units,
-	  });
-	} else {
-	  control = new ol.control.ScaleLine({
-		units: units,
-		bar: true,
-		steps: steps,
-		text: show_text,
-		minWidth: min_width,
-	  });
-	}
-	return control;
-}
-
-// attribution
-const attribution = new ol.control.Attribution({
-	collapsible: false,
-});
-
-const defaultControls = ol.control.defaults.defaults;
-
-// overview map
-const overviewMapControl = new ol.control.OverviewMap({
-    layers: [
-		layer_base_natgeo_ov
-    ],
-	className: 'ol-overviewmap ol-custom-overviewmap',
-	label:'«',
-	collapseLabel:'»',
-	view: new ol.View({
-		maxZoom: getMinZoom(),
-		minZoom: getMinZoom(),
-		extent: boundary,
-		projection: config.dest_proj
-	}),
-	collapsed: !config.show_overview,
-	collapsible: true
-});
-
-// map object TODO attribution fix
-const view = new ol.View({
-	center: ol.proj.transform(config.map_center, config.src_proj, config.dest_proj),
-	minZoom: getMinZoom(),
-	zoom: initialZoom,
-	maxZoom: config.max_zoom,
-	extent: boundary
-});
-
-const map = new ol.Map({
-	target: document.getElementById('map'),
-	interactions: ol.interaction.defaults.defaults({altShiftDragRotate:false, pinchRotate:false}),
-	layers: [
-		layer_base_natgeo,
-		stored_vector_layer,
-		points_vector,
-		study_area_layer
-		],
-	controls: defaultControls({attribution: true}).extend([attribution, overviewMapControl, scaleControl()]),
-	view: view
-});
-
-// for any additional layers specified in the config, show them on top
-overlay_geojson.forEach(function(layer) {
-	map.addLayer(layer);
-})
-
-// initialize some screen elements
-updateCartoStyle();
-$('#map_info').text(`${getCursorText()}`);
-
-// scale the size of the cursor when the map zooms past the min_res or max_res threshold
-/*
-How should this work?
-In the middle range, the mouse cursor is "full size" or native size.
-At the small end of resolution (largest map scale), the icon gets bigger as we continue to zoom in.
-At the large end of resolution (smallest map scale), the icon gets smaller as we continue to zoom out.
-*/
-function getMapScaleFactor() {
-
-	const res = map.getView().getResolution();
-	const scl_minres = config.min_diameter / 100; // m/px == meters / 100px
-	const scl_maxres = config.max_diameter / 100; // m/px == meters / 100px
-
-	if (res <= scl_maxres && res >= scl_minres) {
-		return scl_const;
-	} else if (res > scl_maxres) { // zooming out past the limit
-		return (scl_maxres / res) * scl_const; // e.g., 190/200 < 1
-	} else if (res < scl_minres) { // zooming in past the limit
-		return (scl_minres / res) * scl_const; // e.g., 10/8 > 1
-	}
-};
-
-// calculate an estimated project radius for point based on zoom level, in METERS
-// mouse cursor is ~100px across, radius is 50px. what is that in map units?
-function getRadius() {
-
-	const res = map.getView().getResolution();
-
-	// basic radius calculation for the cursor circle based on map resolution
-	// (and fixed scale correction factor for the size of the image used)
-	// circle has a 50px radius
-	let rad = 50 * res;
-
-	// miles * meters/mi / pixels = m/px
-	const max_rad = config.max_diameter/2;
-	const min_rad = config.min_diameter/2;
-
-	if (rad > max_rad) { // zooming out past the limit
-        rad = max_rad;
-	} else if (rad < min_rad) { // zooming in past the limit
-		rad = min_rad;
-	}
-
-	verbose_log(`getRadius: res=${res} rad=${rad}`)
-
-	return rad;
-};
-
-// ---------------------------------------------------------------------
-// CREATE STYLES FOR DISPLAYING POINTS AND CURSOR ----------------------
-// ---------------------------------------------------------------------
-
-// visual style for placed points
-function mapMarkerStyleFunction(feature) {
-
-	let txt = feature.get('label');
-	if (txt.length === 0) txt = "";
-	if (txt.length > 25) txt = txt.substring(0, 25) + "...";
-
-	// projectid should only be a positive integer
-	const projectid = Number(feature.get('projectid'));
-
-	// colorbrewer 8-class qualitative scheme
-	// NOTE: if you change this, also change 'icon_url' generator code
-	let colormap = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf'];
-	// 'accent' scheme might also work: ['#7fc97f','#beaed4','#fdc086','#ffff99','#386cb0','#f0027f','#bf5b17','#666666']
-	// 'set1' scheme: ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf']
-	// 'paired' scheme: ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00'];
-
-	// we only have 8 unique colors. normally this should be plenty, but we want to fail gracefully
-	// projectid = 1 gets color 0; projectid = 9 also gets color 0
-	// IMPORTANT: use the same colors when generating PNGs for mouse cursor in drawStyleFunction
-	let colorid = (projectid-1) % 8;
-
-	// set transparency for stroke (edge) and fill
-	let stroke_color = colormap[colorid] + 'cc';
-	let fill_color = colormap[colorid] + '4d';
-
-	return [
-		new ol.style.Style({
-				fill: new  ol.style.Fill({
-					color: fill_color
-				}),
-				stroke: new ol.style.Stroke({
-					color: stroke_color,
-					width: 3
-				}),
-				text: new ol.style.Text({
-					font: '12px Calibri,sans-serif',
-					fill: new ol.style.Fill({color: stroke_color}),
-					stroke: new ol.style.Stroke({color: '#ffffff', width: 3}),
-					text: txt
-				})
-		})
-	];
-}
-
-// helper function to retrieve context-sensitive cursor text
-function getCursorText() {
-
-	// distance in map units = meters
-	let diameter = 2 * getRadius();
-	let cursor_txt = 'circle dia: ~';
-
-	// details: round to 10ths of a mile, then divide by 10 to get miles; or 100s of feet
-	// round the diameter, not the radius, so we get odd and even results
-	if(diameter > 8000){
-		cursor_txt += String(round_x(diameter/meters_per_mile)) + " mi";
-	} else if (diameter > 800) { // round to tenths
-		cursor_txt += String(round_x(diameter/meters_per_mile, 1)) + " mi";
-	} else { // round to hundreds of feet
-		cursor_txt += String(round_x(diameter/meters_per_mile*5280,-2)) + " ft"
-	};
-
-	// enable for debugging
-	// if (config.verbose) {
-    //     cursor_txt += ` | ${round_x(diameter)}m`
-	// 	cursor_txt += ` | ${round_x(map.getView().getResolution(),1)}m/px`
-	// 	cursor_txt += ` | ${round_x(map.getView().getZoom(),1)}x`
-	// }
-
-	return cursor_txt;
-}
-
-// safely convert string to integer
-// return NaN if null or empty string
-function StrToInt(val) {
-    if (val==null || val=='') return NaN;
-	if (!Number.isInteger(Number(val))) return NaN;
-
-	return Number(val);
-}
-
-// visual style for drawing highlight halo around mouse cursor
-let drawStyleFunction = function (feature, resolution) {
-
-	// resolution is in units per pixel
-	let cursor_txt = getCursorText();
-
-	// update the map info text on the fly
-	// exploits a side effect of this function being called when the mouse moves
-	if (editingEnabled(feature.coordinate)) {
-        $('#map_info').text(`| ${cursor_txt}`);
-    } else {
-		$('#map_info').text('');
-	}
-
-	let point_style = new ol.style.Style();
-
-	// default text style: black with white outline for contrast
-	let style_text = new ol.style.Text({
-		font: '12px Calibri,sans-serif',
-		fill: new ol.style.Fill({color: '#000'}),
-		stroke: new ol.style.Stroke({color: '#ffffff', width: 3}),
-		text: cursor_txt,
-		offsetY: 65
-	});
-
-	// only allow entry for a valid projectid and not zoomed out too far
-	if (!isValidProjID(projectid)) { // i.e., project ID is either missing or non-integer
-
-		// hide the text
-		style_text.setText('');
-
-	} else if (resolution >= config.max_res) { // i.e., too many meters per pixel
-
-		// show an error message in red, just offset from the pointer
-		style_text.setText('Zoom-in closer to mark locations');
-		style_text.setFill(new ol.style.Fill({color: 'red'}),);
-		style_text.setOffsetY(-10);
-
-	} else { // everything is OK
-
-		// show a context-sensitive mouse pointer
-		let colorid = (projectid-1) % 8;
-        let icon_url = `${img_url}circle_st1_${colorid}.png`;
-
-		point_style.setImage(new ol.style.Icon({
-			anchor: [0.5, 0.5],
-			size: [107, 107],
-			offset: [0, 0],
-			opacity: 1,
-			scale: getMapScaleFactor(),
-			src: icon_url
-		}));
-	}
-
-	// update point style to use style_text determined above
-	point_style.setText(style_text);
-
-	return point_style;
-}
-
-// -------------------------------------------
-// ADD DRAW INTERACTION ----------------------
-// -------------------------------------------
-
-// detect map movement including pan or zoom to update status information
-function onMoveEnd(evt) {
-
-	if (editingEnabled()) {
-        $('#map_info').text(`| ${getCursorText()}`);
-    } else {
-		$('#map_info').text('');
-	}
-}
-  
-map.on('moveend', onMoveEnd);
-
-let selectedFeature = null;
-
-// interaction object to hold drawn points
-let draw_point = new ol.interaction.Draw({
-	type: 'Point',
-	style: drawStyleFunction
-});
-
-// on click: save attributes to feature object after being placed on the map
-draw_point.on('drawend', function(event) {
-
-	const coordinate = event.feature.getGeometry().getCoordinates();
-
-	if (!isValidProjID(projectid)) { return; }
-
-	// check to see if editing is enabled, including for this coordinate
-	if (editingEnabled(coordinate)==false) { return; }
-
-	features = points_source.getFeaturesAtCoordinate(coordinate);
-	if (features.length > 0) {
-		verbose_log('point detected, exiting draw function');
-
-		// since this point already exists, edit
-		pointEdit(features[0]);
-		return;
-	}
-
-	// don't allow point creation if zoomed out too far
-	// i.e. resolution in units per pixel has to be *lower* than max
-	if (map.getView().getResolution() > config.max_res) {
-		verbose_log('zoomed out too far to accurately draw points');
-		return;
-	}
-
-  	// change icon size based on zoom level
-	let radius = getRadius();
-
-	// create new circle feature and update properties
-	let feature = new ol.Feature(new ol.geom.Circle(coordinate, radius*scl_const));
-
-	// prototype feature waiting for form to be filled out
-	feature.setProperties({
-		'id': -1,
-		'description': '', // must be an empty string, not undefined
-		'radius': radius,
-		'projectid': projectid,
-		'status': 0, // < upload status (0=not uploaded)
-		'label': 'Saving...',
-		'resolution': ol.proj.getPointResolution(config.dest_proj, map.getView().getResolution(), coordinate, 'm')
-	})
-
-	feature.setStyle(mapMarkerStyleFunction);
-
-	// add the drawn feature to the collection
-	// this does not post it to the server
-	points_source.addFeature(feature);
-
-	// close an existing popup, if any
-	popup.setPosition(undefined);
-
-	// assign this feature to the global object
-	selectedFeature = feature;
-
-	// only show edit popup if enabled
-	if (config.edit_worktype===true) {
-        pointEditPopup(coordinate);
-	}
-
-	// post this point to the server
-	createPoint(feature);
-
-	countPoints();
-
-});
-
-// ----------------------------------------------------------------
-// HOVER INTERACTION PREVENTS DRAWING OVERLAPPING POINTS ----------
-// ----------------------------------------------------------------
-
-let hover = new ol.interaction.Select({
-	condition: ol.events.condition.pointerMove,
-	layers:[points_vector]  // layers to be hovered
-});
-
-// Turn off drawing when hovering over an existing feature;
-hover.on('select', function(event) {
-	  if(event.selected.length > 0){
-	  	verbose_log('point detected');
-	  	draw_point.setActive(false);
-	  } else {
-	  	draw_point.setActive(true);
-	  }
-});
-
-// ------------------------------------
-// ADD SELECT INTERACTION -------------
-// ------------------------------------
-
-let clickSelect = new ol.interaction.Select({
-	condition: ol.events.condition.click,
-	layers: [points_vector]
-});
-
-// add select interaction for selecting points
-map.addInteraction(clickSelect);
-map.addInteraction(draw_point);
-
-clickSelect.on('select', function(evt) {
-
-	verbose_log(evt.target.getFeatures().getLength() +
-        ' selected features (last operation selected ' +
-        evt.selected.length +
-        ' and deselected ' +
-        evt.deselected.length +
-        ' features)');
-
-	// pass the selected feature into edit logic
-    pointEdit(evt.selected[0]);
-});
-
-function pointEdit(f) {
-
-	// check for object existence
-	if (f != undefined) {
-		let extent = f.getGeometry().getExtent();
-		function getCenterOfExtent(Extent){
-			let X = Extent[0] + (Extent[2]-Extent[0])/2;
-			let Y = Extent[1] + (Extent[3]-Extent[1])/2;
-			return [X, Y];
-		}
-		let pt_coords = getCenterOfExtent(extent);
-		let id = f.getProperties()['id'];
-
-		f.setStyle(mapMarkerStyleFunction);
-		verbose_log('point selected');
-
-		// set the global so the form callbacks get a reference
-		selectedFeature = f;
-
-		// only show edit popup if enabled
-		if (config.edit_worktype===true) {
-            pointEditPopup(pt_coords);
+// OpenLayers Map Module
+// Import the entire ol object and specific components
+import ol, {
+    Map, View, Feature, Overlay,
+    GeoJSON, WKT,
+    Point, Circle, LineString,
+    TileLayer, VectorLayer,
+    OSM, XYZ, TileWMS, VectorSource,
+    Style, Fill, Stroke, Text, Icon, CircleStyle,
+    Select, Draw,
+    Attribution, OverviewMap, ScaleLine,
+    fromLonLat, transform, transformExtent, getPointResolution,
+    click, pointerMove, defaultInteractions, defaultControls
+} from './ol-wrapper.js';
+
+/**
+ * MapManager class that handles map initialization and interactions
+ * @class
+ */
+export class MapManager {
+    /**
+     * Creates a new MapManager instance
+     * @param {string} configElementId - The ID of the element containing the map configuration
+     */
+    constructor(configElementId) {
+        // Constants
+        this.scl_const = 1.234567;
+        this.meters_per_mile = 1609.34;
+
+        // Initialize variables
+        this.selectedFeature = null;
+        this.responseid = getUrlParam('id');
+        this.projectid = this.strToInt(getUrlParam('proj_id'));
+
+        this.attributions =
+  '<a href="https://www.usgs.gov/programs/national-geospatial-program/national-map" target="_blank">USGS National Map</a> ' +
+  '<a href="https://server.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer" target="_blank">&copy; National Geographic, Esri, Garmin, HERE, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, increment P Corp.</a>';
+
+        // Initialize configuration
+        this.initializeConfig(configElementId);
+
+        // Initialize map components
+        this.initializeSources();
+        this.initializeLayers();
+        this.createMapBoundary();
+        this.initializeMapView();
+        this.initializeControls();
+        this.createMap();
+        this.setupInteractions();
+        this.setupEventListeners();
+
+        // Update UI elements
+        this.updateUIElements();
+        this.updateCartoStyle();
+
+        // Log initialization status
+        if (this.config.verbose) console.log(`survey id = ${this.responseid}\nproject id = ${this.projectid}`);
+    }
+
+    /**
+     * Initialize configuration with defaults and getters/setters
+     * @param {string} configElementId - The ID of the element containing configuration JSON
+     */
+    initializeConfig(configElementId) {
+        // Define default configuration
+        this.defaultConfig = {
+            api_url: "/api/surveypoints/",
+            dest_proj: "EPSG:3857", // web mercator
+            src_proj: "EPSG:4326", // wgs84
+
+            // Colorbrewer 8-class qualitative scheme
+            point_colormap: ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf'],
+            edit_worktype: false,
+            max_res: 800,
+            initial_zoom: 4,
+            min_zoom: 4,
+            max_zoom: 16,
+            min_px_km: 10,
+            display_units: 'ft',
+            show_description: true,
+            show_diameter: false,
+            show_overview: true,
+            show_status: true,
+            show_zoom: false,
+            verbose: false,
+            max_diameter: 16093.4, // meters; 10mi
+            min_diameter: 804.67, // meters; 0.5mi
+            site_description: "region near the map center",
+            site_purpose: "wildfire resilience and vulnerability",
+            layers: []
+        };
+
+        // Parse user configuration
+        const userConfig = JSON.parse(document.getElementById(configElementId).textContent);
+
+        // Merge user config with defaults
+        this.config = {...this.defaultConfig, ...userConfig};
+
+        // Get resource URLs
+        this.img_url = document.getElementById('static_img_base').textContent;
+        this.json_url = document.getElementById('static_json_base').textContent;
+
+        // initialize config cache
+        this._configCache = {};
+    }
+
+    /**
+     * Get a configuration value
+     * @param {string} key - The configuration key to retrieve
+     * @param {*} [defaultValue=null] - Default value if key doesn't exist
+     * @returns {*} The configuration value
+     */
+    getConfig(key, defaultValue = null) {
+        // Check cache first
+        if (this._configCache.hasOwnProperty(key)) {
+            return this._configCache[key];
         }
-		else {
-			pointDeletePopup(pt_coords);
-		}
 
-        verbose_log('feature selected', pt_coords, "extent:", extent, "id:", id, f.getProperties());
-	}
+        // Handle nested keys with dot notation (e.g., "layer.color")
+        if (key.includes('.')) {
+            const parts = key.split('.');
+            let value = this.config;
 
-}
+            for (const part of parts) {
+                if (value === undefined || value === null) {
+                    return defaultValue;
+                }
+                value = value[part];
+            }
 
-// -------------------------------------------------------------
-// CREATE POPUP BOX FOR RECORDING POINT DATA -------------------
-// -------------------------------------------------------------
+            // Cache the result
+            this._configCache[key] = value !== undefined ? value : defaultValue;
+            return this._configCache[key];
+        }
 
-const container = document.getElementById('popup');
-const content = document.getElementById('popup-content');
-const closer = document.getElementById('popup-closer');
+        // Simple key lookup
+        const value = this.config[key];
+        this._configCache[key] = value !== undefined ? value : defaultValue;
+        return this._configCache[key];
+    }
 
-const popup = new ol.Overlay({
-	element: container,
-	autoPan: true
-});
-map.addOverlay(popup);
+    /**
+     * Set a configuration value
+     * @param {string} key - The configuration key to set
+     * @param {*} value - The value to set
+     * @returns {boolean} True if successful
+     */
+    setConfig(key, value) {
+        // Handle nested keys with dot notation
+        if (key.includes('.')) {
+            const parts = key.split('.');
+            let obj = this.config;
 
-// Add a keydown handler to the document
-// close the overlay on ESC
-document.addEventListener('keydown', function(event) {
-	// Check if ESC key was pressed
-	if (event.key === 'Escape') {
-        closePopup();
-		return false;
-	}
-},
-{ passive: true });
+            // Navigate to the nested object
+            for (let i = 0; i < parts.length - 1; i++) {
+                const part = parts[i];
+                if (!obj[part]) {
+                    obj[part] = {};
+                }
+                obj = obj[part];
+            }
 
-// show a tour on T
-document.addEventListener('keydown', function(event) {
-	// Check if "T" key was pressed
-	if (event.key === 'T') {
-        tour();
-		return false;
-	}
-},
-{ passive: true });
+            // Set the value on the final property
+            const lastPart = parts[parts.length - 1];
+            obj[lastPart] = value;
 
-// popup form to delete a point
-function pointDeletePopup(coords){
+            // Update cache
+            this._configCache[key] = value;
+            return true;
+        }
 
-	content.innerHTML = `<div class="arrow_box button_box">
-	<button id="cancel" title="Cancel" class="btn btn-xs btn-secondary" style="position:absolute; left:20px;">Cancel</button>
-	<button id="delete" title="Delete work location" class="btn btn-xs btn-danger" style="position:absolute; right:20px;">Delete</button>
-	</div>`
+        // Simple key update
+        this.config[key] = value;
+        this._configCache[key] = value;
+        return true;
+    }
 
-	// adding the button actions here means they don't run afoul of the content security policy for inline scripts!
-	$("#cancel").on('click', function () { closePopup(); });
-	$("#delete").on('click', function () { deleteSelected(); });
-	popup.setPosition(coords);
-};
+    /**
+     * Clear the configuration cache to force re-reading values
+     * @param {string} [key=null] - Specific key to clear, or all if null
+     */
+    clearConfigCache(key = null) {
+        if (key) {
+            delete this._configCache[key];
+        } else {
+            this._configCache = {};
+        }
+    }
 
-// popup form to edit a point
-function pointEditPopup(coords){
+    /**
+     * Extract CRS from GeoJSON object, with fallback to EPSG:4326
+     * @param {Object} geojson - GeoJSON object (FeatureCollection or Feature)
+     * @returns {string} CRS string (e.g., 'EPSG:4326')
+     */
+    extractCrsFromGeoJSON(geojson) {
+        // Default CRS for GeoJSON per RFC 7946 is WGS84 (EPSG:4326)
+        const defaultCrs = 'EPSG:4326';
 
-	// don't allow point EDIT or DELETION if zoomed out too far
-	// i.e. resolution in units per pixel has to be *lower* than max
-	if (map.getView().getResolution() > config.max_res * 4) {
-		verbose_log('zoomed out too far to accurately edit points');
-		return;
-	}
+        if (!geojson) {
+            return defaultCrs;
+        }
 
-	content.innerHTML = `<div class="arrow_box work_completed">
-	<p style="margin-bottom:10px; padding-bottom:5px; font-size:14px; text-align:center; border-bottom:dashed 1px; line-height:1.25em"><b>WORK COMPLETED</b><br>Mark all that apply</p> 
-	<a href="#" id="popup-closer"></a> 
-	<div id="worktypes"> 
-	<label><input type="checkbox" name="response" value="1"> Fire response</label>
-	<label><input type="checkbox" name="rxfire" value="1"> Prescribed fire</label>
-	<label><input type="checkbox" name="mech" value="1"> Mechanical fuel reduction</label>
-	<label><input type="checkbox" name="defense" value="1"> Defensible space</label>
-	<label><input type="checkbox" name="harden" value="1"> Structure hardening</label>
-	<label><input type="checkbox" name="natres" value="1"> Natural resource planning</label>
-	<label><input type="checkbox" name="dev" value="1"> Development planning</label>
-	<label><input type="checkbox" name="outreach" value="1"> Resident/landowner outreach</label>
-	<label><input type="checkbox" name="relationships" value="1"> Building relationships</label>
-	<label><input type="checkbox" name="other" value="1"> Other</label>
-	</div>
-	<button id="edit-save" title="Save work location information" class="btn btn-xs btn-success" style="position:absolute; left:20px;">Save</button>
-	<button id="edit-delete" title="Delete work location" class="btn btn-xs btn-danger" style="position:absolute; right:20px;">Delete</button>
-	</div>`
+        // Check for CRS property (legacy GeoJSON spec, pre-RFC 7946)
+        if (geojson.crs && geojson.crs.properties && geojson.crs.properties.name) {
+            const crsName = geojson.crs.properties.name;
 
-	// adding the button actions here means they don't run afoul of the content security policy for inline scripts!
-	$("#edit-save").on('click', function () { updateFeature(); });
-	$("#edit-delete").on('click', function () { deleteSelected(); });
+            // Handle different CRS name formats:
+            // "urn:ogc:def:crs:EPSG::4326" -> "EPSG:4326"
+            // "EPSG:4326" -> "EPSG:4326"
+            if (typeof crsName === 'string') {
+                const urnMatch = crsName.match(/EPSG::(\d+)/);
+                if (urnMatch) {
+                    return `EPSG:${urnMatch[1]}`;
+                }
 
-	popup.setPosition(coords);
+                const epsgMatch = crsName.match(/EPSG:\d+/);
+                if (epsgMatch) {
+                    return epsgMatch[0];
+                }
+            }
+        }
 
-	attachCheckboxHandlers();
-};
+        // RFC 7946 doesn't allow CRS property, assumes WGS84
+        return defaultCrs;
+    }
 
-// ------------------------------------------------------------------
-// UPDATE WORK FIELD WHEN CHECK BOXES CLICKED ON/OFF ----------------
-// ------------------------------------------------------------------
+    /**
+     * Get label text from a feature based on layer configuration
+     * @param {ol.Feature} feature - The feature to get label from
+     * @param {Object} layerConfig - Layer configuration object
+     * @returns {string|null} Label text or null if no label
+     */
+    getFeatureLabel(feature, layerConfig) {
+        // Use label_format, defaulting to "{name}" if not provided
+        const formatString = layerConfig.label_format || '{name}';
 
-// call onload or in script segment below form
-function attachCheckboxHandlers() {
+        // Replace all {property} placeholders with actual values
+        const result = formatString.replace(/\{(\w+)\}/g, (match, propName) => {
+            const value = feature.get(propName);
+            return (value !== undefined && value !== null) ? String(value) : '';
+        });
 
-    let el = document.getElementById('worktypes');
-    let works = el.getElementsByTagName('input');
-    let worktypes = selectedFeature.getProperties()['description'].split(',');
+        // Return null if result is empty or only whitespace
+        return result.trim() || null;
+    }
 
-    verbose_log("work types:", worktypes);
+    /**
+     * Initialize vector and data sources
+     */
+    initializeSources() {
+        // Points source for vector features
+        this.points_source = new VectorSource();
 
-    // setup onclick interaction for each checkbox.
-    for (let i=0, len=works.length; i<len; i++) {
-        if (works[i].type === 'checkbox' ) {
-            works[i].onclick = updateWorkList;
-            // check if saved worktypes includes checkbox
-            if(worktypes.includes(works[i].name)) {
-            	works[i].checked = true;
+        // Source for stored data from server
+        this.stored_vector_source = new VectorSource({
+            format: new GeoJSON(),
+            url: this.getDataUrl()
+        });
+
+        this.stored_vector_source.addEventListener("change", () => this.updateCartoStyle());
+    }
+
+    /**
+     * Initialize map layers
+     */
+    initializeLayers() {
+        const tile_xyz = 'MapServer/tile/{z}/{y}/{x}';
+
+        // AGOL layers: visit this url to view options
+        const agol_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+        // National map layers
+        const natlmap_url = 'https://basemap.nationalmap.gov/arcgis/rest/services/';
+
+        // layer for overview map
+        this.overview_layer = this.makeXYZLayer(natlmap_url,
+                                                'USGSTopo');
+
+        // basemap layers; specify min and max zoom as needed
+        // to define a stack
+        this.baselayers = [
+            this.makeXYZLayer(agol_url,
+                              'NatGeo_World_Map',
+                              {"minZoom": 0,
+                               "maxZoom": 14}),
+            this.makeXYZLayer(natlmap_url,
+                              'USGSTopo',
+                              {"minZoom": 13.9,
+                               "maxZoom": 99})
+        ];
+
+        // WMS and OSM layers
+        this.layer_wms_fireshed = new TileLayer({
+            source: new TileWMS({
+                url: 'https://apps.fs.usda.gov/arcx/services/EDW/EDW_FireshedRegistry_01/MapServer/WMSServer'
+            })
+        });
+
+        this.layer_osm = new TileLayer({
+            source: new OSM()
+        });
+
+        // Vector layers
+        this.points_vector = new VectorLayer({
+            source: this.points_source,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+            style: this.mapMarkerStyleFunction.bind(this)
+        });
+
+        this.stored_vector_layer = new VectorLayer({
+            source: this.stored_vector_source,
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
+            style: new Style({})
+        });
+
+        // Add configured GeoJSON layers if specified
+        this.loadMapLayers();
+    }
+
+    /**
+     * Load map layers from REST API based on mapconfig
+     */
+    loadMapLayers() {
+        const mapconfigid = window.context?.mapconfigid;
+
+        if (!mapconfigid) {
+            if (this.config.verbose) console.log('No mapconfig ID found, falling back to config layers');
+            this.loadGeoJSONLayers();
+            return;
+        }
+
+        // Fetch map layers from the REST API
+        const mapLayersUrl = `/api/map-layers/?mapconfig=${mapconfigid}`;
+
+        fetch(mapLayersUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (this.config.verbose) console.log(`Retrieved map layers from API:`, data);
+                if (this.config.verbose && data.length > 0) console.log('First layer config:', data[0].config);
+
+                // Sort layers by z_order to ensure proper rendering order
+                const sortedLayers = data.sort((a, b) => a.z_order - b.z_order);
+
+                // Create OpenLayers vector layers for each map layer
+                if (this.config.verbose) console.log(`Processing ${sortedLayers.length} map layers`);
+                sortedLayers.forEach((mapLayer, index) => {
+                    if (this.config.verbose) console.log(`Processing layer ${index}:`, mapLayer);
+                    this.createVectorLayerFromMapLayer(mapLayer, index);
+                });
+            })
+            .catch(error => {
+                console.error(`Error loading map layers from API: ${error.message || error}`);
+                if (this.config.verbose) console.log(`API call failed (${error.message}), falling back to config layers`);
+                this.loadGeoJSONLayers();
+            });
+    }
+
+    /**
+     * Create OpenLayers vector layer from MapLayer API data
+     * @param {Object} mapLayer - MapLayer data from API
+     * @param {number} index - Layer index for fallback styling
+     */
+    createVectorLayerFromMapLayer(mapLayer, index) {
+        const layerFeatures = mapLayer.layer_features;
+
+        if (!layerFeatures || layerFeatures.type !== 'FeatureCollection') {
+            if (this.config.verbose) console.log(`Invalid FeatureCollection for layer ${mapLayer.layer_name}`);
+            return;
+        }
+
+        // Create vector source with the FeatureCollection data
+        const source = new VectorSource({
+            format: new GeoJSON(),
+        });
+
+        // Store layer metadata for styling
+        source.fcName = layerFeatures.name || mapLayer.layer_name;
+        source.layerSlug = mapLayer.layer_slug;
+        source.mapLayerConfig = mapLayer.config || {};
+
+        if (this.config.verbose) console.log(`Layer ${mapLayer.layer_name} config:`, mapLayer.config);
+
+        // Parse and add features
+        let features;
+        try {
+            // Extract CRS from GeoJSON, fall back to EPSG:4326
+            const dataCrs = this.extractCrsFromGeoJSON(layerFeatures);
+
+            features = new GeoJSON().readFeatures(layerFeatures, {
+                dataProjection: dataCrs,
+                featureProjection: this.config.dest_proj
+            });
+            source.addFeatures(features);
+
+            if (this.config.verbose) console.log(`Added ${features.length} features for layer ${mapLayer.layer_name} (CRS: ${dataCrs})`);
+        } catch (error) {
+            console.error(`Error parsing features for layer ${mapLayer.layer_name}: ${error.message || error}`);
+            return;
+        }
+
+        // Create vector layer with z-order aware styling
+        const layer = new VectorLayer({
+            source: source,
+            minZoom: source.mapLayerConfig.min_zoom || 11,
+            maxZoom: source.mapLayerConfig.max_zoom || 14,
+            style: (feature) => {
+                if (this.config.verbose) console.log(`Styling feature for layer ${mapLayer.layer_name}:`, feature);
+                return this.mapLayerStyleFunction(feature, source, index);
+            },
+            declutter: true,
+            // Store z-order for reference
+            zIndex: mapLayer.z_order
+        });
+
+        // Set the z-index to control rendering order
+        layer.setZIndex(mapLayer.z_order);
+
+        // add the layer to the map object
+        this.map.addLayer(layer);
+
+        if (this.config.verbose) console.log(`Created layer ${mapLayer.layer_name} with z-order ${mapLayer.z_order}, features: ${features.length}, zoom: ${source.mapLayerConfig.min_zoom}-${source.mapLayerConfig.max_zoom}`);
+    }
+
+    /**
+     * Style function for map layers loaded from API
+     * @param {ol.Feature} feature - The feature to style
+     * @param {ol.source.Vector} source - The vector source with layer config
+     * @param {number} index - Layer index for fallback styling
+     * @returns {ol.style.Style|Array<ol.style.Style>} Style(s) for the feature
+     */
+    mapLayerStyleFunction(feature, source, index) {
+        if (this.config.verbose) console.log('mapLayerStyleFunction called with:', { feature, source, index });
+
+        const geomType = feature.getGeometry()?.getType();
+        const fcName = source.fcName || 'unknown';
+        const layerConfig = source.mapLayerConfig || {};
+        const layer_colormap = ['#ffffd4','#fed98e','#fe9929','#cc4c02'];
+
+        if (this.config.verbose) console.log('Style config:', { geomType, fcName, layerConfig });
+
+        // Use config or fallback to default colors
+        const defaultColor = layerConfig.stroke_color || layer_colormap[index % layer_colormap.length] || '#3399CC';
+
+        // If no geometry, return empty style
+        if (!geomType) {
+            return new Style({});
+        }
+
+        // For Point features
+        if (geomType === 'Point') {
+            const labelText = this.getFeatureLabel(feature, layerConfig);
+
+            const pointStyle = new Style({
+                image: new CircleStyle({
+                    radius: layerConfig.point_radius || 4,
+                    fill: new Fill({
+                        color: layerConfig.point_color || defaultColor
+                    }),
+                    stroke: new Stroke({
+                        color: '#FFFFFF33',
+                        width: 2
+                    })
+                }),
+                text: labelText ? new Text({
+                    text: labelText,
+                    font: `${layerConfig.font_style || 'italic'} ${layerConfig.font_size || '9px'} ${layerConfig.font_face || 'Arial, Helvetica, sans-serif'}`,
+                    fill: new Fill({
+                        color: layerConfig.font_color || '#000000'
+                    }),
+                    stroke: new Stroke({
+                        color: layerConfig.font_stroke_color || '#FFFFFF33',
+                        width: 3
+                    }),
+                    offsetX: layerConfig.text_offset?.[0] || 0,
+                    offsetY: layerConfig.text_offset?.[1] || -15,
+                    textAlign: layerConfig.text_align || 'center',
+                    textBaseline: 'middle'
+                }) : null
+            });
+
+            if (this.config.verbose) console.log(pointStyle);
+
+            return pointStyle;
+        }
+
+        // For LineString features
+        else if (geomType === 'LineString' || geomType === 'MultiLineString') {
+            return new Style({
+                stroke: new Stroke({
+                    color: layerConfig.stroke_color || defaultColor,
+                    width: layerConfig.line_width || 1.5,
+                    lineDash: layerConfig.line_dash || [5, 2, 2, 2]
+                })
+            });
+        }
+
+        // For Polygon features
+        else if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
+            return new Style({
+                fill: new Fill({
+                    color: layerConfig.fill_color || 'rgba(0, 0, 0, 0.1)'
+                }),
+                stroke: new Stroke({
+                    color: layerConfig.stroke_color || defaultColor,
+                    width: layerConfig.line_width || 1.5,
+                    lineDash: layerConfig.line_dash || null
+                })
+            });
+        }
+
+        // Default style for other geometry types
+        return new Style({
+            fill: new Fill({
+                color: 'rgba(0, 0, 0, 0)'
+            }),
+            stroke: new Stroke({
+                color: defaultColor,
+                width: 2
+            })
+        });
+    }
+
+    /**
+     * Load GeoJSON layers from configuration (fallback method)
+     */
+    loadGeoJSONLayers() {
+        const layer_colormap = ['#ffffd4','#fed98e','#fe9929','#cc4c02'];
+
+        let layers = this.getConfig('layers',[]);
+
+        if (layers.length>0) {
+            if (this.config.verbose) console.log(layers);
+            layers.forEach((lyr, index) => {
+                if (this.config.verbose) console.log(lyr);
+
+                // Create vector source with custom loader to extract FeatureCollection name
+                const source = new VectorSource({
+                    format: new GeoJSON(),
+                    loader: (extent, resolution, projection, success, failure) => {
+                        fetch(this.json_url + lyr.name)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Store the FeatureCollection name for styling
+                                source.fcName = data.name;
+
+                                // Extract CRS from GeoJSON, fall back to EPSG:4326
+                                const dataCrs = this.extractCrsFromGeoJSON(data);
+
+                                // Parse and add features
+                                const features = new GeoJSON().readFeatures(data, {
+                                    dataProjection: dataCrs,
+                                    featureProjection: this.config.dest_proj
+                                });
+                                source.addFeatures(features);
+                                if (this.config.verbose) console.log(`Loaded GeoJSON layer ${lyr.name} with CRS: ${dataCrs}`);
+                                success(features);
+                            })
+                            .catch(error => {
+                                failure();
+                                console.error("Error loading GeoJSON:", error);
+                            });
+                    }
+                });
+
+                // Create vector layer with custom style function
+                const layer = new VectorLayer({
+                    source: source,
+                    minZoom: lyr?.min_zoom || 0,
+                    maxZoom: lyr?.max_zoom || 99,
+                    style: (feature) => this.geojsonStyleFunction(feature, source, lyr, index),
+                    declutter: true
+                });
+
+                // add the layer to the map object
+                this.map.addLayer(layer);
+
+            });
+        }
+    }
+
+    /**
+     * Style function for GeoJSON features
+     * @param {ol.Feature} feature - The feature to style
+     * @param {ol.source.Vector} source - The vector source
+     * @param {Object} layerConfig - Layer configuration from config.layers
+     * @param {number} index - Layer index for default color selection
+     * @returns {ol.style.Style|Array<ol.style.Style>} Style(s) for the feature
+     */
+    geojsonStyleFunction(feature, source, layerConfig, index) {
+        const geomType = feature.getGeometry()?.getType();
+        const fcName = source.fcName || 'unknown';
+        const layer_colormap = ['#ffffd4','#fed98e','#fe9929','#cc4c02'];
+        const defaultColor = layerConfig.stroke_color || layer_colormap[index] || '#3399CC';
+
+        // If no geometry, return empty style
+        if (!geomType) {
+            return new Style({});
+        }
+
+        // Create base style object
+        const baseStyle = {
+            fill: new Fill({
+                color: layerConfig.fill_color || 'rgba(0, 0, 0, 0)'
+            }),
+            stroke: new Stroke({
+                color: defaultColor,
+                width: layerConfig.stroke_width || 2
+            })
+        };
+
+        // For Point features
+        if (geomType === 'Point') {
+            // Get label text using configured property
+            const labelText = this.getFeatureLabel(feature, layerConfig);
+
+            // Customize point style based on FeatureCollection name
+            let pointStyle;
+            let textAlign = 'center';
+            let textOffset = [0, -15]; // Default text offset
+            let fontColor = '#000000'
+            let fontFace = 'Arial, sans-serif';
+            let fontSize = '12px';
+            let fontStyle = '';
+            let pointColor = defaultColor;
+            let pointRadius = 5;
+
+            // Customize based on feature collection name
+            if (fcName === 'sw_bend_landmarks') {
+                pointColor = '#FF5733';
+                pointRadius = 6;
+                fontSize = '12px';
+                textOffset = [0, -20];
+            } else if (fcName.includes('trail')) {
+                pointColor = '#33A1FF';
+                pointRadius = 4;
+                fontSize = '11px';
+            } else if (fcName.includes('point')) {
+                pointColor = '#33FF57';
+                pointRadius = 5;
+            }
+
+            // Apply any custom style from layer config if provided
+            if (layerConfig.point_color) pointColor = layerConfig.point_color;
+            if (layerConfig.point_radius) pointRadius = layerConfig.point_radius;
+            if (layerConfig.text_align) textAlign = layerConfig.text_align;
+            if (layerConfig.text_offset) textOffset = layerConfig.text_offset;
+            if (layerConfig.font_color) fontColor = layerConfig.font_color;
+            if (layerConfig.font_face) fontFace = layerConfig.font_face;
+            if (layerConfig.font_size) fontSize = layerConfig.font_size;
+            if (layerConfig.font_style) fontStyle = layerConfig.font_style;
+
+            // Create the point style
+            pointStyle = new Style({
+                image: new CircleStyle({
+                    radius: pointRadius,
+                    fill: new Fill({
+                        color: pointColor
+                    }),
+                    stroke: new Stroke({
+                        color: '#FFFFFF',
+                        width: 2
+                    })
+                }),
+                // Add text if label exists
+                text: labelText ? new Text({
+                    text: labelText,
+                    font: `${fontStyle} ${fontSize} ${fontFace}`,
+                    fill: new Fill({
+                        color: fontColor
+                    }),
+                    stroke: new Stroke({
+                        color: '#FFFFFF',
+                        width: 3
+                    }),
+                    offsetX: textOffset[0],
+                    offsetY: textOffset[1],
+                    textAlign: `${textAlign}`,
+                    textBaseline: 'middle'
+                }) : null
+            });
+
+            return pointStyle;
+        }
+
+        // For LineString features
+        else if (geomType === 'LineString' || geomType === 'MultiLineString') {
+            return new Style({
+                stroke: new Stroke({
+                    color: defaultColor,
+                    width: layerConfig.stroke_width || 2,
+                    lineDash: layerConfig.line_dash || null
+                })
+            });
+        }
+
+        // For Polygon features
+        else if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
+            return new Style({
+                fill: new Fill({
+                    color: layerConfig.fill_color || 'rgba(0, 0, 0, 0.1)'
+                }),
+                stroke: new Stroke({
+                    color: defaultColor,
+                    width: layerConfig.stroke_width || 2
+                })
+            });
+        }
+
+        // Default style for other geometry types
+        return new Style(baseStyle);
+    }
+
+    /**
+     * Create map boundary
+     */
+    createMapBoundary() {
+        this.extent = transformExtent(this.config.extent, this.config.src_proj, this.config.dest_proj);
+        this.boundary = transformExtent(this.config.boundary, this.config.src_proj, this.config.dest_proj);
+
+        const box_coords = [
+            [this.extent[0], this.extent[1]], [this.extent[0], this.extent[3]],
+            [this.extent[2], this.extent[3]], [this.extent[2], this.extent[1]],
+            [this.extent[0], this.extent[1]]
+        ];
+
+        const vectorSource = new VectorSource();
+        vectorSource.addFeature(new Feature(new LineString(box_coords)));
+
+        this.study_area_layer = new VectorLayer({
+            source: vectorSource,
+            style: new Style({
+                stroke: new Stroke({
+                    color: '#EF535099',
+                    width: 4
+                })
+            })
+        });
+    }
+
+    /**
+     * Initialize map view
+     */
+    initializeMapView() {
+        this.viewport = document.getElementById('map');
+
+        let startZoom = Math.max(this.getMinZoom(),
+                                 getUrlParam('zoom') || this.config.initial_zoom);
+        if (startZoom > this.config.max_zoom) {
+            startZoom = this.config.max_zoom;
+            if (this.config.verbose) console.log("warning: initial zoom cannot be greater than max zoom.");
+        }
+
+        const startCenter = getUrlParam('lonlat')?.split(',').map(
+            item => Number(item.trim()));
+
+        let mapCenter;
+
+        if (startCenter!==undefined &&
+            startCenter.length==2 &&
+            startCenter[0]>=-180 && startCenter[0]<=180 &&
+            startCenter[1]>=-90 && startCenter[1]<=90) {
+
+            mapCenter = transform(startCenter,
+                                  this.config.src_proj,
+                                  this.config.dest_proj);
+        }
+
+        else {
+            mapCenter = transform(this.config.map_center,
+                                  this.config.src_proj,
+                                  this.config.dest_proj);
+        }
+
+        this.view = new View({
+            center: mapCenter,
+            minZoom: this.getMinZoom(),
+            zoom: startZoom,
+            maxZoom: this.config.max_zoom,
+            extent: this.boundary
+        });
+
+        window.addEventListener('resize', () => {
+            const minZoom = this.getMinZoom();
+            if (minZoom !== this.view.getMinZoom()) {
+                if (this.config.verbose) console.log(`resizing: min zoom = ${minZoom}`);
+                this.view.setMinZoom(minZoom);
+            }
+
+            if (this.config.verbose) console.log(`resize: minZoom = ${minZoom}`);
+        });
+    }
+
+    /**
+     * Initialize map controls
+     */
+    initializeControls() {
+        this.overviewMapControl = new OverviewMap({
+            layers: [this.overview_layer],
+            className: 'ol-overviewmap ol-custom-overviewmap',
+            label: '«',
+            collapseLabel: '»',
+            view: new View({
+                maxZoom: this.getMinZoom(),
+                minZoom: this.getMinZoom(),
+                extent: this.boundary,
+                projection: this.config.dest_proj
+            }),
+            collapsed: !this.config.show_overview,
+            collapsible: true
+        });
+    }
+
+    /**
+     * Create the map
+     */
+    createMap() {
+
+        this.map = new Map({
+            target: document.getElementById('map'),
+            interactions: defaultInteractions({altShiftDragRotate: false, pinchRotate: false}),
+            layers: [
+                ...this.baselayers,
+                this.stored_vector_layer,
+                this.points_vector,
+                this.study_area_layer
+            ],
+            controls: defaultControls({attribution: true}).extend([
+                this.overviewMapControl,
+                this.createScaleControl()
+            ]),
+            view: this.view
+        });
+
+        // Initialize popup overlay
+        this.initializePopup();
+    }
+
+    /**
+     * Initialize popup components
+     */
+    initializePopup() {
+        this.container = document.getElementById('popup');
+        this.content = document.getElementById('popup-content');
+        this.closer = document.getElementById('popup-closer');
+
+        this.popup = new Overlay({
+            element: this.container,
+            autoPan: true
+        });
+
+        this.map.addOverlay(this.popup);
+    }
+
+    /**
+     * Setup map interactions
+     */
+    setupInteractions() {
+        // Draw interaction
+        this.draw_point = new Draw({
+            type: 'Point',
+            style: this.getPointerStyle.bind(this)
+        });
+
+        this.draw_point.on('drawend', this.handleDrawEnd.bind(this));
+
+        // Hover interaction
+        this.hover = new Select({
+            condition: pointerMove,
+            layers: [this.points_vector]
+        });
+
+        this.hover.on('select', event => {
+            if (event.selected.length > 0) {
+                if (this.config.verbose) console.log('point detected');
+                this.draw_point.setActive(false);
+            } else {
+                this.draw_point.setActive(true);
+            }
+        });
+
+        // Click select interaction
+        this.clickSelect = new Select({
+            condition: click,
+            layers: [this.points_vector]
+        });
+
+        this.clickSelect.on('select', this.handleClickSelect.bind(this));
+
+        // Add interactions to map
+        this.map.addInteraction(this.clickSelect);
+        this.map.addInteraction(this.draw_point);
+        this.map.addInteraction(this.hover);
+    }
+
+    /**
+     * Setup event listeners
+     */
+    setupEventListeners() {
+        // Map events
+        this.map.on('moveend', this.onMoveEnd.bind(this));
+
+        // Mouse cursor change over features
+        const mapViewport = this.map.getViewport();
+        mapViewport.addEventListener('mousemove', e => {
+            const pixel = this.map.getEventPixel(e);
+            const hit = this.map.forEachFeatureAtPixel(pixel, () => true);
+            mapViewport.style.cursor = hit ? 'context-menu' : '';
+        });
+
+        // Global keydown events
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                this.closePopup();
+                return false;
+            }
+            if (event.key === 'T') {
+                this.tour();
+                return false;
+            }
+        }, { passive: true });
+
+        // Set project ID from form if available
+        const projectIdInput = document.getElementById("projectid");
+        if (projectIdInput) {
+            projectIdInput.value = this.projectid;
+        }
+    }
+
+    /**
+     * Update UI elements with configuration
+     */
+    updateUIElements() {
+
+        // these are/are embedded in the status line
+        const mapStatus = document.getElementById('map_status2');
+        const mapTitle = document.getElementById('map_title');
+        const mapInfo = document.getElementById('map_info');
+
+        // these are embedded in the help popup
+        const siteDescription = document.getElementById('site_description');
+        const sitePurpose = document.getElementById('site_purpose');
+
+        // hide the whole status line if specified
+        if (mapStatus) {
+            if (this.config.show_status===false) {
+                mapStatus.style.display = 'none';
+            } else {
+                mapStatus.style.display = 'block';
+
+                // update the status line
+                if (mapTitle && this.config.show_description)
+                    mapTitle.textContent = this.config.site_description;
+                if (mapInfo)
+                    mapInfo.textContent = this.getCursorText();
+            }
+        }
+
+        // add context to the help popup
+        if (siteDescription)
+            siteDescription.textContent = this.config.site_description;
+        if (sitePurpose)
+            sitePurpose.textContent = this.config.site_purpose;
+    }
+
+    /**
+     * Handle draw end event
+     * @param {Object} event - The draw end event
+     */
+    handleDrawEnd(event) {
+        const coordinate = event.feature.getGeometry().getCoordinates();
+
+        if (!this.isValidProjID(this.projectid)) return;
+
+        // Check if editing is enabled for this coordinate
+        if (this.editingEnabled(coordinate) === false) return;
+
+        // Check for existing features at this location
+        const features = this.points_source.getFeaturesAtCoordinate(coordinate);
+        if (features.length > 0) {
+            if (this.config.verbose) console.log('draw_point.on: point detected, exiting draw function');
+            return;
+        }
+
+        // Don't allow point creation if zoomed out too far
+        if (this.getScale() < this.config.min_px_km) {
+            if (this.config.verbose) console.log('draw_point.on: zoomed out too far to accurately draw points');
+            return;
+        }
+
+        // Change icon size based on zoom level
+        const radius = this.getRadius();
+
+        // Create new circle feature and update properties
+        const feature = new Feature(new Circle(coordinate, radius * this.scl_const));
+
+        // Set feature properties
+        feature.setProperties({
+            'id': -1,
+            'description': '',
+            'radius': radius,
+            'projectid': this.projectid,
+            'status': 0,
+            'label': 'Saving...',
+            'resolution': getPointResolution(
+                this.config.dest_proj,
+                this.map.getView().getResolution(),
+                coordinate,
+                'm'
+            )
+        });
+
+        feature.setStyle(this.mapMarkerStyleFunction.bind(this));
+
+        // Add feature to source
+        this.points_source.addFeature(feature);
+
+        // Close any existing popup
+        this.popup.setPosition(undefined);
+
+        // Update selected feature
+        this.selectedFeature = feature;
+
+        // Show edit popup if enabled
+        if (this.config.edit_worktype === true) {
+            this.pointEditPopup(coordinate);
+        }
+
+        // Post point to server
+        this.createPoint(feature);
+
+        this.countPoints();
+    }
+
+    /**
+     * Handle click select event
+     * @param {Object} evt - The click select event
+     */
+    handleClickSelect(evt) {
+        if (this.config.verbose) console.log(
+            evt.target.getFeatures().getLength() +
+            ' selected features (last operation selected ' +
+            evt.selected.length +
+            ' and deselected ' +
+            evt.deselected.length +
+            ' features)'
+        );
+
+        if (evt.selected.length > 0) {
+            if (this.config.verbose) console.log("clickSelect calling pointEdit");
+            this.pointEdit(evt.selected[0]);
+        }
+    }
+
+    /**
+     * Handle move end event
+     * @param {Object} evt - The move end event
+     */
+    onMoveEnd(evt) {
+        const mapInfo = document.getElementById('map_info');
+        if (mapInfo) {
+
+            let cursortext = this.getCursorText();
+
+            if (cursortext.length>0 && this.editingEnabled()) {
+                mapInfo.textContent = `| ${cursortext}`;
+            } else {
+                mapInfo.textContent = '';
             }
         }
     }
-}
 
-// rebuild csv list of work types when clicking any checkbox
-function updateWorkList(e) {
+    /**
+     * Style function for map markers
+     * @param {Feature} feature - The feature to style
+     * @returns {Array<Style>} The styles to apply to the feature
+     */
+    mapMarkerStyleFunction(feature) {
+        let txt = feature.get('label');
+        if (txt.length === 0) txt = "";
+        if (txt.length > 25) txt = txt.substring(0, 25) + "...";
 
-	let el = document.getElementById('worktypes');
-    let works = el.getElementsByTagName('input');
-    let out = '';
+        // Project ID should only be a positive integer
+        const projectid = Number(feature.get('projectid'));
 
-    // setup onclick interaction for each checkbox.
-    for (let i=0, len=works.length; i<len; i++) {
-        if (works[i].type === 'checkbox' && works[i].checked === true) {
-            out = out + works[i].name + ","
+        const colormap = this.getConfig('point_colormap');
+
+        // default is 8 unique colors; rotate through all available
+        let colorid = (projectid-1) % colormap.length;
+
+        // Set transparency for stroke (edge) and fill
+        let stroke_color = colormap[colorid] + 'cc';
+        let fill_color = colormap[colorid] + '4d';
+
+        return [
+            new Style({
+                fill: new Fill({
+                    color: fill_color
+                }),
+                stroke: new Stroke({
+                    color: stroke_color,
+                    width: 3
+                }),
+                text: new Text({
+                    font: '12px Calibri,sans-serif',
+                    fill: new Fill({color: stroke_color}),
+                    stroke: new Stroke({color: '#ffffff', width: 3}),
+                    text: txt
+                })
+            })
+        ];
+    }
+
+    /**
+     * Style function for drawing cursor
+     * @param {Feature} feature - The feature being drawn
+     * @returns {Style} The style to apply to the drawing cursor
+     */
+    getPointerStyle(feature) {
+
+        // used for both status line and pointer annotation
+        const cursor_txt = this.getCursorText();
+        const scl = this.getScale();
+
+        // Update map info text, like circle diameter and zoom level, if enabled
+        const mapInfo = document.getElementById('map_info');
+        if (mapInfo) {
+            if (this.editingEnabled(feature.coordinate)) {
+                mapInfo.textContent = `| ${cursor_txt}`;
+            } else {
+                mapInfo.textContent = '';
+            }
+        }
+
+        const pointerStyle = new Style();
+
+        // Default text style: black with white outline for contrast
+        const cursorText = new Text({
+            font: '12px Calibri,sans-serif',
+            fill: new Fill({color: '#000'}),
+            stroke: new Stroke({color: '#ffffff', width: 3}),
+            text: cursor_txt,
+            offsetY: 65
+        });
+
+        // Only allow entry for a valid projectid
+        if (!this.isValidProjID(this.projectid)) {
+            cursorText.setText('');
+        }
+        // Show a warning if too zoomed out
+        else if (scl < this.config.min_px_km) {
+            cursorText.setText('⚠️ Zoom-in closer to mark locations');
+            cursorText.setFill(new Fill({color: 'red'}));
+            cursorText.setOffsetY(-10);
+        }
+        // Everything is OK
+        else {
+            // Show a context-sensitive mouse pointer
+            // the cursors are images so they won't match a custom colormap
+            const colormap = this.getConfig('point_colormap');
+            const colorid = (this.projectid-1) % colormap.length;
+
+            const icon_url = `${this.img_url}circle_st1_${colorid}.png`;
+
+            pointerStyle.setImage(new Icon({
+                anchor: [0.5, 0.5],
+                size: [107, 107],
+                offset: [0, 0],
+                opacity: 1,
+                scale: this.getMapScaleFactor(),
+                src: icon_url
+            }));
+        }
+
+        // Update pointer style to use cursorText determined above
+        pointerStyle.setText(cursorText);
+
+        return pointerStyle;
+    }
+
+
+    /**
+     * Create XYZ tile layer
+     * @param {string} baseurl - The base URL for the tile service
+     * @param {string} servicename - The service name
+     * @returns {TileLayer} The created tile layer
+     */
+    makeXYZLayer(baseurl, servicename, options={"minZoom": 0,
+                                                "maxZoom": 99}) {
+
+        return new TileLayer({
+            source: new XYZ({
+                url: `${baseurl}${servicename}/MapServer/tile/{z}/{y}/{x}`,
+                attributions: this.attributions
+            }),
+            minZoom: options.minZoom,
+            maxZoom: options.maxZoom
+        });
+    }
+
+    /**
+     * Get minimum zoom level based on viewport width
+     * @returns {number} The minimum zoom level
+     */
+    getMinZoom() {
+        const width = this.viewport.clientWidth;
+        return Math.ceil(Math.LOG2E * Math.log(width / 256));
+    }
+
+    /**
+     * Create scale control with appropriate units
+     * @returns {ScaleLine} The scale control
+     */
+    createScaleControl() {
+        const units = this.config.display_units === 'm' ? 'metric' : 'us';
+
+        return new ScaleLine({
+            units: units
+        });
+    }
+
+    /**
+     * Get data URL based on response and project IDs
+     * @returns {string} The API URL with query parameters
+     */
+    getDataUrl() {
+        let url_txt = this.config.api_url;
+
+        if (this.responseid != null) {
+            url_txt += '?responseid=' + this.responseid;
+
+            if (this.isValidProjID(this.projectid)) {
+                url_txt += '&projectid=' + this.projectid;
+            }
+        }
+
+        return url_txt;
+    }
+
+    /**
+     * Check if a project ID is valid (positive integer)
+     * @param {string|number} projid - The project ID to validate
+     * @returns {boolean} True if the project ID is valid
+     */
+    isValidProjID(projid) {
+        let int_projectid;
+
+        if (typeof projid === 'string') int_projectid = this.strToInt(projid);
+        if (typeof projid === 'number') int_projectid = projid;
+
+        return (Number.isInteger(int_projectid) && int_projectid > 0);
+    }
+
+    /**
+     * Check if editing is enabled for a coordinate
+     * @param {Array<number>} [coordinate] - The coordinate to check
+     * @returns {boolean} True if editing is enabled
+     */
+    editingEnabled(coordinate) {
+        // Don't allow editing within 2km of the edge to prevent undeleteable points
+        const bias = 2000;
+        if (coordinate != null) {
+            if (coordinate[0] < this.boundary[0] + bias ||
+                coordinate[1] < this.boundary[1] + bias ||
+                coordinate[0] > this.boundary[2] - bias ||
+                coordinate[1] > this.boundary[3] - bias) {
+                return false;
+            }
+        }
+
+        return (this.responseid != null && this.isValidProjID(this.projectid));
+    }
+
+    /**
+     * Count points from each project type and update UI
+     */
+    countPoints() {
+        let counts = {p1: 0, p2: 0, p3: 0, p4: 0};
+
+        this.points_source.getFeatures().forEach(feature => {
+            const pid = feature.get('projectid');
+            if (pid >= 1 && pid <= 4) {
+                counts[`p${pid}`]++;
+            }
+        });
+
+        // Update UI elements
+        const responseIdEl = document.getElementById("responseid");
+        const pointCountEl = document.getElementById("pointcount");
+
+        if (responseIdEl) responseIdEl.textContent = this.responseid;
+        if (pointCountEl) pointCountEl.textContent =
+            `p1 = ${counts.p1} p2 = ${counts.p2} p3 = ${counts.p3} p4 = ${counts.p4}`;
+
+        if (this.config.verbose) console.log(`p1 = ${counts.p1} p2 = ${counts.p2} p3 = ${counts.p3} p4 = ${counts.p4}`);
+    }
+
+    /**
+     * Hide features not matching current project ID
+     */
+    hideFeatures() {
+        this.points_source.getFeatures().forEach(feature => {
+            if (this.isValidProjID(this.projectid) && feature.get('projectid') != this.projectid) {
+                feature.setStyle(new Style({}));
+            } else {
+                feature.setStyle(this.mapMarkerStyleFunction.bind(this));
+            }
+        });
+    }
+
+    /**
+     * Get map scale factor for cursor resizing
+     * @returns {number} The scale factor to apply
+     */
+    getMapScaleFactor() {
+        const res = this.map.getView().getResolution();
+        const scl_minres = this.config.min_diameter / 100; // m/px
+        const scl_maxres = this.config.max_diameter / 100; // m/px
+
+        if (res <= scl_maxres && res >= scl_minres) {
+            return this.scl_const;
+        } else if (res > scl_maxres) { // Zooming out past the limit
+            return (scl_maxres / res) * this.scl_const;
+        } else if (res < scl_minres) { // Zooming in past the limit
+            return (scl_minres / res) * this.scl_const;
         }
     }
-    verbose_log(out);
-    selectedFeature.setProperties({'description':out})
+
+    /**
+     * Get radius in meters based on zoom level
+     * @returns {number} The radius in meters
+     */
+    getRadius() {
+        const res = this.map.getView().getResolution();
+
+        // Basic radius calculation for the cursor circle based on map resolution
+        let rad = 50 * res;
+
+        // Set limits for radius
+        const min_rad = this.config.min_diameter / 2;
+        const max_rad = this.config.max_diameter / 2;
+
+        if (rad > max_rad) {
+            rad = max_rad;
+        } else if (rad < min_rad) {
+            rad = min_rad;
+        }
+
+        if (this.config.verbose) console.log(`getRadius: res=${roundX(res, 2)} rad=${roundX(rad, 2)} scl=${roundX(this.getScale(), 2)}`);
+
+        return rad;
+    }
+
+    /**
+     * Calculate current map scale in px/km
+     * @returns {number} The map scale in pixels per kilometer
+     */
+    getScale() {
+        const res = this.map.getView().getResolution();
+        return (1 / res * 1000); // px/km
+    }
+
+    /**
+     * Get text for cursor display
+     * @returns {string} Formatted text describing cursor size
+     */
+    getCursorText() {
+        // Distance in map units = meters
+        const diameter = 2 * this.getRadius();
+        let cursor_txt='';
+
+        // Display values in meters or feet based on config
+        if (this.config.show_diameter) {
+            cursor_txt += 'circle ⌀: ';
+            if (this.config.display_units === 'm') {
+                if (diameter > 10000) {
+                    cursor_txt += `${roundX(diameter / 1000)} km`;
+                } else if (diameter > 1000) {
+                    cursor_txt += `${roundX(diameter / 1000, 1)} km`;
+                } else {
+                    cursor_txt += `${roundX(diameter, -2)} m`;
+                }
+            } else {
+                if (diameter > 8000) {
+                    cursor_txt += `${roundX(diameter / this.meters_per_mile)} mi`;
+                } else if (diameter > 800) {
+                    cursor_txt += `${roundX(diameter / this.meters_per_mile, 1)} mi`;
+                } else {
+                    cursor_txt += `${roundX(diameter / this.meters_per_mile * 5280, -2)} ft`;
+                }
+            }
+        }
+
+        if (this.config.show_zoom)
+            cursor_txt += ` | z: ${this.view.getZoom().toFixed(1)}`;
+
+        return cursor_txt;
+    }
+
+    /**
+     * Safely convert string to integer
+     * @param {string} val - The string to convert
+     * @returns {number} The integer value or NaN if invalid
+     */
+    strToInt(val) {
+        if (val == null || val === '') return NaN;
+        if (!Number.isInteger(Number(val))) return NaN;
+        return Number(val);
+    }
+
+    /**
+     * Converts a Circle geometry to a Point (for the feature center)
+     * @param {Feature} feature - The feature with Circle geometry
+     * @returns {Point} The point at the center of the circle
+     */
+    circleToPoint(feature) {
+        const extent = feature.getGeometry().getExtent();
+        const centroid = [
+            extent[0] + (extent[2] - extent[0]) / 2,
+            extent[1] + (extent[3] - extent[1]) / 2
+        ];
+        return new Point(centroid);
+    }
+
+    /**
+     * Convert feature to WKT
+     * @param {Feature} feature - The feature to convert
+     * @returns {string} WKT representation of the feature
+     */
+    featureToWKT(feature) {
+        feature.set('geometry', feature.getGeometry());
+        const format = new WKT();
+        return format.writeFeature(feature);
+    }
+
+    /**
+     * Serializes a feature for sending to the API
+     * @param {Feature} feature - The OpenLayers feature to serialize
+     * @returns {string} JSON string representation of the feature for the API
+     */
+    serializeFeature(feature) {
+        // Convert circle to point
+        const pt = this.circleToPoint(feature);
+        const coords = transform(pt.getCoordinates(), this.config.dest_proj, this.config.src_proj);
+
+        /** @type {Object} */
+        const data = {};
+
+        if (feature.get('id') !== -1) data.id = feature.get('id');
+        data.mapconfig = window.context?.mapconfigid || '';
+        data.label = feature.get('label');
+        data.description = feature.get('description');
+        data.radius = feature.get('radius');
+        data.responseid = this.responseid;
+        data.projectid = feature.get('projectid');
+        data.ipaddress = window.context?.ip_address || '';
+        data.status = feature.get('status');
+        data.resolution = feature.get('resolution');
+        data.geom = {"type": "Point", "coordinates": coords};
+
+        if (data.description === '') data.description = 'new point';
+        data.timestamp = encodeURIComponent(Date.now().toString());
+
+        return JSON.stringify(data);
+    }
+
+    /**
+     * Creates a new point on the server
+     * @param {Feature} feature - The feature to send to the server
+     * @returns {Promise<void>} Promise that resolves when the point is created
+     */
+    createPoint(feature) {
+        const csrftoken = this.getCookie('csrftoken');
+        const json = this.serializeFeature(feature);
+
+        return fetch(this.config.api_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Csrftoken': csrftoken
+            },
+            body: json
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            if (this.config.verbose) console.log('createPoint: ' + JSON.stringify(responseData));
+            feature.setProperties({'status': 1});
+            feature.set('label', '');
+            feature.setProperties({'id': parseInt(responseData.id)});
+            this.selectedFeature = feature;
+            if (this.config.verbose) console.log(`createPoint: New point added with ID ${responseData.id}`);
+            this.countPoints();
+        })
+        .catch(error => {
+            if (this.config.verbose) console.log("Problem saving the data: " + json);
+        });
+    }
+
+    /**
+     * Update a point on the server
+     * @param {Feature} feature - The feature to update
+     * @returns {Promise<void>} Promise that resolves when the point is updated
+     */
+    updateData(feature) {
+        const csrftoken = this.getCookie('csrftoken');
+
+        // Copy new description value back to finalize
+        feature.setProperties({'description': feature.get('description_new')});
+
+        const json = this.serializeFeature(feature);
+
+        return fetch(`${this.config.api_url}${feature.get('id')}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Csrftoken': csrftoken
+            },
+            body: json
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            if (this.config.verbose) console.log(JSON.stringify(responseData));
+            this.selectedFeature = feature;
+            if (this.config.verbose) console.log(`updateData: Point ID ${responseData.id} updated.`);
+        })
+        .catch(error => {
+            if (this.config.verbose) console.log("updateData: Problem saving the data: " + json);
+        });
+    }
+
+    /**
+     * Delete a point from the server
+     * @param {Feature} feature - The feature to delete
+     * @returns {Promise<void>} Promise that resolves when the point is deleted
+     */
+    deleteData(feature) {
+        const csrftoken = this.getCookie('csrftoken');
+        const id = feature.get('id');
+
+        return fetch(`${this.config.api_url}${id}/?responseid=${this.responseid}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Csrftoken': csrftoken
+            }
+        })
+        .then(response => {
+            if (this.config.verbose) console.log(`deleteData: Point ${id} deleted from response ${this.responseid}`);
+            this.points_source.removeFeature(feature);
+            this.countPoints();
+        })
+        .catch(error => {
+            if (this.config.verbose) console.log(`deleteData: Problem deleting the point ${id}`);
+        });
+    }
+
+    /**
+     * Get CSRF cookie
+     * @param {string} name - The name of the cookie
+     * @returns {string|null} The cookie value or null if not found
+     */
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    /**
+     * Point edit handler
+     * @param {Feature} feature - The feature to edit
+     */
+    pointEdit(feature) {
+        // Check for object existence
+        if (feature !== undefined) {
+            const extent = feature.getGeometry().getExtent();
+            const pt_coords = [
+                extent[0] + (extent[2] - extent[0]) / 2,
+                extent[1] + (extent[3] - extent[1]) / 2
+            ];
+            const id = feature.get('id');
+
+            feature.setStyle(this.mapMarkerStyleFunction.bind(this));
+            if (this.config.verbose) console.log('pointEdit: point selected');
+
+            // Set the global so form callbacks get a reference
+            this.selectedFeature = feature;
+
+            // Only show edit popup if enabled
+            if (this.config.edit_worktype === true) {
+                this.pointEditPopup(pt_coords);
+            } else {
+                this.pointDeletePopup(pt_coords);
+            }
+
+            if (this.config.verbose) console.log(`pointEdit: feature selected at ${pt_coords}, \nextent: ${extent} \nid: ${id}`);
+        }
+    }
+
+    /**
+     * Show delete popup
+     * @param {Array<number>} coords - The coordinates to position the popup
+     */
+    pointDeletePopup(coords) {
+        this.content.innerHTML = `
+        <div class="arrow_box button_box">
+            <button id="cancel" title="Cancel" class="btn btn-xs btn-secondary" style="position:absolute; left:20px;">Cancel</button>
+            <button id="delete" title="Delete work location" class="btn btn-xs btn-danger" style="position:absolute; right:20px;">Delete</button>
+        </div>`;
+
+        // Add event listeners
+        document.getElementById("cancel").addEventListener('click', () => this.closePopup());
+        document.getElementById("delete").addEventListener('click', () => this.deleteSelected());
+
+        this.popup.setPosition(coords);
+    }
+
+    /**
+     * Show edit popup
+     * @param {Array<number>} coords - The coordinates to position the popup
+     */
+    pointEditPopup(coords) {
+        // Don't allow point EDIT or DELETION if zoomed out too far
+        if (this.getScale() < this.config.min_px_km / 4) {
+            if (this.config.verbose) console.log('zoomed out too far to accurately edit points');
+            return;
+        }
+
+        this.content.innerHTML = `
+        <div class="arrow_box work_completed">
+            <p style="margin-bottom:10px; padding-bottom:5px; font-size:14px; text-align:center; border-bottom:dashed 1px; line-height:1.25em">
+                <b>WORK COMPLETED</b><br>Mark all that apply
+            </p>
+            <a href="#" id="popup-closer"></a>
+            <div id="worktypes">
+                <label><input type="checkbox" name="response" value="1"> Fire response</label>
+                <label><input type="checkbox" name="rxfire" value="1"> Prescribed fire</label>
+                <label><input type="checkbox" name="mech" value="1"> Mechanical fuel reduction</label>
+                <label><input type="checkbox" name="defense" value="1"> Defensible space</label>
+                <label><input type="checkbox" name="harden" value="1"> Structure hardening</label>
+                <label><input type="checkbox" name="natres" value="1"> Natural resource planning</label>
+                <label><input type="checkbox" name="dev" value="1"> Development planning</label>
+                <label><input type="checkbox" name="outreach" value="1"> Resident/landowner outreach</label>
+                <label><input type="checkbox" name="relationships" value="1"> Building relationships</label>
+                <label><input type="checkbox" name="other" value="1"> Other</label>
+            </div>
+            <button id="edit-save" title="Save work location information" class="btn btn-xs btn-success" style="position:absolute; left:20px;">Save</button>
+            <button id="edit-delete" title="Delete work location" class="btn btn-xs btn-danger" style="position:absolute; right:20px;">Delete</button>
+        </div>`;
+
+        // Add event listeners
+        document.getElementById("edit-save").addEventListener('click', () => this.updateFeature());
+        document.getElementById("edit-delete").addEventListener('click', () => this.deleteSelected());
+
+        this.popup.setPosition(coords);
+
+        this.attachCheckboxHandlers();
+    }
+
+    /**
+     * Close popup
+     * @returns {boolean} False to prevent default behavior
+     */
+    closePopup() {
+        this.popup.setPosition(undefined);
+
+        this.clickSelect.getFeatures().clear();
+        this.selectedFeature = null;
+        if (this.closer) this.closer.blur();
+        this.countPoints();
+        return false;
+    }
+
+    /**
+     * Update feature from form
+     * @returns {boolean} False to prevent default behavior
+     */
+    updateFeature() {
+        if (this.selectedFeature != null) {
+            this.updateData(this.selectedFeature);
+        }
+        this.closePopup();
+        return false;
+    }
+
+    /**
+     * Delete selected feature
+     * @returns {boolean} False to prevent default behavior
+     */
+    deleteSelected() {
+        this.deleteData(this.selectedFeature);
+
+        // Cleanup tasks
+        this.hover.getFeatures().clear();
+        this.draw_point.setActive(true);
+
+        if (this.config.verbose) console.log('deleteSelected: Point deleted');
+        this.closePopup();
+        return false;
+    }
+
+    /**
+     * Attach checkbox handlers for work types
+     */
+    attachCheckboxHandlers() {
+        const el = document.getElementById('worktypes');
+        const works = el.getElementsByTagName('input');
+        const worktypes = this.selectedFeature.get('description').split(',');
+
+        if (this.config.verbose) console.log(`attachCheckboxHandlers: work types = ${JSON.stringify(worktypes)}`);
+
+        // Setup onclick interaction for each checkbox
+        for (let i = 0; i < works.length; i++) {
+            if (works[i].type === 'checkbox') {
+                works[i].addEventListener('click', this.updateWorkList.bind(this));
+                // Check if saved worktypes includes checkbox
+                if (worktypes.includes(works[i].name)) {
+                    works[i].checked = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Update work list from checkboxes
+     * @param {Event} e - The click event
+     */
+    updateWorkList(e) {
+        const el = document.getElementById('worktypes');
+        const works = el.getElementsByTagName('input');
+        let out = '';
+
+        // Build comma-separated list of checked work types
+        for (let i = 0; i < works.length; i++) {
+            if (works[i].type === 'checkbox' && works[i].checked === true) {
+                out = out + works[i].name + ",";
+            }
+        }
+        this.selectedFeature.setProperties({'description_new': out});
+    }
+
+    /**
+     * Animate fly to location
+     * @param {Array<number>} location - The location to fly to
+     * @param {Function} done - Callback when animation is done
+     */
+    flyTo(location, done) {
+        const duration = 2000;
+        const zoom = this.view.getZoom();
+        let parts = 2;
+        let called = false;
+
+        function callback(complete) {
+            --parts;
+            if (called) {
+                return;
+            }
+            if (parts === 0 || !complete) {
+                called = true;
+                done(complete);
+            }
+        }
+
+        this.view.animate(
+            {
+                center: location,
+                duration: duration,
+            },
+            callback
+        );
+
+        this.view.animate(
+            {
+                zoom: zoom - 1,
+                duration: duration / 2,
+            },
+            {
+                zoom: zoom,
+                duration: duration / 2,
+            },
+            callback
+        );
+    }
+
+    /**
+     * Start tour of preset points
+     */
+    tour() {
+        const locations = this.points_source.getFeatures();
+        let index = -1;
+        let coords = null;
+
+        const next = (more) => {
+            if (more) {
+                ++index;
+                if (index < locations.length) {
+                    const delay = index === 0 ? 0 : 750;
+                    setTimeout(() => {
+                        coords = locations[index].getGeometry().getExtent();
+                        if (this.config.verbose) console.log(`flying to ${coords}`);
+                        this.flyTo(coords, next);
+                    }, delay);
+                }
+            }
+        };
+
+        next(true);
+    }
+
+    /**
+     * Update style of all features
+     */
+    updateCartoStyle() {
+        let features = this.points_source.getFeatures();
+
+        // Remove features with status 0
+        for (let i = 0; i < features.length; i++) {
+            if (features[i].get('status') === 0) {
+                this.points_source.removeFeature(features[i]);
+            }
+        }
+
+        // Load previously uploaded data from server
+        this.stored_vector_source.forEachFeature(feature => {
+            const coordinate = feature.getGeometry().getCoordinates();
+            const radius = Number(feature.get('radius'));
+
+            // Adjust displayed radius using scale constant
+            const feature2 = new Feature(new Circle(coordinate, radius * this.scl_const));
+
+            feature2.setProperties({
+                'id': feature.get('id'),
+                'description': feature.get('description'),
+                'radius': radius,
+                'projectid': feature.get('projectid'),
+                'status': 1,  // 1==on the server
+                'label': '.'
+            });
+
+            feature2.set('label', '');
+            feature2.setStyle(this.mapMarkerStyleFunction.bind(this));
+
+            this.points_source.addFeature(feature2);
+        });
+
+        // Show only current projectid
+        this.hideFeatures();
+        this.countPoints();
+    }
 }
 
-
-// change mouse cursor when cursor passes over marker
-$(map.getViewport()).on('mousemove', function(e) {
-  let pixel = map.getEventPixel(e.originalEvent);
-  let hit = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-    return true;
-  });
-  if (hit) {
-    map.getTarget().style.cursor = 'context-menu';
-  } else {
-    map.getTarget().style.cursor = '';
-  }
-});
-
-// ---------------------------------------------------------------
-// SERVER FUNCTIONS FOR ADDING AND DELETING  ---------------------
-// ---------------------------------------------------------------
-
-// close the popup AND uninitialize associated variables
-let closePopup = function(evt){
-
-	popup.setPosition(undefined);
-	
-	clickSelect.getFeatures().clear();
-	selectedFeature = null;
-	closer.blur();
-	countPoints();
-	return false;
-
-};
-
-// save changes to the server and clean up the form
-let updateFeature = function(evt){
-	if(selectedFeature != null){
-		updateData(selectedFeature);
-	}
-	closePopup();
-	return false;
-};
-
-function deleteSelected() {
-	deleteData(selectedFeature);
-
-	// unique cleanup tasks not in closepopup
-	// what do they do?
-	hover.getFeatures().clear();
-	draw_point.setActive(true);
-
-	verbose_log('Point deleted');
-	closePopup();
-	return false;
+/**
+ * Get URL parameters
+ * @param {string} name - The name of the parameter to get
+ * @returns {string|null} The parameter value or null if not found
+ */
+export function getUrlParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
 }
 
-function serializeFeature(f) {
-
-	// in the browser we represent features as circles
-	// in the database they are points with a radius
-	// create a point and copy properties from the circle 
-	// due to a limitation in openlayers/geojson
-	let pt = circleToPoint(f);
-	let coords = ol.proj.transform(pt.flatCoordinates, config.dest_proj, config.src_proj)
-
-	let data = {};
-
-	if (f.id!=-1) data.id = f.get('id');
-	data.label = f.get('label');
-	data.description = f.get('description');
-	data.radius = f.get('radius');
-	data.responseid = responseid;
-	data.projectid = f.get('projectid');
-	data.ipaddress = context.ip_address;
-	data.status = f.get('status');
-	data.resolution = f.get('resolution');
-	data.geom = {"type": "Point", "coordinates": coords};
-
-	if (data.description==='') data.description = 'new point';
-	data.timestamp = encodeURIComponent(Date.now().toString());
-
-    return(JSON.stringify(data));
+/**
+ * Rounds a number to the specified number of digits
+ * @param {number} num - The number to round
+ * @param {number} [digits=0] - The number of decimal places
+ * @returns {number} The rounded number
+ */
+export function roundX(num, digits = 0) {
+	const factor = Math.pow(10, digits);
+	return Math.round(num * factor) / factor;
 }
 
-function circleToPoint(f) {
-
-	// convert circle to point
-	const extent = f.getGeometry().getExtent();
-	function getCenterOfExtent(Extent){
-		let X = Extent[0] + (Extent[2]-Extent[0])/2;
-		let Y = Extent[1] + (Extent[3]-Extent[1])/2;
-		return [X, Y];
-	}
-	const centroid = getCenterOfExtent(extent);
-	const pt = new ol.geom.Point(centroid);
-
-	return pt;
-};
-
-// output WKT for a point
-function pointToWKT(f) {
-
-    f.set('geometry', f.getGeometry());
-    let format = new ol.format.WKT()
-    wkt = format.writeFeature(f);
-    return(wkt);
-};
-
-// create single data points
-function createPoint(f) {
-
-	csrftoken = Cookies.get('csrftoken');
-	let json = serializeFeature(f);
-
-	// post data using JQuery
-	$.ajax({
-		type: 'POST',
-		url: config.api_url,
-		headers: {"X-Csrftoken": csrftoken},
-		data: json,
-		contentType: "application/json",
-		dataType: 'json', // type of data expected from the server
-		success: function (responseData, textStatus, jqXHR) {
-			verbose_log(JSON.stringify(responseData));
-			f.setProperties({'status': 1});
-			f.set('label','')
-			f.setProperties({'id': parseInt(responseData.id)});
-			selectedFeature = f;
-			verbose_log(`New point added with ID ${responseData.id}`);
-			countPoints();
-		},
-		error: function (responseData, textStatus, errorThrown) {
-			verbose_log("Problem saving the data: " + json);
-		}
-		});
+/**
+ * Initializes a new map instance
+ * @param {string} configElementId - The ID of the element containing the map configuration
+ * @returns {MapManager} A new MapManager instance
+ */
+export function initializeMap(configElementId) {
+    return new MapManager(configElementId);
 }
-
-// update single data points
-function updateData(f) {
-
-	csrftoken = Cookies.get('csrftoken');
-
-	let json = serializeFeature(f);
-
-	$.ajax({
-		type: 'PATCH',
-		url: config.api_url + f.get('id') + '/',
-		headers: {"X-Csrftoken": csrftoken},
-		data: json,
-		contentType: 'application/json',
-		success: function (responseData, textStatus, jqXHR) {
-			verbose_log(JSON.stringify(responseData));
-			selectedFeature = f;
-			verbose_log('Point ID ' + responseData.id + ' updated.');
-		},
-		error: function (responseData, textStatus, errorThrown) {
-			verbose_log("Problem saving the data: " + json);
-		}
-	  });
-}
-
-// delete single data points
-function deleteData(f) {
-
-	csrftoken = Cookies.get('csrftoken');
-	const id = f.getProperties()['id']
-
-    $.ajax({
-      type: 'DELETE',
-      url: `${config.api_url}${id}/?responseid=${responseid}`,
-      crossDomain: false,
-	  headers: {"X-Csrftoken": csrftoken},
-      dataType: 'json', // type of data expected from the server
-      success: function (responseData, textStatus, jqXHR) {
-			        verbose_log(`Point ${id} deleted from response ${responseid}`);
-			        points_source.removeFeature(f);
-					countPoints();
-      },
-      error: function (responseData, textStatus, errorThrown) {
-        verbose_log(`Problem deleting the point ${id}`);
-      }
-    });
-
-}
-
