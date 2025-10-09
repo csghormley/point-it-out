@@ -1,0 +1,25 @@
+# /etc/systemd/system/mapsurvey-git-deploy.service
+[Unit]
+Description=Git Pull and Build with Error Handling (DEV BRANCH)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/mapsurvey
+ExecStartPre=/bin/bash -c 'git fetch origin'
+ExecStart=/bin/bash -c 'git fetch origin && git diff HEAD origin/dev --quiet && echo "No changes" || (echo "Changes detected" && git pull origin dev && sudo /opt/mapsurvey/checkbuildrun.sh)'
+#ExecStartPost=/bin/systemctl reload nginx
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/node/bin
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=git-deploy
+
+# Security (optional)
+NoNewPrivileges=false
+PrivateTmp=true
