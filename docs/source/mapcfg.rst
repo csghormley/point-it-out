@@ -382,7 +382,7 @@ Must Run from Project Root
 Related Documentation
 ---------------------
 
-- For script call chains and dependencies, see :doc:`../script-call-chain` (Markdown format in ``docs/``)
+- For script call chains and dependencies, see :doc:`script-call-chain`
 - For development workflow, see :doc:`development`
 - For troubleshooting, see :doc:`troubleshooting`
 
