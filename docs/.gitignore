@@ -1,0 +1,16 @@
+# Sphinx build outputs
+build/
+_build/
+
+# Sphinx auto-build
+.doctrees/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
