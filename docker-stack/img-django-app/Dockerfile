@@ -4,7 +4,7 @@
 # docker build . -f<folder-containing-this-Dockerfile>
 
 # pull base image containing dependencies
-FROM csghor/mapsurvey-deps:latest
+FROM csghor/mapsurvey-env:latest
 
 ENV PROJECT=collector
 ENV STATICFILES_SRC=./collector/app_staticfiles

@@ -7,8 +7,10 @@ services:
   # https://hub.docker.com/_/postgres
   # changing the variables only affects an empty data directory!
   # pass an explicit UID and GID from systemd to allow non-root access for pg_hba.conf in git
-  postgis:
+  postgis16:
     image: postgis/postgis:16-3.4
+    logging:
+      driver: journald
     deploy:
       restart_policy:
         condition: on-failure
@@ -18,7 +20,32 @@ services:
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/root_db_password
       PGDATA: /var/lib/postgresql/data/pgdata
+    profiles:
+      - legacy
     user: "${UID_GID}"
+    ports:
+      - 5432:5432
+    volumes:
+      - /opt/mapsurvey/postgis_data:/var/lib/postgresql/data
+      - /opt/mapsurvey:/opt/mapsurvey
+    secrets:
+      - root_db_password
+
+  postgis17:
+    image: postgis/postgis:17-3.5
+    logging:
+      driver: journald
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/root_db_password
+      PGDATA: /var/lib/postgresql/data/pgdata17
+    user: "${UID_GID}"
+    # (host:guest)
     ports:
       - 5432:5432
     volumes:
@@ -29,6 +56,8 @@ services:
 
   nginx:
     image: csghor/nginx:latest
+    logging:
+      driver: journald
     deploy:
       restart_policy:
         condition: on-failure
@@ -36,7 +65,7 @@ services:
         max_attempts: 3
         window: 120s
     ports:
-    # use host nginx to proxy to ssl
+    # use host nginx to proxy to ssl (host:guest)
       - 8888:8888
     volumes:
       - ../collector/app_staticfiles:/home/app/web/staticfiles
@@ -47,6 +76,8 @@ services:
   # the port in command has to line up with the second port under ports!
   django:
     image: csghor/mapsurvey-app:latest
+    logging:
+      driver: journald
     deploy:
       restart_policy:
         condition: on-failure
@@ -63,7 +94,7 @@ services:
       EMAIL_HOST_PASSWORD_FILE: /run/secrets/email_host_password
       SECRET_KEY_FILE: /run/secrets/secret_key
     ports:
-    # use host nginx to proxy to ssl
+    # use host nginx to proxy to ssl (host:guest)
       - 8000:8000
     volumes:
       - ../collector/app_staticfiles:/home/app/web/staticfiles
@@ -74,8 +105,11 @@ services:
       - secret_key
       - email_host_password
     depends_on:
-      - postgis
+      - postgis17
 
+# these originate in these unversioned text files
+# they are passed into the environment inside the container,
+# as declared in the secrets: YAML declaration
 secrets:
   root_db_password:
     file: secrets/root_db_password.txt
