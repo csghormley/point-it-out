@@ -1,0 +1,346 @@
+#!/bin/bash
+
+# mapcfg - Unified management script for map configuration application
+# This script consolidates all development, build, and deployment operations
+
+set -euo pipefail
+
+# Configuration
+DB_CONTAINER="postgis17"
+DB_NAME="mapbe"
+WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Helper functions
+error() {
+    echo -e "${RED}ERROR: $1${NC}" >&2
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+info() {
+    echo -e "${YELLOW}→ $1${NC}"
+}
+
+# Ensure we're in the project root
+ensure_root() {
+    if [ ! -e "$WORKDIR/scripts/bootstrap.sh" ]; then
+        error "This script must be run from the project root directory"
+    fi
+    cd "$WORKDIR"
+}
+
+# Activate virtual environment
+activate_venv() {
+    if [ -f "$WORKDIR/env/bin/activate" ]; then
+        # shellcheck disable=SC1091
+        . "$WORKDIR/env/bin/activate"
+    else
+        error "Virtual environment not found. Run './mapcfg bootstrap' first."
+    fi
+}
+
+###################
+# VERB FUNCTIONS
+###################
+
+# bootstrap - Initial environment setup
+cmd_bootstrap() {
+    info "Starting bootstrap process..."
+
+    if ! command -v python3 &> /dev/null; then
+        info "Installing Python 3..."
+        sudo apt-get update
+        sudo apt-get install -y python3-venv python-is-python3
+    fi
+
+    if [ ! -d "$WORKDIR/env" ]; then
+        info "Creating virtual environment..."
+        python3 -m venv "$WORKDIR/env"
+    fi
+
+    info "Activating virtual environment..."
+    # shellcheck disable=SC1091
+    . "$WORKDIR/env/bin/activate"
+
+    info "Installing Python dependencies..."
+    pip install -r "$WORKDIR/requirements.txt"
+
+    success "Bootstrap complete!"
+}
+
+# check - Run validation checks
+cmd_check() {
+    info "Running validation checks..."
+    activate_venv
+
+    # Django check
+    if ./collector/manage.py check; then
+        success "Django check passed"
+    else
+        error "Django check failed"
+    fi
+
+    # Template validation
+    if ./collector/manage.py validate_templates; then
+        success "Template validation passed"
+    else
+        error "Template validation failed"
+    fi
+
+    # Ruff linting
+    error_lines=$(ruff check collector/ | grep "= help" | grep -v "Remove unused" | wc -l)
+    if [ "$error_lines" -gt 0 ]; then
+        error "Ruff found $error_lines errors"
+    else
+        success "Ruff check passed"
+    fi
+
+    success "All checks passed!"
+}
+
+# version - Update version.txt from git
+cmd_version() {
+    info "Generating version.txt..."
+    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1 > "$WORKDIR/collector/pio/templates/pio/version.txt"
+    success "Version file updated"
+}
+
+# build - Build Docker images
+cmd_build() {
+    info "Building Docker images..."
+    activate_venv
+
+    # Run checks first
+    cmd_check
+
+    # Collect static files
+    info "Collecting static files..."
+    ./collector/manage.py collectstatic --noinput
+
+    # Update version
+    cmd_version
+
+    # Build Docker images in order
+    info "Building Docker images..."
+    ./docker-stack/build-deps.sh
+    ./docker-stack/build-django-env.sh
+    ./docker-stack/build-django.sh
+    ./docker-stack/build-nginx.sh
+
+    success "Docker images built successfully!"
+}
+
+# maintenance - Clean up Docker resources
+cmd_maintenance() {
+    info "Running Docker system maintenance..."
+    sudo docker system prune --force
+    success "Maintenance complete"
+}
+
+# status - Check system status
+cmd_status() {
+    info "Checking system status..."
+
+    echo ""
+    echo "Docker Container Status:"
+
+    if docker ps | grep -q "nginx"; then
+        success "nginx is running"
+    else
+        echo -e "${RED}✗ nginx is not running${NC}"
+    fi
+
+    if docker ps | grep -q "postgis"; then
+        success "postgis is running"
+    else
+        echo -e "${RED}✗ postgis is not running${NC}"
+    fi
+
+    if docker ps | grep -q "mapsurvey-app"; then
+        success "mapsurvey-app is running"
+    else
+        echo -e "${RED}✗ mapsurvey-app is not running${NC}"
+    fi
+
+    running_count=$(docker ps | grep -v "^CONTAINER" | wc -l)
+    echo ""
+    info "$running_count Docker containers running"
+
+    echo ""
+    echo "Storage Status:"
+    df -h . | tail -1
+}
+
+# backup - Backup database
+cmd_backup() {
+    local server="${1:-}"
+    local port="${2:-22}"
+
+    info "Backing up database..."
+
+    if [ -n "$server" ]; then
+        ./scripts/backup-db.sh "$DB_CONTAINER" "$DB_NAME" "$server" "$port"
+    else
+        ./scripts/backup-db.sh "$DB_CONTAINER" "$DB_NAME"
+    fi
+
+    success "Backup complete!"
+}
+
+# run - Build and deploy (equivalent to checkbuildrun.sh)
+cmd_run() {
+    local do_backup=false
+
+    # Check for backup flag
+    if [ "${1:-}" = "backup" ]; then
+        do_backup=true
+    fi
+
+    info "Starting build and deploy process..."
+
+    # Build
+    sudo ./mapcfg build
+
+    # Restart service
+    info "Restarting Docker service..."
+    sudo systemctl restart docker.mapsurvey.service
+
+    # Wait for services
+    sleep 1
+
+    # Backup if requested
+    if [ "$do_backup" = true ]; then
+        cmd_backup
+    fi
+
+    # Maintenance
+    sudo ./mapcfg maintenance
+
+    # Status
+    cmd_status
+
+    success "Deploy complete!"
+}
+
+# migrate - Complete migration workflow
+cmd_migrate() {
+    info "Starting migration workflow..."
+    activate_venv
+
+    # Run checks
+    if ./collector/manage.py check; then
+        success "Django check passed"
+    else
+        error "Django check failed - aborting migration"
+    fi
+
+    # Create migrations
+    info "Creating migrations..."
+    if ./collector/manage.py makemigrations; then
+        success "Migrations created"
+    else
+        error "Migration creation failed"
+    fi
+
+    # Build and deploy
+    ./mapcfg run
+
+    # Apply migrations
+    info "Applying migrations to database..."
+    docker compose -f docker-stack/docker-compose.yml exec -i django ./manage.py migrate
+
+    success "Migration complete!"
+}
+
+# help - Show usage information
+cmd_help() {
+    cat <<EOF
+mapcfg - Unified management script for map configuration application
+
+Usage: ./mapcfg <command> [arguments]
+
+Commands:
+    bootstrap              Initial environment setup (install dependencies, create venv)
+    check                  Run validation checks (Django, templates, linting)
+    build                  Build Docker images (includes checks and static collection)
+    run [backup]           Build and deploy application (add 'backup' to backup DB)
+    migrate                Complete migration workflow (makemigrations, build, deploy, migrate)
+    backup [server] [port] Backup database (optionally to remote server)
+    status                 Check system and container status
+    maintenance            Clean up Docker resources
+    version                Update version.txt from git log
+    help                   Show this help message
+
+Examples:
+    ./mapcfg bootstrap                  # First-time setup
+    ./mapcfg check                      # Validate code before committing
+    ./mapcfg run                        # Build and deploy
+    ./mapcfg run backup                 # Build, deploy, and backup database
+    ./mapcfg migrate                    # Run after model changes
+    ./mapcfg backup                     # Backup database locally
+    ./mapcfg backup server.com 22       # Backup database and upload to remote server
+    ./mapcfg status                     # Check system health
+
+Configuration:
+    Database container: $DB_CONTAINER
+    Database name: $DB_NAME
+
+For more information, see docs/script-call-chain.md
+EOF
+}
+
+###################
+# MAIN
+###################
+
+ensure_root
+
+# Get command
+COMMAND="${1:-help}"
+shift || true
+
+# Execute command
+case "$COMMAND" in
+    bootstrap)
+        cmd_bootstrap "$@"
+        ;;
+    check)
+        cmd_check "$@"
+        ;;
+    build)
+        cmd_build "$@"
+        ;;
+    run)
+        cmd_run "$@"
+        ;;
+    migrate)
+        cmd_migrate "$@"
+        ;;
+    backup)
+        cmd_backup "$@"
+        ;;
+    status)
+        cmd_status "$@"
+        ;;
+    maintenance)
+        cmd_maintenance "$@"
+        ;;
+    version)
+        cmd_version "$@"
+        ;;
+    help|--help|-h)
+        cmd_help
+        ;;
+    *)
+        error "Unknown command: $COMMAND\n\nRun './mapcfg help' for usage information."
+        ;;
+esac
