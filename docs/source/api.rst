@@ -227,7 +227,9 @@ Example usage in JavaScript::
 Rate Limiting
 -------------
 
-Currently no rate limiting is implemented. Consider adding rate limiting for production deployments.
+Rate limiting is implemented using Django REST Framework's throttling system. Different limits apply per endpoint based on authentication status (anonymous vs. authenticated users).
+
+Throttle rates are configured in ``collector/collector/settings.py`` under ``REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']``.
 
 Error Responses
 ---------------
