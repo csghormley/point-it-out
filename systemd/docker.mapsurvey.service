@@ -16,7 +16,7 @@ Environment="UID_GID=1000:1000"
 # Shutdown container (if running) when unit is started
 ExecStartPre=/usr/bin/docker compose -f docker-compose.yml down
 # Start container when unit is started
-ExecStart=/usr/bin/docker compose -f docker-compose.yml up
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up --wait-timeout 3
 # Stop container when unit is stopped
 ExecStop=/usr/bin/docker compose -f docker-compose.yml down
 
