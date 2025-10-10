@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+# Trap errors and report line number
+trap 'echo -e "\033[0;31mAborting due to error at line $LINENO.\033[0m" >&2' ERR
+
 # Configuration
 DB_CONTAINER="postgis17"
 DB_NAME="mapbe"
@@ -106,7 +109,7 @@ cmd_check() {
     fi
 
     # Ruff linting
-    error_lines=$(ruff check collector/ | grep "= help" | grep -v "Remove unused" | wc -l)
+    error_lines=$(ruff check collector/ | grep "= help" | grep -v "Remove unused" | wc -l || true)
     if [ "$error_lines" -gt 0 ]; then
         error "Ruff found $error_lines errors"
     else
