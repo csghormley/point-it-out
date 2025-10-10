@@ -304,6 +304,9 @@ EOF
 
 ensure_root
 
+# ensure locally installed commands are available
+export PATH=$PATH:$HOME/.local/bin
+
 # Get command
 COMMAND="${1:-help}"
 shift || true
