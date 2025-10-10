@@ -30,6 +30,15 @@ info() {
     echo -e "${YELLOW}→ $1${NC}"
 }
 
+# Conditional sudo - only use sudo if not already root
+maybe_sudo() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
 # Ensure we're in the project root
 ensure_root() {
     if [ ! -e "$WORKDIR/scripts/bootstrap.sh" ]; then
@@ -142,7 +151,7 @@ cmd_build() {
 # maintenance - Clean up Docker resources
 cmd_maintenance() {
     info "Running Docker system maintenance..."
-    sudo docker system prune --force
+    maybe_sudo docker system prune --force
     success "Maintenance complete"
 }
 
@@ -208,11 +217,11 @@ cmd_run() {
     info "Starting build and deploy process..."
 
     # Build
-    sudo ./mapcfg build
+    maybe_sudo ./mapcfg build
 
     # Restart service
     info "Restarting Docker service..."
-    sudo systemctl restart docker.mapsurvey.service
+    maybe_sudo systemctl restart docker.mapsurvey.service
 
     # Wait for services
     sleep 1
@@ -223,7 +232,7 @@ cmd_run() {
     fi
 
     # Maintenance
-    sudo ./mapcfg maintenance
+    maybe_sudo ./mapcfg maintenance
 
     # Status
     cmd_status
