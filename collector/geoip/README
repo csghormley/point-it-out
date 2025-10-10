@@ -1,0 +1,3 @@
+Put the geoip2 databases here. 
+Download from https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+Run the setup script from this directory.

@@ -49,7 +49,6 @@ SECRET_KEY=env("SECRET_KEY")
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
-#    'debug_toolbar',
     'django.contrib.auth',
     'django.contrib.messages',
     'django.contrib.contenttypes',
@@ -58,7 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'djgeojson',
     'django_json_widget',
-    'csp', # content security policy
+    'csp', # content security policy, settings under CONTENT_SECURITY_POLICY
 
     'allauth',
     'allauth.account',
@@ -75,14 +74,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
@@ -145,7 +143,7 @@ CONTENT_SECURITY_POLICY = {
         'frame-ancestors': ["https://portlandstate.yul1.qualtrics.com/",
                             "https://portlandstate.qualtrics.com/"],
         'img-src':         [SELF,
-                            'data:', # allow inline svg
+                            'data:', # allow inline svg, e.g., for QR codes
                             'https://cdn.jsdelivr.net',
                             'https://basemap.nationalmap.gov',
                             'https://server.arcgisonline.com',
@@ -170,7 +168,7 @@ CONTENT_SECURITY_POLICY = {
     }
 }
 
-
+# https://developers.yubico.com/PKI/yubico-fido-ca-1.pem
 yubico_u2f_ca = """-----BEGIN CERTIFICATE-----
 MIIDHjCCAgagAwIBAgIEG0BT9zANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZ
 dWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0xNDA4MDEwMDAw
