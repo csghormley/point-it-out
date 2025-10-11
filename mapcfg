@@ -446,10 +446,107 @@ cmd_migrate() {
 
 # help - Show usage information
 cmd_help() {
-    cat <<EOF
+    local specific_cmd="${1:-}"
+
+    # Command-specific help
+    case "$specific_cmd" in
+        bootstrap)
+            cat <<EOF
+bootstrap - Initial environment setup
+
+  Sets up the development environment by installing Python 3, creating a virtual
+  environment, and installing all Python dependencies from requirements.txt.
+  This should be the first command run on a new system.
+EOF
+            ;;
+        check)
+            cat <<EOF
+check - Run validation checks
+
+  Runs Django system checks, template validation, and Ruff linting to verify
+  code quality and configuration. All checks must pass before building.
+  Useful to run before commits to catch issues early.
+EOF
+            ;;
+        build)
+            cat <<EOF
+build - Build Docker images
+
+  Runs all validation checks, collects static files, updates version.txt, then
+  builds all Docker images (deps, django-env, django, nginx) in the correct order.
+  This prepares the application for deployment.
+EOF
+            ;;
+        run)
+            cat <<EOF
+run [backup] - Build and deploy application
+
+  Builds Docker images, restarts the systemd service, and performs maintenance.
+  Add 'backup' argument to also backup the database after deployment.
+  Use this for regular deployments after code changes.
+EOF
+            ;;
+        migrate)
+            cat <<EOF
+migrate - Complete migration workflow
+
+  Runs Django checks, creates migrations with makemigrations, builds and deploys
+  the application, then applies migrations to the database.
+  Use this workflow after making changes to Django models.
+EOF
+            ;;
+        backup)
+            cat <<EOF
+backup [server] [port] - Backup database
+
+  Creates a compressed SQL dump of all databases, verifies integrity, and creates
+  a symlink to the latest backup. Optionally uploads to remote server via rsync.
+  Configure via SSH_SERVER, SSH_PORT, SSH_KEY_PATH, SSH_USER, BACKUP_DIR env vars.
+EOF
+            ;;
+        status)
+            cat <<EOF
+status - Check system and container status
+
+  Displays the running state of Docker containers (nginx, postgis, mapsurvey-app),
+  shows total running container count, and displays current disk usage.
+  Quick health check for the deployed system.
+EOF
+            ;;
+        maintenance)
+            cat <<EOF
+maintenance - Clean up Docker resources
+
+  Runs 'docker system prune --force' to remove unused containers, networks,
+  images, and build cache. Frees up disk space after builds and deployments.
+  Safe to run periodically to keep system clean.
+EOF
+            ;;
+        version)
+            cat <<EOF
+version - Update version.txt from git log
+
+  Generates version.txt from the latest git commit, showing commit hash, date,
+  message, and author. This file is displayed in the application footer.
+  Automatically run during the build process.
+EOF
+            ;;
+        help)
+            cat <<EOF
+help [command] - Show help information
+
+  Without arguments, displays general usage and all available commands.
+  With a command name, shows detailed help for that specific command.
+  Example: ./mapcfg help backup
+EOF
+            ;;
+        "")
+            # General help
+            cat <<EOF
 mapcfg - Unified management script for map configuration application
 
 Usage: ./mapcfg <command> [arguments]
+       ./mapcfg help [command]  # Show help for specific command
 
 Commands:
     bootstrap              Initial environment setup (install dependencies, create venv)
@@ -461,7 +558,7 @@ Commands:
     status                 Check system and container status
     maintenance            Clean up Docker resources
     version                Update version.txt from git log
-    help                   Show this help message
+    help [command]         Show this help message or help for specific command
 
 Examples:
     ./mapcfg bootstrap                  # First-time setup
@@ -472,6 +569,7 @@ Examples:
     ./mapcfg backup                     # Backup database locally
     ./mapcfg backup server.com 22       # Backup database and upload to remote server
     ./mapcfg status                     # Check system health
+    ./mapcfg help backup                # Show detailed help for backup command
 
 Configuration:
     Database container: $DB_CONTAINER
@@ -484,15 +582,13 @@ Environment Variables (for backup command):
     SSH_USER              SSH user for remote backup (default: backups)
     BACKUP_DIR            Local directory for backups (default: postgis_data/pgdata)
 
-The backup command:
-    - Creates a compressed SQL dump of all databases
-    - Waits for container and database to be ready
-    - Verifies backup file integrity
-    - Creates a symlink to latest backup
-    - Optionally uploads to remote server via rsync/SSH
-
 For more information, see docs/script-call-chain.md
 EOF
+            ;;
+        *)
+            error "Unknown command: $specific_cmd\n\nRun './mapcfg help' to see available commands."
+            ;;
+    esac
 }
 
 ###################
@@ -538,7 +634,7 @@ case "$COMMAND" in
         cmd_version "$@"
         ;;
     help|--help|-h)
-        cmd_help
+        cmd_help "$@"
         ;;
     *)
         error "Unknown command: $COMMAND\n\nRun './mapcfg help' for usage information."
