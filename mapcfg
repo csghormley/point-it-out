@@ -233,7 +233,7 @@ cmd_backup() {
 
     # Cleanup function to remove temp files on exit
     cleanup_backup() {
-        if [ -f "$TEMP_SCRIPT" ]; then
+        if [ -n "${TEMP_SCRIPT:-}" ] && [ -f "$TEMP_SCRIPT" ]; then
             rm -f "$TEMP_SCRIPT"
         fi
     }
