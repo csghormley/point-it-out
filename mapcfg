@@ -44,7 +44,7 @@ maybe_sudo() {
 
 # Ensure we're in the project root
 ensure_root() {
-    if [ ! -e "$WORKDIR/scripts/bootstrap.sh" ]; then
+    if [ ! "$WORKDIR" = "$PWD" ]; then
         error "This script must be run from the project root directory"
     fi
     cd "$WORKDIR"
@@ -70,13 +70,15 @@ cmd_bootstrap() {
 
     if ! command -v python3 &> /dev/null; then
         info "Installing Python 3..."
-        sudo apt-get update
-        sudo apt-get install -y python3-venv python-is-python3
+        maybe_sudo apt-get update
+        maybe_sudo apt-get install -y python3-venv python-is-python3
     fi
 
     if [ ! -d "$WORKDIR/env" ]; then
         info "Creating virtual environment..."
         python3 -m venv "$WORKDIR/env"
+    else
+        info "Virtual environment already exists"
     fi
 
     info "Activating virtual environment..."
@@ -194,18 +196,187 @@ cmd_status() {
 
 # backup - Backup database
 cmd_backup() {
-    local server="${1:-}"
-    local port="${2:-22}"
+    local server="${1:-${SSH_SERVER:-}}"
+    local port="${2:-${SSH_PORT:-22}}"
 
     info "Backing up database..."
 
-    if [ -n "$server" ]; then
-        ./scripts/backup-db.sh "$DB_CONTAINER" "$DB_NAME" "$server" "$port"
+    # Configuration with environment variable fallbacks
+    local SSH_KEY_PATH="${SSH_KEY_PATH:-/root/.ssh/id_rsa_backup}"
+    local SSH_USER="${SSH_USER:-backups}"
+    local BACKUP_DIR="${BACKUP_DIR:-postgis_data/pgdata}"
+
+    # Generate timestamps and backup filename
+    local TS=$(date +%s)
+    local DATESTAMP=$(date +%Y%m%d-%H%M%S)
+    local BACKUP_FILE="$DB_NAME-backup-$DATESTAMP.sql.gz"
+    local TEMP_SCRIPT="tmp-backup-${TS}-$$.sh"
+
+    info "Container: $DB_CONTAINER"
+    info "Database: $DB_NAME"
+    info "Backup file: $BACKUP_FILE"
+
+    # Cleanup function to remove temp files on exit
+    cleanup_backup() {
+        if [ -f "$TEMP_SCRIPT" ]; then
+            rm -f "$TEMP_SCRIPT"
+        fi
+    }
+    trap cleanup_backup EXIT
+
+    # Define a function to pull the first matching container ID
+    get_container_id() {
+        if [ -n "$1" ]; then
+            local matches=$(docker ps --format "{{.Names}} {{.ID}}" | grep "$1" | wc -l)
+            if [ "$matches" -eq 1 ]; then
+                docker ps --format "{{.Names}} {{.ID}}" | grep "$1" | awk '{print $2}'
+            elif [ "$matches" -gt 1 ]; then
+                error "Multiple containers match '$1'"
+            else
+                echo ""
+            fi
+        fi
+    }
+
+    # Wait for container to be running
+    wait_for_container() {
+        local name="$1"
+        local timeout=30
+        local count=0
+
+        info "Waiting for container '$name' to be running..."
+        while [ $count -lt $timeout ]; do
+            if docker ps | grep -q "$name"; then
+                success "Container '$name' is running"
+                return 0
+            fi
+            sleep 1
+            count=$((count + 1))
+        done
+
+        error "Timeout waiting for container '$name'"
+    }
+
+    # Wait for db in a container to be online
+    wait_for_db() {
+        local container="$1"
+        local db="$2"
+        local timeout=30
+        local count=0
+
+        local container_id=$(get_container_id "$container")
+
+        if [ -z "$container_id" ]; then
+            error "Could not find container ID for '$container'"
+        fi
+
+        info "Waiting for database '$db' to be ready..."
+        while [ $count -lt $timeout ]; do
+            if docker exec -i -u root "$container_id" runuser -u postgres -- psql -l 2>/dev/null | grep -q "$db"; then
+                success "Database '$db' is ready"
+                return 0
+            fi
+            echo "Waiting... ($count/$timeout)"
+            sleep 1
+            count=$((count + 1))
+        done
+
+        error "Timeout waiting for database '$db' in container '$container'"
+    }
+
+    # Create a temporary script to execute the backup
+    cat <<EOF > "$TEMP_SCRIPT"
+#!/bin/bash
+set -euo pipefail
+
+# Perform database dump
+runuser -u postgres -- pg_dumpall | gzip -c > /tmp/$BACKUP_FILE
+
+# Verify backup was created and has content
+if [ ! -f /tmp/$BACKUP_FILE ]; then
+    echo "ERROR: Backup file was not created" >&2
+    exit 1
+fi
+
+if [ ! -s /tmp/$BACKUP_FILE ]; then
+    echo "ERROR: Backup file is empty" >&2
+    exit 1
+fi
+
+# Move backup to persistent storage
+mv /tmp/$BACKUP_FILE /var/lib/postgresql/data/pgdata/
+
+echo "Backup completed: $BACKUP_FILE"
+EOF
+
+    # Make sure the container is running before we try to access it
+    info "Checking container status..."
+    local DB_CONTAINER_ID=$(get_container_id "$DB_CONTAINER")
+
+    if [ -z "$DB_CONTAINER_ID" ]; then
+        error "Container '$DB_CONTAINER' not found"
+    fi
+
+    info "Found container ID: $DB_CONTAINER_ID"
+
+    wait_for_container "$DB_CONTAINER"
+    wait_for_db "$DB_CONTAINER" "$DB_NAME"
+
+    # Create backup directory if it doesn't exist
+    mkdir -p "$BACKUP_DIR"
+
+    # Run the backup script in the container
+    info "Executing backup in container..."
+    if docker exec -i -u root "$DB_CONTAINER_ID" bash < "$TEMP_SCRIPT"; then
+        success "Backup created successfully"
     else
-        ./scripts/backup-db.sh "$DB_CONTAINER" "$DB_NAME"
+        error "Backup failed"
+    fi
+
+    # Verify local backup file exists
+    if [ ! -f "$BACKUP_DIR/$BACKUP_FILE" ]; then
+        error "Backup file not found at $BACKUP_DIR/$BACKUP_FILE"
+    fi
+
+    # Get backup file size for reporting
+    local BACKUP_SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILE" | cut -f1)
+    info "Backup size: $BACKUP_SIZE"
+
+    # Create symlink to the latest backup
+    info "Creating symlink to latest backup..."
+    ln -sf "$BACKUP_FILE" "$BACKUP_DIR/$DB_NAME-backup-latest.sql.gz"
+
+    # Ship database backup to remote server if configured
+    if [ -n "$server" ]; then
+        info "Shipping database backup to $SSH_USER@$server..."
+
+        # Determine base path (try to find the actual full path)
+        local FULL_BACKUP_PATH="$(cd "$(dirname "$BACKUP_DIR")" && pwd)/$(basename "$BACKUP_DIR")"
+        local HOSTNAME=$(hostname)
+
+        # Build rsync command with SSH options
+        local RSYNC_CMD="rsync -avz"
+
+        if [ -f "$SSH_KEY_PATH" ]; then
+            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port -i $SSH_KEY_PATH\""
+        else
+            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port\""
+            echo -e "${YELLOW}WARNING: SSH key not found at $SSH_KEY_PATH, attempting passwordless SSH${NC}" >&2
+        fi
+
+        # Use eval to properly handle the quoted ssh command
+        if eval "$RSYNC_CMD \"$FULL_BACKUP_PATH/$BACKUP_FILE\" \"$SSH_USER@$server:db_backups/$HOSTNAME/\""; then
+            success "Remote backup successful"
+        else
+            echo -e "${YELLOW}WARNING: Remote backup failed, but local backup is available${NC}" >&2
+        fi
+    else
+        info "No remote server configured, skipping remote backup"
     fi
 
     success "Backup complete!"
+    info "Local backup: $BACKUP_DIR/$BACKUP_FILE"
+    [ -n "$server" ] && info "Remote backup: $SSH_USER@$server:db_backups/$(hostname)/$BACKUP_FILE"
 }
 
 # run - Build and deploy (equivalent to checkbuildrun.sh)
@@ -305,6 +476,20 @@ Examples:
 Configuration:
     Database container: $DB_CONTAINER
     Database name: $DB_NAME
+
+Environment Variables (for backup command):
+    SSH_SERVER            Remote server for backup upload
+    SSH_PORT              SSH port for remote backup (default: 22)
+    SSH_KEY_PATH          Path to SSH key (default: /root/.ssh/id_rsa_backup)
+    SSH_USER              SSH user for remote backup (default: backups)
+    BACKUP_DIR            Local directory for backups (default: postgis_data/pgdata)
+
+The backup command:
+    - Creates a compressed SQL dump of all databases
+    - Waits for container and database to be ready
+    - Verifies backup file integrity
+    - Creates a symlink to latest backup
+    - Optionally uploads to remote server via rsync/SSH
 
 For more information, see docs/script-call-chain.md
 EOF
