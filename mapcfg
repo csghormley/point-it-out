@@ -196,15 +196,30 @@ cmd_status() {
 
 # backup - Backup database
 cmd_backup() {
-    local server="${1:-${SSH_SERVER:-}}"
+    local server_arg="${1:-${SSH_SERVER:-}}"
     local port="${2:-${SSH_PORT:-22}}"
 
     info "Backing up database..."
 
     # Configuration with environment variable fallbacks
     local SSH_KEY_PATH="${SSH_KEY_PATH:-/root/.ssh/id_rsa_backup}"
-    local SSH_USER="${SSH_USER:-backups}"
     local BACKUP_DIR="${BACKUP_DIR:-postgis_data/pgdata}"
+
+    # Parse user@server format
+    local SSH_USER=""
+    local server=""
+    if [ -n "$server_arg" ]; then
+        if [[ "$server_arg" =~ @ ]]; then
+            SSH_USER="${server_arg%%@*}"
+            server="${server_arg#*@}"
+        else
+            # If no @ sign, assume just server and use default user
+            server="$server_arg"
+            SSH_USER="${SSH_USER:-backups}"
+        fi
+    else
+        SSH_USER="${SSH_USER:-backups}"
+    fi
 
     # Generate timestamps and backup filename
     local TS=$(date +%s)
@@ -497,11 +512,11 @@ EOF
             ;;
         backup)
             cat <<EOF
-backup [server] [port] - Backup database
+backup [[user]@server] [port] - Backup database
 
   Creates a compressed SQL dump of all databases, verifies integrity, and creates
   a symlink to the latest backup. Optionally uploads to remote server via rsync.
-  Configure via SSH_SERVER, SSH_PORT, SSH_KEY_PATH, SSH_USER, BACKUP_DIR env vars.
+  Server format: user@hostname or just hostname (defaults to 'backups' user).
 EOF
             ;;
         status)
@@ -552,10 +567,10 @@ Commands:
     bootstrap              Initial environment setup (install dependencies, create venv)
     check                  Run validation checks (Django, templates, linting)
     build                  Build Docker images (includes checks and static collection)
-    run [backup]           Build and deploy application (add 'backup' to backup DB)
-    migrate                Complete migration workflow (makemigrations, build, deploy, migrate)
-    backup [server] [port] Backup database (optionally to remote server)
-    status                 Check system and container status
+    run [backup]                Build and deploy application (add 'backup' to backup DB)
+    migrate                     Complete migration workflow (makemigrations, build, deploy, migrate)
+    backup [[user]@server] [port] Backup database (optionally to remote server)
+    status                      Check system and container status
     maintenance            Clean up Docker resources
     version                Update version.txt from git log
     help [command]         Show this help message or help for specific command
@@ -567,7 +582,8 @@ Examples:
     ./mapcfg run backup                 # Build, deploy, and backup database
     ./mapcfg migrate                    # Run after model changes
     ./mapcfg backup                     # Backup database locally
-    ./mapcfg backup server.com 22       # Backup database and upload to remote server
+    ./mapcfg backup user@server.com     # Backup and upload to remote server as 'user'
+    ./mapcfg backup server.com 22       # Backup and upload using default 'backups' user on port 22
     ./mapcfg status                     # Check system health
     ./mapcfg help backup                # Show detailed help for backup command
 
@@ -576,10 +592,10 @@ Configuration:
     Database name: $DB_NAME
 
 Environment Variables (for backup command):
-    SSH_SERVER            Remote server for backup upload
+    SSH_SERVER            Remote server for backup upload ([user]@server format supported)
     SSH_PORT              SSH port for remote backup (default: 22)
     SSH_KEY_PATH          Path to SSH key (default: /root/.ssh/id_rsa_backup)
-    SSH_USER              SSH user for remote backup (default: backups)
+    SSH_USER              Default SSH user if not specified in server (default: backups)
     BACKUP_DIR            Local directory for backups (default: postgis_data/pgdata)
 
 For more information, see docs/script-call-chain.md
