@@ -43,7 +43,7 @@ pip install -r requirements.txt
 ## Architecture Overview
 
 ### Core Application Structure
-This is a **Django-based geospatial web mapping application** with the following key components:
+This is a **Django-based spatial data entry application** with the following key components:
 
 **Primary Django App**: `collector/pio/` (Point It Out)
 - **Models**: MapConfig, FeatureLayer, MapLayer, SurveyPoint, VisitorBehavior
