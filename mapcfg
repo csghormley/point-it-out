@@ -5,13 +5,64 @@
 
 set -euo pipefail
 
-# Trap errors and report line number
-trap 'echo -e "\033[0;31mAborting due to error at line $LINENO.\033[0m" >&2' ERR
+# Trap errors and report line number with better context
+trap 'error_handler $? $LINENO "$BASH_COMMAND" "${BASH_LINENO[@]}" "${FUNCNAME[@]}"' ERR
 
-# Configuration
-DB_CONTAINER="postgis17"
-DB_NAME="mapbe"
+error_handler() {
+    local exit_code=$1
+    local line_no=$2
+    local bash_command=$3
+    shift 3
+    local bash_lineno=("$@")
+
+    echo -e "\033[0;31mError: Command failed with exit code $exit_code\033[0m" >&2
+
+    # Show the call stack
+    if [ ${#bash_lineno[@]} -gt 1 ]; then
+        echo -e "\033[0;31mCall stack:\033[0m" >&2
+        local frame=0
+        while [ $frame -lt ${#bash_lineno[@]} ]; do
+            local lineno="${bash_lineno[$frame]}"
+            local func="${FUNCNAME[$((frame + 1))]}"
+            if [ "$func" != "error_handler" ] && [ "$func" != "main" ]; then
+                echo -e "\033[0;31m  at $func() [line $lineno]\033[0m" >&2
+            fi
+            ((frame++)) || true
+        done
+    else
+        echo -e "\033[0;31m  at line $line_no\033[0m" >&2
+    fi
+}
+
+# Determine working directory
 WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Colors for output (needed for error messages)
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Load configuration from .mapcfgrc - required
+if [ -f "$WORKDIR/.mapcfgrc" ]; then
+    # shellcheck disable=SC1091
+    . "$WORKDIR/.mapcfgrc"
+else
+    echo -e "${RED}ERROR: Configuration file .mapcfgrc not found${NC}" >&2
+    echo "" >&2
+    echo "Create .mapcfgrc from the example template:" >&2
+    echo "  cp .mapcfgrc.example .mapcfgrc" >&2
+    echo "" >&2
+    echo "Then edit .mapcfgrc to customize settings for your environment." >&2
+    exit 1
+fi
+
+# Set defaults for any unset configuration variables
+: "${DB_CONTAINER:=postgis}"
+: "${DB_NAME:=mapbe}"
+: "${SSH_SERVER:=}"
+: "${SSH_PORT:=22}"
+: "${SSH_KEY_PATH:=~/.ssh/id_rsa_backup}"
+: "${BACKUP_DIR:=postgis_data/pgdata}"
+: "${SYSTEMD_SERVICE:=docker.mapsurvey.service}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -201,24 +252,16 @@ cmd_backup() {
 
     info "Backing up database..."
 
-    # Configuration with environment variable fallbacks
-    local SSH_KEY_PATH="${SSH_KEY_PATH:-/root/.ssh/id_rsa_backup}"
-    local BACKUP_DIR="${BACKUP_DIR:-postgis_data/pgdata}"
-
     # Parse user@server format
-    local SSH_USER=""
+    local ssh_user=""
     local server=""
     if [ -n "$server_arg" ]; then
         if [[ "$server_arg" =~ @ ]]; then
-            SSH_USER="${server_arg%%@*}"
+            ssh_user="${server_arg%%@*}"
             server="${server_arg#*@}"
         else
-            # If no @ sign, assume just server and use default user
-            server="$server_arg"
-            SSH_USER="${SSH_USER:-backups}"
+            error "SSH_SERVER must be in user@hostname format (e.g., backups@server.com)"
         fi
-    else
-        SSH_USER="${SSH_USER:-backups}"
     fi
 
     # Generate timestamps and backup filename
@@ -363,7 +406,7 @@ EOF
 
     # Ship database backup to remote server if configured
     if [ -n "$server" ]; then
-        info "Shipping database backup to $SSH_USER@$server..."
+        info "Shipping database backup to $ssh_user@$server..."
 
         # Determine base path (try to find the actual full path)
         local FULL_BACKUP_PATH="$(cd "$(dirname "$BACKUP_DIR")" && pwd)/$(basename "$BACKUP_DIR")"
@@ -380,7 +423,7 @@ EOF
         fi
 
         # Use eval to properly handle the quoted ssh command
-        if eval "$RSYNC_CMD \"$FULL_BACKUP_PATH/$BACKUP_FILE\" \"$SSH_USER@$server:db_backups/$HOSTNAME/\""; then
+        if eval "$RSYNC_CMD \"$FULL_BACKUP_PATH/$BACKUP_FILE\" \"$ssh_user@$server:db_backups/$HOSTNAME/\""; then
             success "Remote backup successful"
         else
             echo -e "${YELLOW}WARNING: Remote backup failed, but local backup is available${NC}" >&2
@@ -391,7 +434,7 @@ EOF
 
     success "Backup complete!"
     info "Local backup: $BACKUP_DIR/$BACKUP_FILE"
-    [ -n "$server" ] && info "Remote backup: $SSH_USER@$server:db_backups/$(hostname)/$BACKUP_FILE"
+    [ -n "$server" ] && info "Remote backup: $ssh_user@$server:db_backups/$(hostname)/$BACKUP_FILE"
 }
 
 # run - Build and deploy (equivalent to checkbuildrun.sh)
@@ -410,7 +453,7 @@ cmd_run() {
 
     # Restart service
     info "Restarting Docker service..."
-    maybe_sudo systemctl restart docker.mapsurvey.service
+    maybe_sudo systemctl restart "$SYSTEMD_SERVICE"
 
     # Wait for services
     sleep 1
@@ -425,6 +468,23 @@ cmd_run() {
 
     # Status
     cmd_status
+
+    # Check if docs are out of date
+    if [ -d "docs/source" ]; then
+        # Check if any .rst files are newer than the build directory
+        if [ -d "docs/build/html" ]; then
+            local newest_rst=$(find docs/source -name "*.rst" -newer docs/build/html 2>/dev/null | head -1)
+            if [ -n "$newest_rst" ]; then
+                echo ""
+                echo -e "${YELLOW}NOTE: Documentation may be out of date.${NC}"
+                echo -e "${YELLOW}      Rebuild with: cd docs && make html${NC}"
+            fi
+        else
+            echo ""
+            echo -e "${YELLOW}NOTE: Documentation has not been built.${NC}"
+            echo -e "${YELLOW}      Build with: cd docs && make html${NC}"
+        fi
+    fi
 
     success "Deploy complete!"
 }
@@ -512,11 +572,11 @@ EOF
             ;;
         backup)
             cat <<EOF
-backup [[user]@server] [port] - Backup database
+backup [user@server] [port] - Backup database
 
   Creates a compressed SQL dump of all databases, verifies integrity, and creates
   a symlink to the latest backup. Optionally uploads to remote server via rsync.
-  Server format: user@hostname or just hostname (defaults to 'backups' user).
+  Server must be in user@hostname format (e.g., backups@server.com).
 EOF
             ;;
         status)
@@ -567,10 +627,10 @@ Commands:
     bootstrap              Initial environment setup (install dependencies, create venv)
     check                  Run validation checks (Django, templates, linting)
     build                  Build Docker images (includes checks and static collection)
-    run [backup]                Build and deploy application (add 'backup' to backup DB)
-    migrate                     Complete migration workflow (makemigrations, build, deploy, migrate)
-    backup [[user]@server] [port] Backup database (optionally to remote server)
-    status                      Check system and container status
+    run [backup]              Build and deploy application (add 'backup' to backup DB)
+    migrate                   Complete migration workflow (makemigrations, build, deploy, migrate)
+    backup [user@server] [port] Backup database (optionally to remote server)
+    status                    Check system and container status
     maintenance            Clean up Docker resources
     version                Update version.txt from git log
     help [command]         Show this help message or help for specific command
@@ -583,22 +643,28 @@ Examples:
     ./mapcfg migrate                    # Run after model changes
     ./mapcfg backup                     # Backup database locally
     ./mapcfg backup user@server.com     # Backup and upload to remote server as 'user'
-    ./mapcfg backup server.com 22       # Backup and upload using default 'backups' user on port 22
+    ./mapcfg backup user@server.com 22  # Backup and upload to remote server on port 22
     ./mapcfg status                     # Check system health
     ./mapcfg help backup                # Show detailed help for backup command
 
 Configuration:
-    Database container: $DB_CONTAINER
-    Database name: $DB_NAME
+    Settings can be customized in .mapcfgrc
 
-Environment Variables (for backup command):
-    SSH_SERVER            Remote server for backup upload ([user]@server format supported)
+    Current settings:
+      Database container: $DB_CONTAINER
+      Database name: $DB_NAME
+      Systemd service: $SYSTEMD_SERVICE
+
+Configuration File (.mapcfgrc):
+    DB_CONTAINER          PostgreSQL container name (default: postgis)
+    DB_NAME               Database name (default: mapbe)
+    SSH_SERVER            Remote backup server in user@hostname format (e.g., backups@server.com)
     SSH_PORT              SSH port for remote backup (default: 22)
-    SSH_KEY_PATH          Path to SSH key (default: /root/.ssh/id_rsa_backup)
-    SSH_USER              Default SSH user if not specified in server (default: backups)
+    SSH_KEY_PATH          Path to SSH key (default: ~/.ssh/id_rsa_backup)
     BACKUP_DIR            Local directory for backups (default: postgis_data/pgdata)
+    SYSTEMD_SERVICE       Systemd service name (default: docker.mapsurvey.service)
 
-For more information, see docs/script-call-chain.md
+Note: Environment variables override .mapcfgrc settings
 EOF
             ;;
         *)

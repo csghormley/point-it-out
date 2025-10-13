@@ -12,7 +12,6 @@ MapSurvey is a Django-based web mapping application for collecting and visualizi
    development
    mapcfg
    api
-   script-call-chain
    troubleshooting
 
 Overview

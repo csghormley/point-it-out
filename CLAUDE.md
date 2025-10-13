@@ -76,6 +76,13 @@ MapConfig (map configurations)
 
 ## Key Configuration Files
 
+### mapcfg Configuration
+- **Configuration file**: `.mapcfgrc` (git-ignored)
+  - Database container name and database name
+  - Backup settings (SSH server, port, key path, backup directory)
+  - Systemd service name
+  - All settings can be overridden by environment variables
+
 ### Django Settings
 - **Main settings**: `collector/collector/settings.py`
 - **Local settings**: `collector/collector/localsettings.py` (git-ignored)

@@ -1,0 +1,21 @@
+# .mapcfgrc.example - Example configuration file for mapcfg
+# Copy this file to .mapcfgrc and customize values for your environment.
+# The mapcfg script will create .mapcfgrc with these defaults if it doesn't exist.
+
+# Database configuration
+DB_CONTAINER="postgis"                         # PostgreSQL container name
+DB_NAME="mapbe"                                # Database name
+
+# Backup configuration
+SSH_SERVER=""                                  # Remote backup server (user@hostname format, e.g., backups@server.com)
+SSH_PORT="22"                                  # SSH port for remote backups
+SSH_KEY_PATH="~/.ssh/id_rsa_backup"            # Path to SSH private key for backups
+BACKUP_DIR="postgis_data/pgdata"               # Local directory for database backups
+
+# Systemd service name
+SYSTEMD_SERVICE="docker.mapsurvey.service"    # Name of the systemd service to restart
+
+# Notes:
+# - All settings can be overridden by environment variables
+# - SSH_SERVER must be in user@hostname format (e.g., backupuser@backup.example.com)
+# - Leave SSH_SERVER empty to skip remote backups

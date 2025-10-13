@@ -232,15 +232,35 @@ help
 Configuration
 -------------
 
-The script uses these configuration values (set at the top of the script):
+The ``mapcfg`` script uses a configuration file located at the project root: ``.mapcfgrc``
+
+Configuration File (.mapcfgrc)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``.mapcfgrc`` file is required and must be created before running ``mapcfg``. Copy from the example template and customize for your environment:
 
 .. code-block:: bash
 
-   DB_CONTAINER="postgis17"
-   DB_NAME="mapbe"
-   WORKDIR="$(cd "$(dirname "$0")" && pwd)"
+   cp .mapcfgrc.example .mapcfgrc
 
-Modify these if your database container name or database name differs.
+**Available Settings:**
+
+.. code-block:: bash
+
+   # Database configuration
+   DB_CONTAINER="postgis"                # PostgreSQL container name
+   DB_NAME="mapbe"                       # Database name
+
+   # Backup configuration
+   SSH_SERVER=""                         # Remote backup server (user@hostname format, e.g., backups@server.com)
+   SSH_PORT="22"                         # SSH port for remote backups
+   SSH_KEY_PATH="~/.ssh/id_rsa_backup"  # SSH private key path
+   BACKUP_DIR="postgis_data/pgdata"      # Local backup directory
+
+   # Systemd service name
+   SYSTEMD_SERVICE="docker.mapsurvey.service"
+
+``.mapcfgrc`` is git-ignored by default. A template is provided in ``.mapcfgrc.example``. Environment variables override ``.mapcfgrc`` settings.
 
 Common Workflows
 ----------------
@@ -382,7 +402,6 @@ Must Run from Project Root
 Related Documentation
 ---------------------
 
-- For script call chains and dependencies, see :doc:`script-call-chain`
 - For development workflow, see :doc:`development`
 - For troubleshooting, see :doc:`troubleshooting`
 
