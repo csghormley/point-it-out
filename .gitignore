@@ -9,10 +9,10 @@ junk
 .vscode
 .mapcfgrc
 collector/pio/static/pio/lib/ol/
-*localsettings.py
+localsettings.py
 collector/static
 collector/app_staticfiles
-#postgis_data
+postgis_data/pgdata*
 *password.txt
 *key.txt
 postgis_data/pgdata/base
@@ -24,3 +24,4 @@ postgis_data/pgdata/postmaster.opts
 postgis_data/pgdata/postmaster.pid
 postgis_data/pgdata/*.pem
 GeoLite2*
+version.txt

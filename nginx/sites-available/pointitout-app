@@ -1,0 +1,58 @@
+
+server {
+	root /var/www/html;
+
+    location = /favicon.ico {
+        alias /opt/mapsurvey/collector/app_staticfiles/favicon.ico;
+    }
+
+    location = /static/ {
+        alias /opt/mapsurvey/collector/app_staticfiles/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    # dev
+    location = /dev-static/ {
+        alias /opt/dev-mapsurvey/collector/app_staticfiles/;
+    }
+
+    location /dev/ {
+        proxy_pass http://127.0.0.1:18888;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+    }
+
+    # set client body size to 10M #
+    client_max_body_size 10M;
+
+    server_name pointitout.app; # managed by Certbot
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/pointitout.app/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/pointitout.app/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+}
+
+server {
+    if ($host = pointitout.app) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80 ;
+	listen [::]:80 ;
+    server_name pointitout.app;
+    return 404; # managed by Certbot
+}

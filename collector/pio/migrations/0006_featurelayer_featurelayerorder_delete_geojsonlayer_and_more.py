@@ -39,17 +39,6 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='GeoJSONLayer',
         ),
-        migrations.AddField(
-            model_name='surveypoint',
-            name='mapconfig',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pio.mapconfig'),
-        ),
-# too complicated to run
-#        migrations.AlterField(
-#            model_name='mapconfig',
-#            name='layers',
-#            field=models.ManyToManyField(blank=True, related_name='mapconfig', through='pio.FeatureLayerOrder', to='pio.featurelayer'),
-#        ),
 
 # stepwise version of above
         migrations.RemoveField(

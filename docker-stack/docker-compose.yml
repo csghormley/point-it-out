@@ -7,29 +7,6 @@ services:
   # https://hub.docker.com/_/postgres
   # changing the variables only affects an empty data directory!
   # pass an explicit UID and GID from systemd to allow non-root access for pg_hba.conf in git
-  postgis16:
-    image: postgis/postgis:16-3.4
-    logging:
-      driver: journald
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/root_db_password
-      PGDATA: /var/lib/postgresql/data/pgdata
-    profiles:
-      - legacy
-    user: "${UID_GID}"
-    ports:
-      - 5432:5432
-    volumes:
-      - /opt/mapsurvey/postgis_data:/var/lib/postgresql/data
-      - /opt/mapsurvey:/opt/mapsurvey
-    secrets:
-      - root_db_password
 
   postgis17:
     image: postgis/postgis:17-3.5

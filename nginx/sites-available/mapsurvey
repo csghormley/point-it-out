@@ -15,7 +15,13 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_redirect off;
+
     }
+
+    # set client body size to 10M
+    # this has to be set in the container webserver (here),
+    # as well as in the proxy
+    client_max_body_size 10M;
 
     server_name dev.ghormley.net; # managed by Certbot
 
