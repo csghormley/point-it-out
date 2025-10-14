@@ -51,10 +51,11 @@ MapSurvey is designed for embedding in survey platforms (e.g., Qualtrics) but ca
 
 The application consists of:
 
-- **Django Application** (collector/pio/) - GeoDjango with PostGIS backend
-- **PostgreSQL 17/PostGIS 3.5** - Spatial database
-- **Nginx** - Reverse proxy and static file serving
-- **Docker Compose Stack** - Containerized deployment
+- **Docker Compose Stack**
+  - **Nginx** - Application proxy and static file server
+  - **Django Application** (collector/pio/) - GeoDjango with PostGIS backend
+  - **PostgreSQL 17/PostGIS 3.5** - Spatial database
+- **Nginx** - Reverse proxy for Docker stack
 
 ### Project Structure
 
@@ -78,14 +79,17 @@ The sections below contain legacy setup notes that may be useful for reference.
 Clone the project into a folder, such as /opt/mapsurvey. Make that
 folder the working directory.
 
-Run the build script
+Most operations can be performed with the map configuration script,
+`mapcfg`, located in the project root directory. For example, to
+build the Docker images,
 
 `./mapcfg build`
 
-Provided docker is installed, this will download the docker images and
+Provided docker is installed, this will perform syntax checks, download the base docker images, and
 install the required software.
 
-If setting up a webserver facing the internet, the following practices are strongly recommended but out of the scope of this document.
+If setting up a webserver facing the internet, the following practices
+are strongly recommended but out of the scope of this document.
 
  * install a firewall and secure the Docker installation against outside access (e.g., ufw-docker)
  * install Nginx with config files in ./nginx as an example
