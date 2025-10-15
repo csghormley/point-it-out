@@ -1,6 +1,5 @@
 # .mapcfgrc.example - Example configuration file for mapcfg
 # Copy this file to .mapcfgrc and customize values for your environment.
-# The mapcfg script will create .mapcfgrc with these defaults if it doesn't exist.
 
 # Database configuration
 DB_CONTAINER="postgis"                         # PostgreSQL container name
