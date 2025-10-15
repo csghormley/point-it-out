@@ -1,9 +1,11 @@
 import csv
+import json
 from django.contrib import admin
 from django.http import HttpResponse
 from django.contrib.gis.db.models import JSONField
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.contrib.gis.geos import GEOSGeometry
 
 from leaflet.admin import LeafletGeoAdmin
 
@@ -31,13 +33,83 @@ class ExportCsvMixin:
 
     export_as_csv.short_description = "Export Selected to CSV"
 
+class DownloadAsGeoJsonMixin:
+    """Mixin to export model instances as GeoJSON FeatureCollection"""
+
+    def download_as_geojson(self, request, queryset):
+        """Export selected objects as GeoJSON FeatureCollection"""
+        features = []
+
+        for obj in queryset:
+            # Get the geometry field - assume it's called 'geom'
+            geom_field = getattr(obj, 'geom', None)
+
+            if geom_field is None:
+                continue
+
+            # Convert geometry to GeoJSON dict
+            if isinstance(geom_field, GEOSGeometry):
+                geometry = json.loads(geom_field.geojson)
+            else:
+                continue
+
+            # Build properties from all non-geometry fields
+            properties = {}
+            meta = self.model._meta
+
+            for field in meta.fields:
+                field_name = field.name
+
+                # Skip the geometry field
+                if field_name == 'geom':
+                    continue
+
+                field_value = getattr(obj, field_name)
+
+                # Handle special field types
+                if hasattr(field_value, 'isoformat'):  # DateTime fields
+                    properties[field_name] = field_value.isoformat()
+                elif hasattr(field_value, 'pk'):  # ForeignKey fields
+                    properties[field_name] = str(field_value)
+                    properties[f'{field_name}_id'] = field_value.pk
+                elif field_value is None:
+                    properties[field_name] = None
+                else:
+                    properties[field_name] = str(field_value)
+
+            # Create GeoJSON feature
+            feature = {
+                "type": "Feature",
+                "geometry": geometry,
+                "properties": properties
+            }
+
+            features.append(feature)
+
+        # Create FeatureCollection
+        feature_collection = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+
+        # Create response
+        response = HttpResponse(
+            json.dumps(feature_collection, indent=2),
+            content_type='application/geo+json'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{self.model._meta.model_name}_export.geojson"'
+
+        return response
+
+    download_as_geojson.short_description = "Download Selected as GeoJSON"
+
 @admin.register(SurveyPoint)
-class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin):
+class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
     fields = ['surveyid', 'mapconfig', 'description', 'responseid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'geom', 'deleted']
     readonly_fields = ['surveyid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'responseid', 'mapconfig',]
     list_filter = ['surveyid', 'deleted', 'responseid', 'ipaddress', 'radius', ]
     search_fields = ['surveyid', 'ipaddress', 'radius', 'responseid', 'geom']
-    actions = ["export_as_csv"]
+    actions = ["export_as_csv", "download_as_geojson"]
 
 class MapLayerInline(admin.TabularInline):
     model = MapLayer
