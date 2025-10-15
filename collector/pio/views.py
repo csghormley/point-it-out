@@ -13,7 +13,7 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 # use local version
 ##from .serializers import GeoFeatureModelSerializer
 
-from .models import FeatureLayer, MapLayer, MapConfig, SurveyPoint, VisitorBehavior
+from .models import FeatureLayer, MapLayer, MapConfig, BaseMap, MapBasemap, SurveyPoint, VisitorBehavior
 from .permissions import FeatureLayerPermission, MapLayerPermission, SurveyPointPermission, VisitorBehaviorPermission
 from .throttles import (
     SurveyPointAnonThrottle,
@@ -145,6 +145,25 @@ class MapConfigDetailSerializer(MapConfigSerializer):
     class Meta(MapConfigSerializer.Meta):
         fields = MapConfigSerializer.Meta.fields + ['map_layers']
 
+class BaseMapSerializer(serializers.ModelSerializer):
+    """Serializer for BaseMap objects"""
+    class Meta:
+        model = BaseMap
+        fields = ['id', 'name', 'slug', 'tile_url', 'attribution']
+
+class MapBasemapSerializer(serializers.ModelSerializer):
+    """Serializer for MapBasemap with embedded BaseMap details"""
+    basemap_name = serializers.CharField(source='basemap.name', read_only=True)
+    basemap_slug = serializers.CharField(source='basemap.slug', read_only=True)
+    basemap_tile_url = serializers.CharField(source='basemap.tile_url', read_only=True)
+    basemap_attribution = serializers.CharField(source='basemap.attribution', read_only=True)
+
+    class Meta:
+        model = MapBasemap
+        fields = ['id', 'basemap', 'basemap_name', 'basemap_slug', 'basemap_tile_url',
+                  'basemap_attribution', 'min_zoom', 'max_zoom', 'opacity', 'z_index']
+        read_only_fields = ['basemap_name', 'basemap_slug', 'basemap_tile_url', 'basemap_attribution']
+
 class FeatureLayerSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
@@ -236,6 +255,26 @@ class MapLayerViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(layer_id=layer_id)
 
         return queryset.order_by('mapconfig', 'z_order')
+
+class MapBasemapViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MapBasemap - provides basemaps for a given MapConfig
+    """
+    serializer_class = MapBasemapSerializer
+    throttle_classes = [MapLayerThrottle]  # Reuse MapLayerThrottle for similar resource
+
+    def get_queryset(self):
+        """
+        Optionally filter by mapconfig
+        """
+        queryset = MapBasemap.objects.all().select_related('mapconfig', 'basemap')
+
+        # Filter by mapconfig if provided
+        mapconfig_id = self.request.query_params.get('mapconfig')
+        if mapconfig_id is not None:
+            queryset = queryset.filter(mapconfig_id=mapconfig_id)
+
+        return queryset.order_by('z_index')
 
 # Serializers define the API representation.
 class SurveyPointSerializer(GeoFeatureModelSerializer):

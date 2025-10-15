@@ -39,9 +39,18 @@ export class MapManager {
         // Initialize configuration
         this.initializeConfig(configElementId);
 
+        // Initialize map components asynchronously
+        this.initialize();
+    }
+
+    /**
+     * Async initialization method
+     * @private
+     */
+    async initialize() {
         // Initialize map components
         this.initializeSources();
-        this.initializeLayers();
+        await this.initializeLayers();
         this.createMapBoundary();
         this.initializeMapView();
         this.initializeControls();
@@ -263,30 +272,16 @@ export class MapManager {
     /**
      * Initialize map layers
      */
-    initializeLayers() {
-        const tile_xyz = 'MapServer/tile/{z}/{y}/{x}';
-
-        // AGOL layers: visit this url to view options
-        const agol_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
-        // National map layers
+    async initializeLayers() {
         const natlmap_url = 'https://basemap.nationalmap.gov/arcgis/rest/services/';
 
         // layer for overview map
         this.overview_layer = this.makeXYZLayer(natlmap_url,
                                                 'USGSTopo');
 
-        // basemap layers; specify min and max zoom as needed
-        // to define a stack
-        this.baselayers = [
-            this.makeXYZLayer(agol_url,
-                              'NatGeo_World_Map',
-                              {"minZoom": 0,
-                               "maxZoom": 14}),
-            this.makeXYZLayer(natlmap_url,
-                              'USGSTopo',
-                              {"minZoom": 13.9,
-                               "maxZoom": 99})
-        ];
+        // Load basemap layers from API (async)
+        // This will fall back to hardcoded basemaps if API fails or no basemaps configured
+        this.baselayers = await this.loadBasemapsFromAPI();
 
         // WMS and OSM layers
         this.layer_wms_fireshed = new TileLayer({
@@ -1195,10 +1190,13 @@ export class MapManager {
      * Create XYZ tile layer
      * @param {string} baseurl - The base URL for the tile service
      * @param {string} servicename - The service name
+     * @param {Object} options - Layer options (minZoom, maxZoom, opacity, zIndex)
      * @returns {TileLayer} The created tile layer
      */
     makeXYZLayer(baseurl, servicename, options={"minZoom": 0,
-                                                "maxZoom": 99}) {
+                                                "maxZoom": 99,
+                                                "opacity": 1.0,
+                                                "zIndex": 0}) {
 
         return new TileLayer({
             source: new XYZ({
@@ -1206,8 +1204,101 @@ export class MapManager {
                 attributions: this.attributions
             }),
             minZoom: options.minZoom,
-            maxZoom: options.maxZoom
+            maxZoom: options.maxZoom,
+            opacity: options.opacity !== undefined ? options.opacity : 1.0,
+            zIndex: options.zIndex !== undefined ? options.zIndex : 0
         });
+    }
+
+    /**
+     * Load basemaps from API for the current MapConfig
+     * @returns {Promise<Array<TileLayer>>} Promise resolving to array of basemap layers
+     */
+    loadBasemapsFromAPI() {
+        const mapconfigid = window.context?.mapconfigid;
+
+        if (!mapconfigid) {
+            if (this.config.verbose) console.log('No mapconfig ID found, using default basemaps');
+            return Promise.resolve(this.getDefaultBasemaps());
+        }
+
+        // Fetch basemaps from the REST API
+        const basemapsUrl = `/api/basemaps/?mapconfig=${mapconfigid}`;
+
+        return fetch(basemapsUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (this.config.verbose) console.log(`Retrieved ${data.length} basemaps from API:`, data);
+
+                // If no basemaps configured, use defaults
+                if (data.length === 0) {
+                    if (this.config.verbose) console.log('No basemaps configured for this MapConfig, using defaults');
+                    return this.getDefaultBasemaps();
+                }
+
+                // Sort basemaps by z_index to ensure proper rendering order
+                const sortedBasemaps = data.sort((a, b) => a.z_index - b.z_index);
+
+                // Create OpenLayers tile layers for each basemap
+                const basemapLayers = sortedBasemaps.map(basemap => {
+                    if (this.config.verbose) console.log(`Creating basemap layer: ${basemap.basemap_name} (z=${basemap.z_index})`);
+
+                    return new TileLayer({
+                        source: new XYZ({
+                            url: basemap.basemap_tile_url,
+                            attributions: basemap.basemap_attribution || this.attributions
+                        }),
+                        minZoom: basemap.min_zoom || 0,
+                        maxZoom: basemap.max_zoom || 23,
+                        opacity: basemap.opacity !== undefined ? basemap.opacity : 1.0,
+                        zIndex: basemap.z_index
+                    });
+                });
+
+                return basemapLayers;
+            })
+            .catch(error => {
+                console.error(`Error loading basemaps from API: ${error.message || error}`);
+                if (this.config.verbose) console.log(`API call failed (${error.message}), falling back to default basemaps`);
+                return this.getDefaultBasemaps();
+            });
+    }
+
+    /**
+     * Get default hardcoded basemaps (fallback)
+     * @returns {Array<TileLayer>} Array of default basemap layers
+     */
+    getDefaultBasemaps() {
+        const tile_xyz = 'MapServer/tile/{z}/{y}/{x}';
+        const agol_url = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+        const natlmap_url = 'https://basemap.nationalmap.gov/arcgis/rest/services/';
+
+        return [
+            this.makeXYZLayer(agol_url, 'NatGeo_World_Map', {
+                "minZoom": 0,
+                "maxZoom": 14,
+                "opacity": 1.0,
+                "zIndex": 0
+            }),
+            this.makeXYZLayer(natlmap_url, 'USGSTopo', {
+                "minZoom": 13.9,
+                "maxZoom": 99,
+                "opacity": 1.0,
+                "zIndex": 1
+            })
+        ];
     }
 
     /**

@@ -1,0 +1,22 @@
+[
+  {
+    "model": "pio.basemap",
+    "pk": 1,
+    "fields": {
+      "name": "Esri NatGeo World Map",
+      "slug": "esri-natgeo",
+      "tile_url": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
+      "attribution": "© National Geographic, Esri, Garmin, HERE, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, increment P Corp."
+    }
+  },
+  {
+    "model": "pio.basemap",
+    "pk": 2,
+    "fields": {
+      "name": "USGS Topo",
+      "slug": "usgs-topo",
+      "tile_url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+      "attribution": "USGS National Map"
+    }
+  }
+]

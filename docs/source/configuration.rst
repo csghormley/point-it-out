@@ -14,6 +14,8 @@ The map system uses three components that work together:
 
 Each MapConfig can include multiple MapLayers, each referencing a FeatureLayer and defining how it should be styled and stacked.
 
+The basemap is one or more tile sources, such as from OpenStreetMap or an Esri server. The default is Esri NatGeo at lower zoom levels, and the USGS National Map "USGS Topo" for details at higher zoom levels. The database supports BaseMap objects that denote a tile URL and a descriptor. A MapConfig may reference an alernate set of BaseMap objects with a range of valid zoom levels, min_zoom and max_zoom, as well as an opacity setting and z-index value. The lowest zoom level is 0 and the highest zoom level is 23, but most sources do not support such a fine level of detail. When creating a stack of basemaps, the zoom levels may overlap by a small amount (0.1) to avoid flicker when zooming. 
+
 Step 1: Create a FeatureLayer
 ------------------------------
 
@@ -373,6 +375,120 @@ Example stacking::
     z_order: 3 → Point landmarks (top)
 
 Each MapConfig must have unique z-order values across its MapLayers.
+
+Step 4: Configure Basemaps (Optional)
+--------------------------------------
+
+Basemaps are the tile layers that provide the background map imagery. By default, the system uses Esri NatGeo World Map at lower zoom levels and USGS Topo at higher zoom levels. You can configure custom basemap stacks for each MapConfig.
+
+What are Basemaps?
+~~~~~~~~~~~~~~~~~~
+
+Basemaps are reusable tile sources (similar to FeatureLayers) that can be shared across multiple MapConfigs. Each basemap has:
+
+- **Name**: Descriptive name (e.g., "USGS Topo")
+- **Slug**: URL-friendly identifier (e.g., "usgs-topo")
+- **Tile URL**: Template URL with {z}/{y}/{x} placeholders
+- **Attribution**: Copyright/attribution text
+
+Creating a BaseMap
+~~~~~~~~~~~~~~~~~~~
+
+1. Navigate to **Django Admin** → **PIO** → **Base Maps** → **Add Base Map**
+2. Fill in the fields:
+
+   - **Name**: Descriptive name
+   - **Slug**: URL-friendly identifier
+   - **Tile URL**: Tile service URL with {z}/{y}/{x} placeholders
+   - **Attribution**: Copyright text for the basemap
+
+Example tile URLs:
+
+- USGS Topo: ``https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}``
+- Esri World Imagery: ``https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}``
+- OpenStreetMap: ``https://tile.openstreetmap.org/{z}/{x}/{y}.png``
+
+Linking Basemaps to MapConfigs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once you have BaseMap objects, you can associate them with a MapConfig:
+
+1. Edit a MapConfig in Django Admin
+2. In the **Map basemaps** inline section at the bottom, click "Add another Map basemap"
+3. Configure each basemap entry:
+
+   - **Basemap**: Select the BaseMap
+   - **Min zoom**: Minimum zoom level (0-23)
+   - **Max zoom**: Maximum zoom level (0-23)
+   - **Opacity**: Transparency (0.0 = fully transparent, 1.0 = fully opaque)
+   - **Z index**: Rendering order (lower values render first/bottom)
+
+Basemap Stacking
+~~~~~~~~~~~~~~~~
+
+You can create a stack of multiple basemaps with different zoom ranges. For example:
+
+::**Basemap Stack Example**::
+
+    Basemap 1: Esri NatGeo World Map
+    - min_zoom: 0
+    - max_zoom: 14
+    - opacity: 1.0
+    - z_index: 0
+
+    Basemap 2: USGS Topo
+    - min_zoom: 13.9
+    - max_zoom: 23
+    - opacity: 1.0
+    - z_index: 1
+
+This creates a seamless transition where NatGeo World Map shows at zoom levels 0-14, and USGS Topo shows at zoom levels 13.9-23. The slight overlap (0.1 zoom levels) prevents flickering during zoom transitions.
+
+Basemap Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 10 70
+
+   * - Option
+     - Type
+     - Description
+   * - ``min_zoom``
+     - Float
+     - Minimum zoom level (0-23) where basemap is visible
+   * - ``max_zoom``
+     - Float
+     - Maximum zoom level (0-23) where basemap is visible
+   * - ``opacity``
+     - Float
+     - Layer opacity from 0.0 (transparent) to 1.0 (opaque)
+   * - ``z_index``
+     - Integer
+     - Rendering order - lower values render first (bottom)
+
+Best Practices for Basemaps
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Zoom Level Overlap**
+  Use a small overlap (0.1-0.2 zoom levels) between basemaps to prevent flickering during zoom transitions.
+
+**Z-Index Order**
+  Ensure z_index values are unique within a MapConfig. Lower detail basemaps should have lower z_index values.
+
+**Opacity for Blending**
+  Use opacity < 1.0 for semi-transparent overlay basemaps (e.g., hillshade over imagery).
+
+**Attribution**
+  Always provide proper attribution for tile sources to comply with usage terms.
+
+**Testing Zoom Ranges**
+  Verify basemaps load correctly at their configured zoom levels. Some tile services don't support all zoom levels.
+
+Fallback Behavior
+~~~~~~~~~~~~~~~~~
+
+If no basemaps are configured for a MapConfig, the system automatically falls back to the default basemaps (Esri NatGeo World Map + USGS Topo). This ensures maps always have a background layer.
 
 Complete Example
 ----------------

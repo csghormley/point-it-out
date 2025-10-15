@@ -9,7 +9,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 # Register your models here.
 from .models import SurveyPoint, MapConfig, FeatureLayer, MapLayer, \
-VisitorBehavior, ResponseSummary
+BaseMap, MapBasemap, VisitorBehavior, ResponseSummary
 
 from django_json_widget.widgets import JSONEditorWidget
 
@@ -56,6 +56,15 @@ class MapLayerInline(admin.TabularInline):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('layer')
 
+class MapBasemapInline(admin.TabularInline):
+    model = MapBasemap
+    extra = 1
+    fields = ('basemap', 'min_zoom', 'max_zoom', 'opacity', 'z_index')
+    ordering = ('z_index',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('basemap')
+
 @admin.register(MapConfig)
 class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
     fields = ['id', 'name', 'slug', 'config',]
@@ -65,7 +74,7 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
     search_fields = ['name', 'slug', 'config',]
     actions = ["export_as_csv"]
 
-    inlines = [MapLayerInline]
+    inlines = [MapLayerInline, MapBasemapInline]
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})},
@@ -105,4 +114,13 @@ class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_filter = ['surveyid', 'responseid', 'ipaddr',]
     search_fields = ['surveyid', 'responseid', 'ipaddr',]
 
+    actions = ["export_as_csv"]
+
+@admin.register(BaseMap)
+class BaseMapAdmin(admin.ModelAdmin, ExportCsvMixin):
+    fields = ['id', 'name', 'slug', 'tile_url', 'attribution']
+    list_display = ('name', 'slug', 'tile_url')
+    prepopulated_fields = {"slug": ("name",)}
+    readonly_fields = ['id']
+    search_fields = ['name', 'slug', 'tile_url']
     actions = ["export_as_csv"]

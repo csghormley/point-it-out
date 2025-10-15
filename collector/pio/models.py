@@ -67,6 +67,65 @@ class FeatureLayer(models.Model):
     class Meta:
         verbose_name_plural = "Feature Layers"
 
+# basemap tile sources - reusable across MapConfigs
+class BaseMap(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField()
+    tile_url = models.URLField(max_length=500,
+        help_text="Tile URL template with {z}/{y}/{x} placeholders (e.g., https://server.com/service/MapServer/tile/{z}/{y}/{x})")
+    attribution = models.TextField(blank=True,
+        help_text="Attribution text for the basemap")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Base Maps"
+
+# links a BaseMap to a MapConfig with zoom levels and styling
+class MapBasemap(models.Model):
+    mapconfig = models.ForeignKey("MapConfig", on_delete=models.CASCADE)
+    basemap = models.ForeignKey("BaseMap", on_delete=models.CASCADE)
+    min_zoom = models.FloatField(default=0,
+        help_text="Minimum zoom level (0-23)")
+    max_zoom = models.FloatField(default=23,
+        help_text="Maximum zoom level (0-23)")
+    opacity = models.FloatField(default=1.0,
+        help_text="Opacity 0.0-1.0")
+    z_index = models.IntegerField(default=0,
+        help_text="Rendering order (lower values render first/bottom)")
+
+    class Meta:
+        ordering = ['z_index']
+        unique_together = [('mapconfig', 'z_index')]
+
+    def clean(self):
+        # Validate zoom levels
+        if self.min_zoom < 0 or self.min_zoom > 23:
+            raise ValidationError("min_zoom must be between 0 and 23")
+        if self.max_zoom < 0 or self.max_zoom > 23:
+            raise ValidationError("max_zoom must be between 0 and 23")
+        if self.min_zoom > self.max_zoom:
+            raise ValidationError("min_zoom cannot be greater than max_zoom")
+
+        # Validate opacity
+        if self.opacity < 0.0 or self.opacity > 1.0:
+            raise ValidationError("opacity must be between 0.0 and 1.0")
+
+        # Ensure z_index is unique within the map
+        if self.mapconfig_id:
+            existing = MapBasemap.objects.filter(
+                mapconfig=self.mapconfig,
+                z_index=self.z_index
+            )
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.exists():
+                raise ValidationError(f"Z-index {self.z_index} already exists for this map")
+
+    def __str__(self):
+        return f"{self.mapconfig.name} - {self.basemap.name} (z={self.z_index})"
+
 # specify a FeatureLayer and display parameters
 class MapLayer(models.Model):
     mapconfig = models.ForeignKey("MapConfig", on_delete=models.CASCADE)
@@ -124,6 +183,12 @@ class MapConfig(models.Model):
         through='MapLayer',
         related_name='mapconfig',
         blank=True)
+    basemaps = models.ManyToManyField(
+        'BaseMap',
+        through='MapBasemap',
+        related_name='mapconfigs',
+        blank=True,
+        help_text="Basemap tile layers for this map")
 
     def __str__(self):
         return self.name
