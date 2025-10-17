@@ -65,7 +65,7 @@ class FeatureLayer(models.Model):
             raise ValidationError("FeatureCollection must have features array")
 
     class Meta:
-        verbose_name_plural = "Feature Layers"
+        verbose_name_plural = "Feature layers"
 
 # basemap tile sources - reusable across MapConfigs
 class BaseMap(models.Model):
@@ -80,7 +80,7 @@ class BaseMap(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = "Base Maps"
+        verbose_name_plural = "Basemaps"
 
 # links a BaseMap to a MapConfig with zoom levels and styling
 class MapBasemap(models.Model):
@@ -192,6 +192,11 @@ class MapConfig(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['slug']
+        verbose_name_plural = "Map setups"
+
 
 # log data from web-user-behaviour, when enabled
 class VisitorBehavior(models.Model):

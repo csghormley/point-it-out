@@ -118,7 +118,8 @@ class MapLayerInline(admin.TabularInline):
     ordering = ('z_order',)
 
     formfield_overrides = {
-        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})}
+        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               height='300px')}
     }
 
     # TODO: style the inline form to give more room to the text editor
@@ -149,7 +150,8 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
     inlines = [MapLayerInline, MapBasemapInline]
 
     formfield_overrides = {
-        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})},
+        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               height='300px')}
     }
 
     def map_link(self, obj):
@@ -165,7 +167,8 @@ class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
     actions = ["export_as_csv"]
 
     formfield_overrides = {
-        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'})},
+        JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               height='300px')}
     }
 
 @admin.register(VisitorBehavior)
