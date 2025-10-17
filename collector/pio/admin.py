@@ -122,9 +122,10 @@ class MapLayerInline(admin.TabularInline):
                                                height='300px')}
     }
 
-    # TODO: style the inline form to give more room to the text editor
-    # and less to the related object widget.
-    # https://stackoverflow.com/questions/910169/resize-fields-in-django-admin
+    class Media:
+        css = {
+            'all': ('pio/css/admin-inline.css',)
+        }
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('layer')
@@ -134,6 +135,11 @@ class MapBasemapInline(admin.TabularInline):
     extra = 1
     fields = ('basemap', 'min_zoom', 'max_zoom', 'opacity', 'z_index')
     ordering = ('z_index',)
+
+    class Media:
+        css = {
+            'all': ('pio/css/admin-inline.css',)
+        }
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('basemap')
