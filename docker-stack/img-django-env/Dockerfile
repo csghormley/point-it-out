@@ -13,12 +13,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# install uv for faster dependency installation
-RUN pip install --upgrade pip uv
+# copy uv binary from official image,
+# for faster dependency installation
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # copy dependency files
 COPY ./pyproject.toml .
 COPY ./uv.lock .
+COPY ./README.md .
 
 # create a fresh virtual environment and install dependencies with uv
 RUN uv venv /opt/venv
