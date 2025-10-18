@@ -1,12 +1,19 @@
+# deprecated - use pyproject.toml with uv instead
 wheel
 
 Django==5.2.7
 django-environ
-GDAL==3.8.4
 
 GEOS
 PROJ
 django-geojson
+
+# Install different packages based on platform
+psycopg[binary]>=3.0 ; sys_platform == 'darwin' or sys_platform == 'win32'
+psycopg>=3.0 ; sys_platform == 'linux'
+
+GDAL==3.11.4 ; sys_platform == 'darwin' or sys_platform == 'win32'
+GDAL==3.8.4 ; sys_platform == 'linux'
 
 # required for 2FA
 phonenumbers
@@ -21,7 +28,6 @@ django-csp>=4.0
 django-allauth
 django-allauth[mfa]
 
-psycopg>=3.0
 django-extensions
 djangorestframework
 djangorestframework-gis==1.2.0
