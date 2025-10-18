@@ -140,12 +140,17 @@ cmd_bootstrap() {
         info "Virtual environment already exists"
     fi
 
+<<<<<<< HEAD
     info "Activating virtual environment..."
     # shellcheck disable=SC1091
     . "$WORKDIR/.venv/bin/activate"
 
     info "Installing Python dependencies with uv..."
     uv pip install -r "$WORKDIR/requirements.txt"
+=======
+    info "Installing Python dependencies with uv..."
+    uv sync
+>>>>>>> ec4cb48 (Switch to uv from pip for better dependency management)
 
     success "Bootstrap complete!"
 }

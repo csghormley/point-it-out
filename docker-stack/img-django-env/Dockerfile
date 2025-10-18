@@ -13,12 +13,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# create a fresh virtual environment in 'venv',
-# and install the required packages
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN . /opt/venv/bin/activate
-COPY ./requirements.txt .
+# install uv for faster dependency installation
+RUN pip install --upgrade pip uv
 
-RUN pip install -r requirements.txt && \
-    pip install --upgrade pip
+# copy dependency files
+COPY ./pyproject.toml .
+COPY ./uv.lock .
+
+# create a fresh virtual environment and install dependencies with uv
+RUN uv venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN uv sync --frozen

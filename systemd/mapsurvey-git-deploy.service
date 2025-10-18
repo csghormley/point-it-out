@@ -10,7 +10,7 @@ User=deploy
 Group=deploy
 WorkingDirectory=/opt/mapsurvey
 ExecStartPre=/bin/bash -c 'git fetch origin'
-ExecStart=/bin/bash -c 'git fetch origin && git diff HEAD origin/dev --quiet && echo "No changes" || (echo "Changes detected" && git pull origin dev && sudo /opt/mapsurvey/checkbuildrun.sh)'
+ExecStart=/bin/bash -c 'git fetch origin && git diff HEAD origin/dev --quiet && echo "No changes" || (echo "Changes detected" && git pull origin dev && sudo /opt/mapsurvey/mapcfg run)'
 #ExecStartPost=/bin/systemctl reload nginx
 Environment=NODE_ENV=production
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/node/bin
