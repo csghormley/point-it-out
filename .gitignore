@@ -2,7 +2,7 @@
 *.pyc
 *.zip
 *gz
-env
+.venv/
 wait
 junk
 *.code-workspace

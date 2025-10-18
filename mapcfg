@@ -103,9 +103,9 @@ ensure_root() {
 
 # Activate virtual environment
 activate_venv() {
-    if [ -f "$WORKDIR/env/bin/activate" ]; then
+    if [ -f "$WORKDIR/.venv/bin/activate" ]; then
         # shellcheck disable=SC1091
-        . "$WORKDIR/env/bin/activate"
+        . "$WORKDIR/.venv/bin/activate"
     else
         error "Virtual environment not found. Run './mapcfg bootstrap' first."
     fi
@@ -122,22 +122,30 @@ cmd_bootstrap() {
     if ! command -v python3 &> /dev/null; then
         info "Installing Python 3..."
         maybe_sudo apt-get update
-        maybe_sudo apt-get install -y python3-venv python-is-python3
+        maybe_sudo apt-get install -y python3 python-is-python3
     fi
 
-    if [ ! -d "$WORKDIR/env" ]; then
-        info "Creating virtual environment..."
-        python3 -m venv "$WORKDIR/env"
+    # Check if uv is installed
+    if ! command -v uv &> /dev/null; then
+        info "Installing uv..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        # Add uv to PATH for current session
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+
+    if [ ! -d "$WORKDIR/.venv" ]; then
+        info "Creating virtual environment with uv..."
+        uv venv "$WORKDIR/.venv"
     else
         info "Virtual environment already exists"
     fi
 
     info "Activating virtual environment..."
     # shellcheck disable=SC1091
-    . "$WORKDIR/env/bin/activate"
+    . "$WORKDIR/.venv/bin/activate"
 
-    info "Installing Python dependencies..."
-    pip install -r "$WORKDIR/requirements.txt"
+    info "Installing Python dependencies with uv..."
+    uv pip install -r "$WORKDIR/requirements.txt"
 
     success "Bootstrap complete!"
 }
@@ -437,7 +445,7 @@ EOF
     [ -n "$server" ] && info "Remote backup: $ssh_user@$server:db_backups/$(hostname)/$BACKUP_FILE"
 }
 
-# run - Build and deploy (equivalent to checkbuildrun.sh)
+# run - Build and deploy
 cmd_run() {
     local do_backup=false
 
