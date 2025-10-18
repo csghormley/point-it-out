@@ -151,6 +151,18 @@ cmd_check() {
     info "Running validation checks..."
     activate_venv
 
+    # Verify venv path matches current directory
+    if [ -f "$WORKDIR/.venv/bin/activate" ]; then
+        venv_path=$(grep "^VIRTUAL_ENV=" "$WORKDIR/.venv/bin/activate" | cut -d"'" -f2)
+        expected_path="$WORKDIR/.venv"
+        if [ "$venv_path" != "$expected_path" ]; then
+            error "Virtual environment path mismatch!"
+            error "Expected: $expected_path"
+            error "Found:    $venv_path"
+            error "Run './mapcfg bootstrap' to recreate the virtual environment"
+        fi
+    fi
+
     # Django check
     if ./collector/manage.py check; then
         success "Django check passed"

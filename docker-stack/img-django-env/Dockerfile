@@ -23,6 +23,7 @@ COPY ./uv.lock .
 COPY ./README.md .
 
 # create a fresh virtual environment and install dependencies with uv
-RUN uv venv /opt/venv
+# Use UV_PROJECT_ENVIRONMENT to force uv to install into /opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN uv sync --frozen
