@@ -4,12 +4,9 @@ Django settings for collector project.
 import environ
 import os
 from pathlib import Path
-from .localsettings import DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, DB_SERVER
+from .localsettings import * # for platform flexibility
 
 from csp.constants import SELF, NONCE, UNSAFE_HASHES, UNSAFE_INLINE
-
-# these settings are only needed on Macs
-#from .localsettings import GDAL_LIBRARY_PATH, GEOS_LIBRARY_PATH
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
