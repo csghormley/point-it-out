@@ -752,12 +752,12 @@ wheels = [
 
 [[package]]
 name = "gdal"
-version = "3.8.4"
+version = "3.11.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "sys_platform == 'linux'",
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/21/6f/7f76d6ff3673fa18e9edd8d76679968d682f937cded93311f82fa172697f/GDAL-3.8.4.tar.gz", hash = "sha256:7c51e0ae7a7ccf43ad9e4bf435176baa9276653dfa16fd167c3632f6e7275207", size = 802459, upload-time = "2024-02-18T15:35:29.047Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3d/45/8aec2bd5493067525a73a85847aab45cfed8d58be120ffcb8b11e9672339/gdal-3.11.0.tar.gz", hash = "sha256:ac59ccfe291d3ce4f6a9a3eed17da3777bc3bae970ce27217d4fa85db98650f8", size = 877693, upload-time = "2025-05-09T16:08:01.52Z" }
 
 [[package]]
 name = "gdal"
@@ -959,7 +959,7 @@ dependencies = [
     { name = "django-leaflet" },
     { name = "djangorestframework" },
     { name = "djangorestframework-gis" },
-    { name = "gdal", version = "3.8.4", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'linux'" },
+    { name = "gdal", version = "3.11.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'linux'" },
     { name = "gdal", version = "3.11.4", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin' or sys_platform == 'win32'" },
     { name = "geoip2" },
     { name = "geos" },
@@ -996,7 +996,7 @@ requires-dist = [
     { name = "djangorestframework" },
     { name = "djangorestframework-gis", specifier = "==1.2.0" },
     { name = "gdal", marker = "sys_platform == 'darwin' or sys_platform == 'win32'", specifier = "==3.11.4" },
-    { name = "gdal", marker = "sys_platform == 'linux'", specifier = "==3.8.4" },
+    { name = "gdal", marker = "sys_platform == 'linux'", specifier = "==3.11.0" },
     { name = "geoip2" },
     { name = "geos" },
     { name = "gunicorn" },

@@ -178,9 +178,7 @@ cmd_check() {
 
 # version - Update version.txt from git
 cmd_version() {
-    info "Generating version.txt..."
-    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1 > "$WORKDIR/collector/pio/templates/pio/version.txt"
-    success "Version file updated"
+    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1
 }
 
 # build - Build Docker images
@@ -196,7 +194,10 @@ cmd_build() {
     ./collector/manage.py collectstatic --noinput
 
     # Update version
-    cmd_version
+    info "Generating version.txt..."
+    cmd_version > "$WORKDIR/collector/pio/templates/pio/version.txt"
+    success "Version file updated"
+
 
     # Build Docker images in order
     info "Building Docker images..."
