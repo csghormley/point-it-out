@@ -25,12 +25,16 @@
 .inline-group .tabular tr td.field-layer,
 .inline-group .tabular tr td.field-basemap {
     min-width: 120px;
+    max-width: 200px;
+    width: 150px;
 }
 
 .inline-group .tabular .related-widget-wrapper {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Make the select dropdown full width within its container */
