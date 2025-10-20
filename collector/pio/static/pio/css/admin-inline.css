@@ -45,16 +45,27 @@
 }
 
 /* Put the action buttons in a horizontal row below the select */
-/* Each button link has the class related-widget-wrapper-link */
-.inline-group .tabular a.related-widget-wrapper-link {
+/* Force each related-widget-wrapper-link to display inline */
+.inline-group .tabular .related-widget-wrapper .related-widget-wrapper-link,
+.inline-group .tabular td .related-widget-wrapper-link,
+.inline-group .tabular .field-layer .related-widget-wrapper-link,
+.inline-group .tabular .field-basemap .related-widget-wrapper-link {
     display: inline-block !important;
-    margin-right: 4px;
-    margin-bottom: 2px;
+    float: none !important;
+    margin-right: 4px !important;
+    margin-bottom: 2px !important;
     text-align: center;
     padding: 2px 6px;
     font-size: 11px;
     white-space: nowrap;
     vertical-align: top;
+}
+
+/* Clear any floats that might be stacking them */
+.inline-group .tabular .related-widget-wrapper::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 
 /* Give more space to the JSON config field */
@@ -74,4 +85,14 @@
 .inline-group .tabular tr td.field-config .django-json-widget textarea {
     width: 100% !important;
     box-sizing: border-box;
+}
+
+/* Nuclear option: force all links in the wrapper to be inline */
+.inline-group .tabular .related-widget-wrapper > * {
+    display: inline-block !important;
+}
+
+.inline-group .tabular .related-widget-wrapper > select {
+    display: block !important;
+    width: 100% !important;
 }
