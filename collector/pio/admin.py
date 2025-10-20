@@ -119,6 +119,7 @@ class MapLayerInline(admin.TabularInline):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
@@ -157,6 +158,7 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
@@ -174,6 +176,7 @@ class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
