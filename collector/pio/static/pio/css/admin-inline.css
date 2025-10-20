@@ -41,14 +41,17 @@
 .inline-group .tabular .related-widget-wrapper select {
     width: 100%;
     margin-bottom: 4px;
+    display: block;
 }
 
-/* Put the action buttons in a horizontal row */
+/* Put the action buttons in a horizontal row below the select */
 .inline-group .tabular .related-widget-wrapper-link {
     display: flex;
     flex-direction: row;
     gap: 4px;
     margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
 }
 
 /* Style individual action buttons */
