@@ -45,22 +45,16 @@
 }
 
 /* Put the action buttons in a horizontal row below the select */
-.inline-group .tabular .related-widget-wrapper-link {
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
-    margin-left: 0;
-    width: 100%;
-    flex-wrap: wrap;
-}
-
-/* Style individual action buttons */
-.inline-group .tabular .related-widget-wrapper-link a {
-    display: inline-block;
+/* Each button link has the class related-widget-wrapper-link */
+.inline-group .tabular a.related-widget-wrapper-link {
+    display: inline-block !important;
+    margin-right: 4px;
+    margin-bottom: 2px;
     text-align: center;
     padding: 2px 6px;
     font-size: 11px;
     white-space: nowrap;
+    vertical-align: top;
 }
 
 /* Give more space to the JSON config field */
