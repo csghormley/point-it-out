@@ -8,10 +8,10 @@
     padding-right: 8px;
 }
 
-/* Make the z_order input exactly 40px wide */
+/* Make the z_order input about 40px wide, allowing for padding */
 .inline-group .tabular tr td.field-z_order input {
-    width: 40px !important;
-    max-width: 40px;
+    width: 60px !important;
+    max-width: 60px;
     box-sizing: border-box;
 }
 
@@ -36,7 +36,6 @@
     width: 60px;
     min-width: 60px;
     padding-left: 12px;
-    vertical-align: middle;
 }
 
 /* Style the related widget wrapper to put dropdown above buttons */
