@@ -81,12 +81,8 @@ class BaseMap(models.Model):
         return self.name
 
     class Meta:
-<<<<<<< HEAD
-        verbose_name_plural = "Base Maps"
-=======
         verbose_name = "Basemap"
         verbose_name_plural = "Basemaps"
->>>>>>> a0d85bd (Specify model verbose names for more consistent admin display)
 
 # links a BaseMap to a MapConfig with zoom levels and styling
 class MapBasemap(models.Model):
@@ -199,15 +195,11 @@ class MapConfig(models.Model):
     def __str__(self):
         return self.name
 
-<<<<<<< HEAD
-=======
     class Meta:
         ordering = ['slug']
         verbose_name = "Map setup"
         verbose_name_plural = "Map setups"
 
-
->>>>>>> a0d85bd (Specify model verbose names for more consistent admin display)
 # log data from web-user-behaviour, when enabled
 class VisitorBehavior(models.Model):
     responseid = models.CharField(max_length=20)

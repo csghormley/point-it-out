@@ -21,13 +21,8 @@ COPY ./$PROJECT/ .
 # TODO: eliminate this dependency with environment file, since we're already passing secrets that way
 RUN ln -sf site-config/localsettings.py $PROJECT/localsettings.py
 
-#COPY $STATICFILES_SRC ./app_staticfiles
-
 # chown all the files to the app user
 RUN chown -R app:app $APP_HOME
 
 # change to the app user
 USER app
-
-# DON'T run entrypoint.sh living in ./app folder (see docker-compose.yml for initial command)
-##ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

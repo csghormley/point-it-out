@@ -74,7 +74,7 @@ services:
     # use host nginx to proxy to ssl (host:guest)
       - 8000:8000
     volumes:
-      - ../collector/app_staticfiles:/home/app/web/staticfiles
+    #  - ../collector/app_staticfiles:/home/app/web/staticfiles
       - /opt/mapsurvey:/opt/mapsurvey
     secrets:
       - app_db_password
