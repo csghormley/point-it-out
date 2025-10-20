@@ -3,22 +3,40 @@
 /* Reduce z_order field width */
 .inline-group .tabular tr td.field-z_order,
 .inline-group .tabular tr th.column-z_order {
-    width: 40px;
+    width: 50px;
+    max-width: 50px;
+    padding-right: 8px;
+}
+
+/* Make the z_order input exactly 40px wide */
+.inline-group .tabular tr td.field-z_order input {
+    width: 40px !important;
     max-width: 40px;
+    box-sizing: border-box;
 }
 
 /* Reduce z_index field width for MapBasemap inline */
 .inline-group .tabular tr td.field-z_index,
 .inline-group .tabular tr th.column-z_index {
-    width: 40px;
+    width: 50px;
+    max-width: 50px;
+    padding-right: 8px;
+}
+
+/* Make the z_index input exactly 40px wide */
+.inline-group .tabular tr td.field-z_index input {
+    width: 40px !important;
     max-width: 40px;
+    box-sizing: border-box;
 }
 
 /* Give the delete checkbox column more space to prevent crowding */
 .inline-group .tabular tr td.delete,
 .inline-group .tabular tr th.delete {
-    width: 50px;
-    padding-left: 10px;
+    width: 60px;
+    min-width: 60px;
+    padding-left: 12px;
+    vertical-align: middle;
 }
 
 /* Style the related widget wrapper to put dropdown above buttons */
