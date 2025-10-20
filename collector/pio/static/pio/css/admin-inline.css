@@ -30,14 +30,12 @@
 }
 
 .inline-group .tabular .related-widget-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: block;
     width: 100%;
     max-width: 100%;
 }
 
-/* Make the select dropdown full width within its container */
+/* Make the select dropdown full width and on its own line */
 .inline-group .tabular .related-widget-wrapper select {
     width: 100%;
     margin-bottom: 4px;
@@ -45,27 +43,16 @@
 }
 
 /* Put the action buttons in a horizontal row below the select */
-/* Force each related-widget-wrapper-link to display inline */
-.inline-group .tabular .related-widget-wrapper .related-widget-wrapper-link,
-.inline-group .tabular td .related-widget-wrapper-link,
-.inline-group .tabular .field-layer .related-widget-wrapper-link,
-.inline-group .tabular .field-basemap .related-widget-wrapper-link {
+/* Each <a> with class related-widget-wrapper-link should be inline */
+.inline-group .tabular .related-widget-wrapper a.related-widget-wrapper-link {
     display: inline-block !important;
-    float: none !important;
-    margin-right: 4px !important;
-    margin-bottom: 2px !important;
+    margin-right: 4px;
+    margin-bottom: 2px;
     text-align: center;
     padding: 2px 6px;
     font-size: 11px;
     white-space: nowrap;
-    vertical-align: top;
-}
-
-/* Clear any floats that might be stacking them */
-.inline-group .tabular .related-widget-wrapper::after {
-    content: "";
-    display: table;
-    clear: both;
+    vertical-align: middle;
 }
 
 /* Give more space to the JSON config field */
