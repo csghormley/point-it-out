@@ -23,7 +23,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 env = environ.FileAwareEnv(
     # set casting, default value
     DEBUG=(bool, False),
-    APP_DB_PASSWORD=(str, 'secret'),
+    DB_SERVER=(str, 'localhost'),
+    DB_PORT=(int, 5432),
+    DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),
     EMAIL_HOST_PASSWORD=(str, 'none'), # use this as a sentinel to trigger lookup in localsettings
     SECRET_KEY=(str, 'secret'),

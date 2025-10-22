@@ -1,0 +1,284 @@
+"""
+Core segmentation logic for survey points
+"""
+
+from datetime import timedelta
+from typing import List, Dict, Any
+import logging
+
+import numpy as np
+from sklearn.cluster import DBSCAN
+from shapely.geometry import Point, LineString, Polygon, MultiPoint
+
+from .data import SurveyPointData
+
+logger = logging.getLogger(__name__)
+
+
+class GeometrySegmenter:
+    """Segments survey points into meaningful geometric features"""
+
+    def __init__(
+        self,
+        max_time_gap: float = 180.0,  # seconds
+        max_distance: float = 50.0,    # meters (approximate for EPSG:4326)
+        min_cluster_points: int = 3,
+        polygon_closure_threshold: float = 20.0,  # meters
+        min_polygon_points: int = 4,
+        min_linestring_points: int = 2
+    ):
+        """
+        Initialize the segmenter with configuration parameters.
+
+        Args:
+            max_time_gap: Maximum time gap (seconds) to split temporal segments
+            max_distance: Maximum distance for DBSCAN clustering (approx meters)
+            min_cluster_points: Minimum points to form a cluster
+            polygon_closure_threshold: Max distance between first/last point for polygon
+            min_polygon_points: Minimum points required for polygon
+            min_linestring_points: Minimum points required for linestring
+        """
+        self.max_time_gap = timedelta(seconds=max_time_gap)
+        # Convert meters to degrees (rough approximation at mid-latitudes)
+        # 1 degree ≈ 111,000 meters
+        self.max_distance_deg = max_distance / 111000.0
+        self.min_cluster_points = min_cluster_points
+        self.polygon_closure_threshold_deg = polygon_closure_threshold / 111000.0
+        self.min_polygon_points = min_polygon_points
+        self.min_linestring_points = min_linestring_points
+
+    def segment_session(
+        self,
+        points: List[SurveyPointData]
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Segment a session's points into polygons, linestrings, and individual points.
+
+        Returns:
+            Dictionary with keys 'polygons', 'linestrings', 'points'
+        """
+        if not points:
+            return {'polygons': [], 'linestrings': [], 'points': []}
+
+        # Step 1: Sort by timestamp
+        sorted_points = sorted(points, key=lambda p: p.datetime)
+
+        # Step 2: Temporal segmentation
+        temporal_segments = self._temporal_segmentation(sorted_points)
+        logger.info(f"Created {len(temporal_segments)} temporal segments")
+
+        # Step 3: Process each segment
+        polygons = []
+        linestrings = []
+        individual_points = []
+
+        for segment_idx, segment in enumerate(temporal_segments):
+            logger.debug(f"Processing segment {segment_idx + 1} with {len(segment)} points")
+
+            if len(segment) < self.min_cluster_points:
+                # Too few points - treat as individual points
+                individual_points.extend(self._points_to_features(segment))
+                continue
+
+            # Step 4: Spatial clustering within segment
+            clusters = self._spatial_clustering(segment)
+
+            # Step 5: Classify each cluster
+            for cluster_id, cluster_points in clusters.items():
+                if cluster_id == -1:  # DBSCAN noise points
+                    individual_points.extend(self._points_to_features(cluster_points))
+                    continue
+
+                geometry = self._classify_and_create_geometry(cluster_points)
+
+                if geometry['type'] == 'Polygon':
+                    polygons.append(geometry)
+                elif geometry['type'] == 'LineString':
+                    linestrings.append(geometry)
+                elif geometry['type'] == 'Point':
+                    individual_points.append(geometry)
+
+        return {
+            'polygons': polygons,
+            'linestrings': linestrings,
+            'points': individual_points
+        }
+
+    def _temporal_segmentation(
+        self,
+        points: List[SurveyPointData]
+    ) -> List[List[SurveyPointData]]:
+        """Split points into temporal segments based on time gaps"""
+        if not points:
+            return []
+
+        segments = []
+        current_segment = [points[0]]
+
+        for i in range(1, len(points)):
+            time_gap = points[i].datetime - points[i-1].datetime
+
+            if time_gap > self.max_time_gap:
+                segments.append(current_segment)
+                current_segment = [points[i]]
+            else:
+                current_segment.append(points[i])
+
+        segments.append(current_segment)
+        return segments
+
+    def _spatial_clustering(
+        self,
+        points: List[SurveyPointData]
+    ) -> Dict[int, List[SurveyPointData]]:
+        """Perform DBSCAN spatial clustering on a segment"""
+        coords = np.array([p.coords for p in points])
+
+        clustering = DBSCAN(
+            eps=self.max_distance_deg,
+            min_samples=2,
+            metric='euclidean'
+        ).fit(coords)
+
+        # Group points by cluster label
+        clusters = {}
+        for idx, label in enumerate(clustering.labels_):
+            if label not in clusters:
+                clusters[label] = []
+            clusters[label].append(points[idx])
+
+        return clusters
+
+    def _classify_and_create_geometry(
+        self,
+        points: List[SurveyPointData]
+    ) -> Dict[str, Any]:
+        """
+        Classify a cluster of points as polygon, linestring, or point.
+
+        Classification logic:
+        1. If points form a closed loop (first ≈ last) and >= min_polygon_points → Polygon
+        2. If points follow a linear pattern → LineString
+        3. Otherwise → Individual points or MultiPoint
+        """
+        n_points = len(points)
+
+        # Not enough points for complex geometry
+        if n_points < self.min_linestring_points:
+            return self._points_to_features(points)[0]
+
+        coords = [p.coords for p in points]
+        shapely_points = [Point(c) for c in coords]
+
+        # Check for polygon (closed loop)
+        if n_points >= self.min_polygon_points:
+            first_point = Point(coords[0])
+            last_point = Point(coords[-1])
+            closure_distance = first_point.distance(last_point)
+
+            if closure_distance < self.polygon_closure_threshold_deg:
+                # Create polygon
+                try:
+                    # Ensure closure
+                    if coords[0] != coords[-1]:
+                        coords.append(coords[0])
+
+                    poly = Polygon(coords)
+
+                    # Validate polygon
+                    if poly.is_valid and poly.area > 0:
+                        return {
+                            'type': 'Polygon',
+                            'geometry': poly,
+                            'coordinates': list(poly.exterior.coords),
+                            'point_count': n_points,
+                            'point_ids': [p.id for p in points],
+                            'area': poly.area,
+                            'timestamp_range': (
+                                points[0].datetime.isoformat(),
+                                points[-1].datetime.isoformat()
+                            )
+                        }
+                except Exception as e:
+                    logger.warning(f"Failed to create polygon: {e}")
+
+        # Check for linestring
+        if n_points >= self.min_linestring_points:
+            try:
+                line = LineString(coords)
+
+                if line.is_valid and line.length > 0:
+                    # Calculate linearity (how straight the line is)
+                    linearity = self._calculate_linearity(shapely_points)
+
+                    return {
+                        'type': 'LineString',
+                        'geometry': line,
+                        'coordinates': list(line.coords),
+                        'point_count': n_points,
+                        'point_ids': [p.id for p in points],
+                        'length': line.length,
+                        'linearity': linearity,
+                        'timestamp_range': (
+                            points[0].datetime.isoformat(),
+                            points[-1].datetime.isoformat()
+                        )
+                    }
+            except Exception as e:
+                logger.warning(f"Failed to create linestring: {e}")
+
+        # Fallback to individual points
+        if n_points == 1:
+            return self._points_to_features(points)[0]
+        else:
+            # Create MultiPoint
+            multi_point = MultiPoint(shapely_points)
+            return {
+                'type': 'MultiPoint',
+                'geometry': multi_point,
+                'coordinates': coords,
+                'point_count': n_points,
+                'point_ids': [p.id for p in points]
+            }
+
+    def _calculate_linearity(self, points: List[Point]) -> float:
+        """
+        Calculate how linear a set of points is (0-1, where 1 is perfectly linear).
+
+        Uses the ratio of actual path length to straight-line distance.
+        """
+        if len(points) < 2:
+            return 1.0
+
+        # Total path length
+        path_length = sum(
+            points[i].distance(points[i+1])
+            for i in range(len(points) - 1)
+        )
+
+        # Straight-line distance from first to last
+        straight_distance = points[0].distance(points[-1])
+
+        if path_length == 0:
+            return 0.0
+
+        # Linearity: closer to 1 means more linear
+        linearity = straight_distance / path_length
+        return linearity
+
+    def _points_to_features(
+        self,
+        points: List[SurveyPointData]
+    ) -> List[Dict[str, Any]]:
+        """Convert individual points to feature dictionaries"""
+        features = []
+        for p in points:
+            features.append({
+                'type': 'Point',
+                'geometry': Point(p.coords),
+                'coordinates': p.coords,
+                'point_count': 1,
+                'point_ids': [p.id],
+                'timestamp': p.datetime.isoformat()
+            })
+        return features
