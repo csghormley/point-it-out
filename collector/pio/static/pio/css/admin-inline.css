@@ -84,11 +84,12 @@
     max-width: 100%;
 }
 
-/* Also ensure the textarea inside uses full width */
+/* Also ensure the textarea inside uses full width and full height */
 .inline-group .tabular tr td.field-config .jsoneditor textarea,
 .inline-group .tabular tr td.field-config .django-json-widget textarea {
     width: 100% !important;
     box-sizing: border-box;
+    height: 100% !important;
 }
 
 /* Nuclear option: force all links in the wrapper to be inline */
