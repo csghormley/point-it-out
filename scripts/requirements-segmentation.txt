@@ -1,0 +1,7 @@
+# Requirements for the survey point segmentation tool
+# Install with: pip install -r requirements-segmentation.txt
+
+numpy>=1.21.0
+scikit-learn>=1.0.0
+shapely>=2.0.0
+requests>=2.25.0
