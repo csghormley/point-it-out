@@ -153,8 +153,6 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f"✓ Exported to {options['output']}")
                 )
 
-<<<<<<< HEAD
-=======
             # Save to FeatureLayers if requested
             if options['save_layers']:
                 param_hash = self._generate_params_hash(options)
@@ -200,7 +198,6 @@ class Command(BaseCommand):
 
         self.stdout.write("\n" + "="*70 + "\n")
 
->>>>>>> cc398b0 (Enable saving polygons and linestrings as FeatureLayers)
     def _fetch_points(self, responseid, projectid=None):
         """Fetch points from database and convert to SurveyPointData objects"""
         queryset = SurveyPoint.objects.filter(
