@@ -33,7 +33,6 @@ try:
     import numpy as np
     from sklearn.cluster import DBSCAN
     from shapely.geometry import Point, LineString, Polygon, MultiPoint
-    from shapely.ops import nearest_points
 except ImportError as e:
     print(f"Error: Required package not found: {e}")
     print("\nInstall required packages:")

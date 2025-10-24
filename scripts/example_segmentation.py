@@ -3,7 +3,6 @@
 Example usage of the segmentation tool programmatically
 """
 
-import sys
 from segment_points import (
     GeometrySegmenter,
     SurveyPointData,
