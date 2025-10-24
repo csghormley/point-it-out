@@ -153,7 +153,7 @@ Docker Configuration
 ~~~~~~~~~~~~~~~~~~~~
 
 - **Compose file**: ``docker-stack/docker-compose.yml``
-- **Secrets directory**: ``docker-stack/secrets/``
+- **Secrets directory**: ``docker-stack/secrets/`` (see `Environment Variables (via Docker Secrets)`_ for details)
 
 Map Configuration
 ~~~~~~~~~~~~~~~~~
@@ -231,6 +231,10 @@ Database Security
 
 Environment Variables (via Docker Secrets)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The application uses `docker-environ <https://django-environ.readthedocs.io/>`_ with ``FileAwareEnv`` to automatically read `Docker secrets <https://docs.docker.com/compose/use-secrets/>`_ from files. Environment variables with a ``_FILE`` suffix (e.g., ``SECRET_KEY_FILE``) are automatically resolved by reading the file at the specified path.
+
+Available secret files:
 
 - ``SECRET_KEY_FILE``: Django secret key
 - ``APP_DB_PASSWORD_FILE``: Application database password
