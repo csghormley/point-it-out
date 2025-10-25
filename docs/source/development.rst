@@ -61,11 +61,38 @@ Docker Operations
 Environment Setup
 ~~~~~~~~~~~~~~~~~
 
+Python Virtual Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 ::
 
     python -m venv env
     source env/bin/activate  # or `. env/bin/activate`
     pip install -r requirements.txt
+
+Git Hooks
+^^^^^^^^^
+
+The repository includes a pre-commit hook that runs ``./mapcfg check`` before allowing commits.
+
+Install the hooks (one-time setup)::
+
+    ./.githooks/install-hooks.sh
+
+This creates symlinks from ``.git/hooks/`` to ``.githooks/`` so the versioned hooks are used automatically.
+
+The pre-commit hook ensures:
+
+- Django system checks pass
+- Templates are valid
+- Ruff linting passes
+- Docker Compose configuration is valid
+
+To bypass the hook temporarily (not recommended)::
+
+    git commit --no-verify -m "message"
+
+See ``.githooks/README.md`` for more information about managing git hooks.
 
 Architecture Overview
 ---------------------

@@ -40,6 +40,19 @@ source env/bin/activate  # or `. env/bin/activate`
 pip install -r requirements.txt
 ```
 
+### Git Hooks
+The repository includes a pre-commit hook that runs `./mapcfg check` before allowing commits.
+
+**Install hooks** (one-time setup):
+```bash
+./.githooks/install-hooks.sh
+```
+
+This ensures all code quality checks pass before committing. To bypass (not recommended):
+```bash
+git commit --no-verify -m "message"
+```
+
 ## Architecture Overview
 
 ### Core Application Structure
