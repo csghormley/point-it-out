@@ -39,3 +39,8 @@ tzdata
 geoip2
 
 django-json-widget
+
+# Segmentation dependencies
+numpy>=1.21.0
+scikit-learn>=1.0.0
+shapely>=2.0.0

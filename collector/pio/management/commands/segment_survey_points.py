@@ -9,23 +9,7 @@ Usage:
 
 from django.core.management.base import BaseCommand, CommandError
 from pio.models import SurveyPoint
-import sys
-import os
-
-# Add scripts directory to path
-SCRIPTS_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))),
-    'scripts'
-)
-sys.path.insert(0, SCRIPTS_DIR)
-
-try:
-    from segment_points import GeometrySegmenter, SurveyPointData, format_results, export_geojson
-except ImportError as e:
-    print(f"Error: Cannot import segmentation tools: {e}")
-    print("Make sure the required packages are installed:")
-    print("  pip install numpy scikit-learn shapely")
-    sys.exit(1)
+from pio.segmentation import GeometrySegmenter, SurveyPointData, format_results, export_geojson
 
 
 class Command(BaseCommand):
