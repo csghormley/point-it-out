@@ -185,6 +185,17 @@ cmd_check() {
         success "Ruff check passed"
     fi
 
+    # Docker Compose configuration validation
+    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+        if docker compose -f docker-stack/docker-compose.yml config > /dev/null 2>&1; then
+            success "Docker Compose config validation passed"
+        else
+            error "Docker Compose config validation failed"
+        fi
+    else
+        info "Docker Compose not available, skipping config validation"
+    fi
+
     success "All checks passed!"
 }
 
@@ -555,9 +566,10 @@ EOF
             cat <<EOF
 check - Run validation checks
 
-  Runs Django system checks, template validation, and Ruff linting to verify
-  code quality and configuration. All checks must pass before building.
-  Useful to run before commits to catch issues early.
+  Runs Django system checks, template validation, Ruff linting, and Docker
+  Compose configuration validation to verify code quality and configuration.
+  All checks must pass before building. Useful to run before commits to
+  catch issues early.
 EOF
             ;;
         build)
