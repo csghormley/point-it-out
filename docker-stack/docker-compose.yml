@@ -1,12 +1,10 @@
-# https://docs.docker.com/compose/compose-file/compose-file-v3/
-#version: '3.8'
-
 services:
 
   # notes on environment variables:
   # https://hub.docker.com/_/postgres
   # changing the variables only affects an empty data directory!
   # pass an explicit UID and GID from systemd to allow non-root access for pg_hba.conf in git
+  # example: UID_GID=1000:1000 docker compose up
 
   postgis17:
     image: postgis/postgis:17-3.5
