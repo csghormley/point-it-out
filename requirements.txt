@@ -13,7 +13,7 @@ psycopg[binary]>=3.0 ; sys_platform == 'darwin' or sys_platform == 'win32'
 psycopg>=3.0 ; sys_platform == 'linux'
 
 GDAL==3.11.4 ; sys_platform == 'darwin' or sys_platform == 'win32'
-GDAL==3.8.4 ; sys_platform == 'linux'
+GDAL==3.11.0 ; sys_platform == 'linux'
 
 # required for 2FA
 phonenumbers
