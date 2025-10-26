@@ -8,7 +8,7 @@ DB_NAME="mapbe"                                # Database name
 # Backup configuration
 SSH_SERVER=""                                  # Remote backup server (user@hostname format, e.g., backups@server.com)
 SSH_PORT="22"                                  # SSH port for remote backups
-SSH_KEY_PATH="~/.ssh/id_rsa_backup"            # Path to SSH private key for backups
+SSH_KEY_PATH="$HOME/.ssh/id_rsa_backup"        # Path to SSH private key for backups (use $HOME, not ~)
 BACKUP_DIR="postgis_data/pgdata"               # Local directory for database backups
 
 # Systemd service name
