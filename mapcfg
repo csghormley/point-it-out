@@ -239,6 +239,43 @@ cmd_maintenance() {
     success "Maintenance complete"
 }
 
+# check_services_running - Silent check if all required services are running
+check_services_running() {
+    # Returns 0 if all services running, 1 if any missing
+    docker ps | grep -q "nginx" && \
+    docker ps | grep -q "postgis" && \
+    docker ps | grep -q "mapsurvey-app"
+}
+
+# wait_for_services - Wait for all services to be running
+wait_for_services() {
+    local timeout=5
+    local count=0
+
+    while [ $count -lt $timeout ]; do
+        if check_services_running; then
+            return 0
+        fi
+        sleep 1
+        count=$((count + 1))
+    done
+
+    # Timeout - show which services are missing
+    error "Services failed to start within ${timeout} seconds:"
+    echo ""
+    if ! docker ps | grep -q "nginx"; then
+        echo -e "${RED}  ✗ nginx is not running${NC}"
+    fi
+    if ! docker ps | grep -q "postgis"; then
+        echo -e "${RED}  ✗ postgis is not running${NC}"
+    fi
+    if ! docker ps | grep -q "mapsurvey-app"; then
+        echo -e "${RED}  ✗ mapsurvey-app is not running${NC}"
+    fi
+    echo ""
+    return 1
+}
+
 # status - Check system status
 cmd_status() {
     info "Checking system status..."
@@ -486,8 +523,10 @@ cmd_run() {
     info "Restarting Docker service..."
     maybe_sudo systemctl restart "$SYSTEMD_SERVICE"
 
-    # Wait for services
-    sleep 1
+    # Wait for all services to be running
+    if ! wait_for_services; then
+        exit 1
+    fi
 
     # Backup if requested
     if [ "$do_backup" = true ]; then
