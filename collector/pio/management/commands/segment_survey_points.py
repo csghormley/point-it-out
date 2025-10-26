@@ -97,6 +97,9 @@ class Command(BaseCommand):
                     self.stdout.write(f"\nResponse ID: {responseid}")
                     self.stdout.write(format_results(results))
 
+            # Display summary statistics
+            self._display_summary(all_results)
+
             # Export combined results if requested
             if options['output']:
                 combined = {
@@ -135,6 +138,46 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.SUCCESS(f"✓ Exported to {options['output']}")
                 )
+
+    def _display_summary(self, all_results):
+        """Display summary statistics across all response IDs"""
+        import numpy as np
+
+        total_polygons = 0
+        total_linestrings = 0
+        total_points = 0
+        all_min_distances = []
+        all_median_distances = []
+        all_max_distances = []
+
+        for _, results in all_results:
+            total_polygons += len(results['polygons'])
+            total_linestrings += len(results['linestrings'])
+            total_points += len(results['points'])
+
+            # Collect distance statistics from temporal segments
+            for seg in results.get('temporal_segments', []):
+                if seg['point_count'] >= 2:
+                    all_min_distances.append(seg['min_distance'])
+                    all_median_distances.append(seg['median_distance'])
+                    all_max_distances.append(seg['max_distance'])
+
+        # Display summary
+        self.stdout.write("\n" + "="*70)
+        self.stdout.write("SUMMARY ACROSS ALL RESPONSE IDs")
+        self.stdout.write("="*70)
+        self.stdout.write(f"\nTotal Response IDs processed: {len(all_results)}")
+        self.stdout.write(f"Total Polygons found: {total_polygons}")
+        self.stdout.write(f"Total LineStrings found: {total_linestrings}")
+        self.stdout.write(f"Total Individual Points: {total_points}")
+
+        if all_median_distances:
+            self.stdout.write("\nSpatial Distance Statistics (across all temporal clusters):")
+            self.stdout.write(f"  Min distance (smallest):     {min(all_min_distances):7.1f} m")
+            self.stdout.write(f"  Median distance (overall):   {np.median(all_median_distances):7.1f} m")
+            self.stdout.write(f"  Max distance (largest):      {max(all_max_distances):7.1f} m")
+
+        self.stdout.write("\n" + "="*70 + "\n")
 
     def _fetch_points(self, responseid, projectid=None):
         """Fetch points from database and convert to SurveyPointData objects"""
