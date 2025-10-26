@@ -55,10 +55,15 @@ class GeometrySegmenter:
         Segment a session's points into polygons, linestrings, and individual points.
 
         Returns:
-            Dictionary with keys 'polygons', 'linestrings', 'points'
+            Dictionary with keys 'polygons', 'linestrings', 'points', 'temporal_segments'
         """
         if not points:
-            return {'polygons': [], 'linestrings': [], 'points': []}
+            return {
+                'polygons': [],
+                'linestrings': [],
+                'points': [],
+                'temporal_segments': []
+            }
 
         # Step 1: Sort by timestamp
         sorted_points = sorted(points, key=lambda p: p.datetime)
@@ -66,6 +71,12 @@ class GeometrySegmenter:
         # Step 2: Temporal segmentation
         temporal_segments = self._temporal_segmentation(sorted_points)
         logger.info(f"Created {len(temporal_segments)} temporal segments")
+
+        # Calculate statistics for temporal segments
+        temporal_segment_stats = []
+        for segment_idx, segment in enumerate(temporal_segments):
+            stats = self._calculate_segment_statistics(segment, segment_idx)
+            temporal_segment_stats.append(stats)
 
         # Step 3: Process each segment
         polygons = []
@@ -101,7 +112,8 @@ class GeometrySegmenter:
         return {
             'polygons': polygons,
             'linestrings': linestrings,
-            'points': individual_points
+            'points': individual_points,
+            'temporal_segments': temporal_segment_stats
         }
 
     def _temporal_segmentation(
@@ -265,6 +277,59 @@ class GeometrySegmenter:
         # Linearity: closer to 1 means more linear
         linearity = straight_distance / path_length
         return linearity
+
+    def _calculate_segment_statistics(
+        self,
+        segment: List[SurveyPointData],
+        segment_idx: int
+    ) -> Dict[str, Any]:
+        """
+        Calculate spatial statistics for a temporal segment.
+
+        Returns statistics including min/max/median distance between consecutive points.
+        """
+        if len(segment) < 2:
+            return {
+                'segment_id': segment_idx + 1,
+                'point_count': len(segment),
+                'min_distance': 0.0,
+                'max_distance': 0.0,
+                'median_distance': 0.0,
+                'mean_distance': 0.0,
+                'total_distance': 0.0,
+                'duration_seconds': 0.0,
+                'timestamp_start': segment[0].datetime.isoformat() if segment else None,
+                'timestamp_end': segment[0].datetime.isoformat() if segment else None,
+            }
+
+        # Calculate distances between consecutive points
+        distances = []
+        shapely_points = [Point(p.coords) for p in segment]
+
+        for i in range(len(shapely_points) - 1):
+            # Distance in degrees, convert to approximate meters
+            dist_deg = shapely_points[i].distance(shapely_points[i+1])
+            dist_meters = dist_deg * 111000.0  # Approximate conversion
+            distances.append(dist_meters)
+
+        # Calculate statistics
+        distances_array = np.array(distances)
+
+        # Calculate duration
+        duration = (segment[-1].datetime - segment[0].datetime).total_seconds()
+
+        return {
+            'segment_id': segment_idx + 1,
+            'point_count': len(segment),
+            'min_distance': float(np.min(distances_array)),
+            'max_distance': float(np.max(distances_array)),
+            'median_distance': float(np.median(distances_array)),
+            'mean_distance': float(np.mean(distances_array)),
+            'total_distance': float(np.sum(distances_array)),
+            'duration_seconds': duration,
+            'timestamp_start': segment[0].datetime.isoformat(),
+            'timestamp_end': segment[-1].datetime.isoformat(),
+        }
 
     def _points_to_features(
         self,
