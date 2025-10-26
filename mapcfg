@@ -60,7 +60,7 @@ fi
 : "${DB_NAME:=mapbe}"
 : "${SSH_SERVER:=}"
 : "${SSH_PORT:=22}"
-: "${SSH_KEY_PATH:=~/.ssh/id_rsa_backup}"
+: "${SSH_KEY_PATH:=$HOME/.ssh/id_rsa_backup}"
 : "${BACKUP_DIR:=postgis_data/pgdata}"
 : "${SYSTEMD_SERVICE:=docker.mapsurvey.service}"
 
@@ -440,14 +440,17 @@ EOF
         local FULL_BACKUP_PATH="$(cd "$(dirname "$BACKUP_DIR")" && pwd)/$(basename "$BACKUP_DIR")"
         local HOSTNAME=$(hostname)
 
+        # Expand tilde in SSH_KEY_PATH
+        local SSH_KEY_PATH_EXPANDED="${SSH_KEY_PATH/#\~/$HOME}"
+
         # Build rsync command with SSH options
         local RSYNC_CMD="rsync -avz"
 
-        if [ -f "$SSH_KEY_PATH" ]; then
-            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port -i $SSH_KEY_PATH\""
+        if [ -f "$SSH_KEY_PATH_EXPANDED" ]; then
+            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port -i $SSH_KEY_PATH_EXPANDED\""
         else
             RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port\""
-            echo -e "${YELLOW}WARNING: SSH key not found at $SSH_KEY_PATH, attempting passwordless SSH${NC}" >&2
+            echo -e "${YELLOW}WARNING: SSH key not found at $SSH_KEY_PATH_EXPANDED, attempting passwordless SSH${NC}" >&2
         fi
 
         # Use eval to properly handle the quoted ssh command
