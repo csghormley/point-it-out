@@ -147,6 +147,7 @@ class MapBasemapInline(admin.TabularInline):
 
 @admin.register(MapConfig)
 class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'config',]
     list_display = ('name', 'map_link',)
     prepopulated_fields = {"slug": ("name",)}
@@ -168,6 +169,7 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(FeatureLayer)
 class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'geojson',]
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['id',]
@@ -192,6 +194,7 @@ class VisitorBehaviorAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(ResponseSummary)
 class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['surveyid', 'responseid', 'ts_start', 'ts_end', 'duration', 'ipaddr', 'recordct',]
     list_display = fields
     readonly_fields = fields # this is a view - read only
@@ -202,6 +205,7 @@ class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(BaseMap)
 class BaseMapAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'tile_url', 'attribution']
     list_display = ('name', 'slug', 'tile_url')
     prepopulated_fields = {"slug": ("name",)}
