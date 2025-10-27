@@ -299,14 +299,16 @@ export class MapManager {
             source: this.points_source,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
-            style: this.mapMarkerStyleFunction.bind(this)
+            style: this.mapMarkerStyleFunction.bind(this),
+            zIndex: 1000  // Survey points render on top of feature layers
         });
 
         this.stored_vector_layer = new VectorLayer({
             source: this.stored_vector_source,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
-            style: new Style({})
+            style: new Style({}),
+            zIndex: 900  // Stored points render below active survey points
         });
 
         // Add configured GeoJSON layers if specified
@@ -741,7 +743,8 @@ export class MapManager {
                     color: '#EF535099',
                     width: 4
                 })
-            })
+            }),
+            zIndex: 1100  // Study area boundary renders on top of everything
         });
     }
 

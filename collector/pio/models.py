@@ -94,8 +94,8 @@ class MapBasemap(models.Model):
         help_text="Maximum zoom level (0-23)")
     opacity = models.FloatField(default=1.0,
         help_text="Opacity 0.0-1.0")
-    z_index = models.IntegerField(default=0,
-        help_text="Rendering order (lower values render first/bottom)")
+    z_index = models.IntegerField(default=-10,
+        help_text="Rendering order for basemaps (must be ≤ 0, lower values render first/bottom). Leave gaps between values (e.g., -10, -20, -30) for easier reordering.")
 
     class Meta:
         ordering = ['z_index']
@@ -113,6 +113,10 @@ class MapBasemap(models.Model):
         # Validate opacity
         if self.opacity < 0.0 or self.opacity > 1.0:
             raise ValidationError("opacity must be between 0.0 and 1.0")
+
+        # Validate z_index (basemaps must be at or below 0)
+        if self.z_index > 0:
+            raise ValidationError("z_index for basemaps must be ≤ 0 (basemaps render below feature layers)")
 
         # Ensure z_index is unique within the map
         if self.mapconfig_id:
@@ -133,8 +137,8 @@ class MapLayer(models.Model):
     mapconfig = models.ForeignKey("MapConfig", on_delete=models.CASCADE)
     layer = models.ForeignKey("FeatureLayer", on_delete=models.CASCADE)
     config = models.JSONField(default=maplayer_default)
-    z_order = models.IntegerField(default=1,
-                                  help_text="Lower values render first (bottom)")
+    z_order = models.IntegerField(default=10,
+                                  help_text="Rendering order for feature layers (positive values, higher renders on top). Leave gaps between values (e.g., 10, 20, 30) for easier reordering. Survey points render at z=1000.")
 
     class Meta:
         unique_together = [('mapconfig', 'layer'), ('mapconfig', 'z_order')]
