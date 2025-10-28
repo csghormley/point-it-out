@@ -19,7 +19,7 @@ WORKDIR $APP_HOME
 COPY ./$PROJECT/ .
 
 # TODO: eliminate this dependency with environment file, since we're already passing secrets that way
-RUN ln -sf site-config/localsettings.py $PROJECT/localsettings.py
+RUN ln -sf site-config/localsettings-docker.py $PROJECT/localsettings.py
 
 # chown all the files to the app user
 RUN chown -R app:app $APP_HOME
