@@ -43,8 +43,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--max-distance',
             type=float,
-            default=50.0,
-            help='Maximum distance in meters (default: 50)'
+            default=150.0,
+            help='Maximum distance in meters (default: 150)'
         )
         parser.add_argument(
             '--min-cluster-points',
@@ -55,8 +55,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--polygon-threshold',
             type=float,
-            default=20.0,
-            help='Polygon closure threshold in meters (default: 20)'
+            default=100.0,
+            help='Polygon closure threshold in meters (default: 100)'
         )
 
         # Output options
