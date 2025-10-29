@@ -80,7 +80,6 @@ export class MapManager {
             // Colorbrewer 8-class qualitative scheme
             point_colormap: ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf'],
             edit_worktype: false,
-            max_res: 800,
             initial_zoom: 4,
             min_zoom: 4,
             max_zoom: 16,
@@ -95,8 +94,7 @@ export class MapManager {
             max_diameter: 16093.4, // meters; 10mi
             min_diameter: 804.67, // meters; 0.5mi
             site_description: "region near the map center",
-            site_purpose: "wildfire resilience and vulnerability",
-            layers: []
+            site_purpose: "wildfire resilience and vulnerability"
         };
 
         // Parse user configuration
