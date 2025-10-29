@@ -228,14 +228,12 @@ DATABASES = {
         'NAME': 'mapbe',
         'USER': 'geodjango',
         'OPTIONS': {
-            'options': '-c search_path=geodjango,public'
+            'options': '-c search_path=geodjango,public',
+            'sslmode': 'require',
         },
 
         'HOST': DB_SERVER,
         'PORT': DB_PORT,
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
 
         # trim the \n from the end of password, if present
         'PASSWORD': env("DB_PASSWORD").replace('\n', ''),
