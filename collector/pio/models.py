@@ -12,13 +12,15 @@ def mapconfig_default():
         boundary = [-123, 41.9, -119.385, 46.324],
         src_proj = 'EPSG:4326', # wgs84
         dest_proj = 'EPSG:3857', # web mercator
+        display_units = 'ft',
         api_url = '/api/surveypoints/',
         zoom = 4,
         max_zoom = 16,
         min_zoom = 4,
-        max_res = 170,
+        max_diameter = 16093.4, # meters; 10mi
+        min_diameter = 804.67,  # meters; 0.5mi
         edit_worktype = True,
-        verbose = False
+        verbose = False,
     )
 
 # supply a default configuration dict for MapLayer.config
