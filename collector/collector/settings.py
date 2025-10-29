@@ -16,18 +16,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # https://django-environ.readthedocs.io/en/latest/tips.html
 # (using Docker secrets with _FILE appended to the variable name
 
-# Take environment variables from .env file (use this as backup in case we're not running in docker compose/stack)
-# Normally, the primary source should be variables fed in through the compose.yml file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
 env = environ.FileAwareEnv(
     # set casting, default value
     DEBUG=(bool, False),
-    APP_DB_PASSWORD=(str, 'secret'),
+    DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),
     EMAIL_HOST_PASSWORD=(str, 'none'), # use this as a sentinel to trigger lookup in localsettings
     SECRET_KEY=(str, 'secret'),
 )
+
+# Take environment variables from .env file
+# use this as backup in case we're not running in docker compose/stack
+# Normally, the primary source should be variables fed in through the compose.yml file
+# see .env.dist for an example
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # this should be imported from an unversioned local file
@@ -229,30 +231,20 @@ DATABASES = {
             'options': '-c search_path=geodjango,public'
         },
 
-        # trim the \n from the end of password, if present
-        'PASSWORD': env("APP_DB_PASSWORD").replace('\n', ''),
         'HOST': DB_SERVER,
-        'PORT': 5432,
+        'PORT': DB_PORT,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+
+        # trim the \n from the end of password, if present
+        'PASSWORD': env("DB_PASSWORD").replace('\n', ''),
     },
 }
 
 SERIALIZATION_MODULES = {
     'geojson' : 'djgeojson.serializers'
 }
-
-"""
-    'admin': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'mapbe',
-        'USER': 'postgres',
-
-        # trim the \n from the end of password, if present
-        'PASSWORD': env("ROOT_DB_PASSWORD").replace('\n', ''),
-        'HOST': DB_SERVER,
-        'PORT': DB_PORT,
-    },
-"""
-
 
 # declare this explicitly so we can enable ManifestStaticFiles
 STORAGES = {
