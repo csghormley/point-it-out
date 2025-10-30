@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.FileAwareEnv(
     # set casting, default value
     DEBUG=(bool, False),
+    DB_SERVER=(str, 'localhost'),
     DB_PORT=(int, 5432),
     DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),

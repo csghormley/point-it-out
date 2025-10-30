@@ -4,11 +4,15 @@ Django management command for segmenting survey points.
 Usage:
     python manage.py segment_survey_points --responseid ABC123XYZ
     python manage.py segment_survey_points --responseid ABC123XYZ --output results.geojson
+    python manage.py segment_survey_points --responseid ABC123XYZ --save-layers
     python manage.py segment_survey_points --all
 """
 
+import hashlib
+import json
 from django.core.management.base import BaseCommand, CommandError
-from pio.models import SurveyPoint
+from django.utils.text import slugify
+from pio.models import SurveyPoint, FeatureLayer
 from pio.segmentation import GeometrySegmenter, SurveyPointData, format_results, export_geojson
 
 
@@ -65,6 +69,11 @@ class Command(BaseCommand):
             type=str,
             help='Output GeoJSON file path'
         )
+        parser.add_argument(
+            '--save-layers',
+            action='store_true',
+            help='Save detected geometries as FeatureLayers in the database'
+        )
 
     def handle(self, *args, **options):
         # Validate input
@@ -88,6 +97,8 @@ class Command(BaseCommand):
             self.stdout.write(f"Processing {len(responseids)} response IDs...")
 
             all_results = []
+            param_hash = self._generate_params_hash(options) if options['save_layers'] else None
+
             for responseid in responseids:
                 points = self._fetch_points(responseid, options.get('projectid'))
                 if points:
@@ -96,6 +107,10 @@ class Command(BaseCommand):
 
                     self.stdout.write(f"\nResponse ID: {responseid}")
                     self.stdout.write(format_results(results))
+
+                    # Save to FeatureLayers if requested
+                    if options['save_layers']:
+                        self._save_to_feature_layers(responseid, results, param_hash)
 
             # Display summary statistics
             self._display_summary(all_results)
@@ -138,6 +153,11 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.SUCCESS(f"✓ Exported to {options['output']}")
                 )
+
+            # Save to FeatureLayers if requested
+            if options['save_layers']:
+                param_hash = self._generate_params_hash(options)
+                self._save_to_feature_layers(responseid, results, param_hash)
 
     def _display_summary(self, all_results):
         """Display summary statistics across all response IDs"""
@@ -205,3 +225,115 @@ class Command(BaseCommand):
             ))
 
         return points
+
+    def _generate_params_hash(self, options):
+        """Generate a hash of segmentation parameters to prevent duplicates"""
+        params = {
+            'max_time_gap': options['max_time_gap'],
+            'max_distance': options['max_distance'],
+            'min_cluster_points': options['min_cluster_points'],
+            'polygon_threshold': options['polygon_threshold']
+        }
+        # Create a stable JSON representation and hash it
+        params_str = json.dumps(params, sort_keys=True)
+        return hashlib.md5(params_str.encode()).hexdigest()[:8]
+
+    def _save_to_feature_layers(self, responseid, results, param_hash):
+        """Save segmentation results to FeatureLayers"""
+        created_layers = []
+
+        # Save polygons if any
+        if results['polygons']:
+            layer_name = f"seg_{responseid}_{param_hash}_polygons"
+            layer = self._create_or_update_feature_layer(
+                layer_name,
+                results['polygons'],
+                'polygon',
+                responseid,
+                param_hash
+            )
+            if layer:
+                created_layers.append(layer)
+                self.stdout.write(
+                    self.style.SUCCESS(f"✓ Saved {len(results['polygons'])} polygons to layer: {layer_name}")
+                )
+
+        # Save linestrings if any
+        if results['linestrings']:
+            layer_name = f"seg_{responseid}_{param_hash}_linestrings"
+            layer = self._create_or_update_feature_layer(
+                layer_name,
+                results['linestrings'],
+                'linestring',
+                responseid,
+                param_hash
+            )
+            if layer:
+                created_layers.append(layer)
+                self.stdout.write(
+                    self.style.SUCCESS(f"✓ Saved {len(results['linestrings'])} linestrings to layer: {layer_name}")
+                )
+
+        return created_layers
+
+    def _create_or_update_feature_layer(self, name, geometries, geom_type, responseid, param_hash):
+        """Create or update a FeatureLayer with the given geometries"""
+        features = []
+
+        for idx, geom_data in enumerate(geometries):
+            if geom_type == 'polygon':
+                geometry = {
+                    'type': 'Polygon',
+                    'coordinates': [geom_data['coordinates']]
+                }
+                properties = {
+                    'geometry_type': 'polygon',
+                    'point_count': geom_data['point_count'],
+                    'point_ids': geom_data['point_ids'],
+                    'area': geom_data['area'],
+                    'timestamp_start': geom_data['timestamp_range'][0],
+                    'timestamp_end': geom_data['timestamp_range'][1],
+                    'responseid': responseid,
+                    'param_hash': param_hash
+                }
+            elif geom_type == 'linestring':
+                geometry = {
+                    'type': 'LineString',
+                    'coordinates': geom_data['coordinates']
+                }
+                properties = {
+                    'geometry_type': 'linestring',
+                    'point_count': geom_data['point_count'],
+                    'point_ids': geom_data['point_ids'],
+                    'length': geom_data['length'],
+                    'linearity': geom_data.get('linearity', 0),
+                    'timestamp_start': geom_data['timestamp_range'][0],
+                    'timestamp_end': geom_data['timestamp_range'][1],
+                    'responseid': responseid,
+                    'param_hash': param_hash
+                }
+            else:
+                continue
+
+            features.append({
+                'type': 'Feature',
+                'geometry': geometry,
+                'properties': properties
+            })
+
+        geojson = {
+            'type': 'FeatureCollection',
+            'features': features
+        }
+
+        # Create or update the layer
+        slug = slugify(name)
+        layer, created = FeatureLayer.objects.update_or_create(
+            slug=slug,
+            defaults={
+                'name': name,
+                'geojson': geojson
+            }
+        )
+
+        return layer
