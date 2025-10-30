@@ -27,6 +27,9 @@ urlpatterns = [
 
     path('version', views.version, name='version'),
 
+    # Public GeoJSON export endpoint (no authentication required)
+    path('export/surveypoints.geojson', views.export_surveypoints_geojson, name='export_surveypoints_geojson'),
+
     # Wire up our API using automatic URL routing.
     # Additionally, we include login URLs for the browsable API.
     path('api/', include(router.urls)),
