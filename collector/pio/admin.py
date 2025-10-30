@@ -107,8 +107,8 @@ class DownloadAsGeoJsonMixin:
 class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
     fields = ['surveyid', 'mapconfig', 'description', 'responseid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'geom', 'deleted']
     readonly_fields = ['surveyid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'responseid', 'mapconfig',]
-    list_filter = ['surveyid', 'deleted', 'responseid', 'ipaddress', 'radius', ]
-    search_fields = ['surveyid', 'ipaddress', 'radius', 'responseid', 'geom']
+    list_filter = ['surveyid', 'mapconfig__name', 'deleted', 'responseid', 'ipaddress', 'radius', ]
+    search_fields = ['surveyid', 'mapconfig__name', 'ipaddress', 'radius', 'responseid', 'geom']
     actions = ["export_as_csv", "download_as_geojson"]
 
 class MapLayerInline(admin.TabularInline):
