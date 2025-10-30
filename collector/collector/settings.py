@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.FileAwareEnv(
     # set casting, default value
     DEBUG=(bool, False),
+    DB_PORT=(int, 5432),
     DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),
     EMAIL_HOST_PASSWORD=(str, 'none'), # use this as a sentinel to trigger lookup in localsettings
@@ -232,8 +233,8 @@ DATABASES = {
             'sslmode': 'require',
         },
 
-        'HOST': DB_SERVER,
-        'PORT': DB_PORT,
+        'HOST': env("DB_SERVER"),
+        'PORT': env("DB_PORT"),
 
         # trim the \n from the end of password, if present
         'PASSWORD': env("DB_PASSWORD").replace('\n', ''),
