@@ -396,3 +396,115 @@ class VisitorBehaviorViewSet(viewsets.ModelViewSet):
             logger.info(f"responseid: {responseid}, user={self.request.user}")
             return queryset
     """
+
+
+def export_surveypoints_geojson(request):
+    """
+    Public view to export SurveyPoints as GeoJSON with filters.
+    This allows sharing filtered datasets without admin access.
+
+    Query parameters:
+    - responseid: Filter by response ID
+    - projectid: Filter by project ID
+    - surveyid: Filter by survey ID
+    - mapconfig: Filter by map configuration ID
+    - deleted: Include deleted points (default: false)
+    """
+    from django.http import JsonResponse
+    from django.contrib.gis.geos import GEOSGeometry
+    import json
+
+    # Start with base queryset
+    queryset = SurveyPoint.objects.all()
+
+    # Apply filters from query parameters
+    responseid = request.GET.get('responseid')
+    if responseid:
+        queryset = queryset.filter(responseid=responseid)
+
+    projectid = request.GET.get('projectid')
+    if projectid:
+        queryset = queryset.filter(projectid=projectid)
+
+    surveyid = request.GET.get('surveyid')
+    if surveyid:
+        queryset = queryset.filter(surveyid=surveyid)
+
+    mapconfig_id = request.GET.get('mapconfig')
+    if mapconfig_id:
+        queryset = queryset.filter(mapconfig_id=mapconfig_id)
+
+    # By default, exclude deleted points unless explicitly requested
+    include_deleted = request.GET.get('deleted', 'false').lower() == 'true'
+    if not include_deleted:
+        queryset = queryset.filter(deleted=False)
+
+    # Build GeoJSON FeatureCollection
+    features = []
+    for point in queryset:
+        if not point.geom:
+            continue
+
+        geometry = json.loads(point.geom.geojson)
+
+        # Helper to safely convert datetime/string to ISO format
+        def to_iso(dt):
+            if dt is None:
+                return None
+            if isinstance(dt, str):
+                return dt
+            return dt.isoformat()
+
+        properties = {
+            'id': point.id,
+            'surveyid': point.surveyid,
+            'responseid': point.responseid,
+            'projectid': point.projectid,
+            'description': point.description,
+            'ipaddress': point.ipaddress,
+            'timestamp': to_iso(point.timestamp),
+            'timestamp_add': to_iso(point.timestamp_add),
+            'radius': float(point.radius) if point.radius else None,
+            'resolution': point.resolution,
+            'deleted': point.deleted,
+            'mapconfig_id': point.mapconfig_id,
+            'mapconfig_name': point.mapconfig.name if point.mapconfig else None,
+        }
+
+        features.append({
+            'type': 'Feature',
+            'geometry': geometry,
+            'properties': properties
+        })
+
+    feature_collection = {
+        'type': 'FeatureCollection',
+        'features': features,
+        'metadata': {
+            'count': len(features),
+            'filters': {
+                'responseid': responseid,
+                'projectid': projectid,
+                'surveyid': surveyid,
+                'mapconfig': mapconfig_id,
+                'deleted': include_deleted
+            }
+        }
+    }
+
+    # Set appropriate headers for download
+    response = JsonResponse(feature_collection, safe=False)
+
+    # Generate filename based on filters
+    filename_parts = ['surveypoints']
+    if responseid:
+        filename_parts.append(f'resp-{responseid}')
+    if projectid:
+        filename_parts.append(f'proj-{projectid}')
+    if surveyid:
+        filename_parts.append(f'survey-{surveyid}')
+
+    filename = '_'.join(filename_parts) + '.geojson'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
