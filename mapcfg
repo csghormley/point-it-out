@@ -235,7 +235,7 @@ cmd_build() {
 # maintenance - Clean up Docker resources
 cmd_maintenance() {
     info "Running Docker system maintenance..."
-    maybe_sudo docker system prune --force
+    maybe_sudo docker system prune --all --force
     success "Maintenance complete"
 }
 
@@ -249,11 +249,14 @@ check_services_running() {
 
 # wait_for_services - Wait for all services to be running
 wait_for_services() {
-    local timeout=5
+    local timeout=10
     local count=0
+
+    info "Waiting for services to start..."
 
     while [ $count -lt $timeout ]; do
         if check_services_running; then
+            success "All services are running"
             return 0
         fi
         sleep 1
