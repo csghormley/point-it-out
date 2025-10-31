@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth email URLs
     'django.contrib.gis',
     'djgeojson',
     'django_json_widget',
@@ -73,6 +74,9 @@ INSTALLED_APPS = [
     'rest_framework_gis',
     'pio',
 ]
+
+# Sites framework configuration for allauth
+SITE_ID = 1
 
 MIDDLEWARE = [
     'csp.middleware.CSPMiddleware',
@@ -98,6 +102,8 @@ TWO_FACTOR_REMEMBER_COOKIE_AGE = 86400*14
 # ALLAUTH settings
 ACCOUNT_CHANGE_EMAIL=True
 ACCOUNT_CONFIRM_EMAIL_ON_GET=True
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/admin/'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/admin/'
 
 MFA_SUPPORTED_TYPES = ["totp", "webauthn", "recovery_codes"]
 MFA_PASSKEY_LOGIN_ENABLED = True
