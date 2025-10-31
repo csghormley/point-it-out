@@ -447,6 +447,14 @@ def export_surveypoints_geojson(request):
 
         geometry = json.loads(point.geom.geojson)
 
+        # Helper to safely convert datetime/string to ISO format
+        def to_iso(dt):
+            if dt is None:
+                return None
+            if isinstance(dt, str):
+                return dt
+            return dt.isoformat()
+
         properties = {
             'id': point.id,
             'surveyid': point.surveyid,
@@ -454,8 +462,8 @@ def export_surveypoints_geojson(request):
             'projectid': point.projectid,
             'description': point.description,
             'ipaddress': point.ipaddress,
-            'timestamp': point.timestamp.isoformat() if point.timestamp else None,
-            'timestamp_add': point.timestamp_add.isoformat() if point.timestamp_add else None,
+            'timestamp': to_iso(point.timestamp),
+            'timestamp_add': to_iso(point.timestamp_add),
             'radius': float(point.radius) if point.radius else None,
             'resolution': point.resolution,
             'deleted': point.deleted,
