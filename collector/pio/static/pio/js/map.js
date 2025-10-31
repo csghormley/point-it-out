@@ -1164,11 +1164,12 @@ export class MapManager {
         // Everything is OK
         else {
             // Show a context-sensitive mouse pointer
-            // the cursors are images so they won't match a custom colormap
             const colormap = this.getConfig('point_colormap');
             const colorid = (this.projectid-1) % colormap.length;
+            const color = colormap[colorid];
 
-            const icon_url = `${this.img_url}circle_st1_${colorid}.png`;
+            // Create dynamic cursor icon using the colormap color
+            const cursorIcon = this.createCursorIcon(color);
 
             pointerStyle.setImage(new Icon({
                 anchor: [0.5, 0.5],
@@ -1176,7 +1177,8 @@ export class MapManager {
                 offset: [0, 0],
                 opacity: 1,
                 scale: this.getMapScaleFactor(),
-                src: icon_url
+                img: cursorIcon,
+                imgSize: [107, 107]
             }));
         }
 
@@ -1410,6 +1412,44 @@ export class MapManager {
                 feature.setStyle(this.mapMarkerStyleFunction.bind(this));
             }
         });
+    }
+
+    /**
+     * Create a dynamic cursor icon with the specified color
+     * @param {string} color - Hex color code (e.g., '#e41a1c')
+     * @returns {HTMLCanvasElement} Canvas element with the cursor icon
+     */
+    createCursorIcon(color) {
+        const size = 107;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = 42; // Main circle radius
+
+        // Draw inner fill (lighter/more transparent)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = color + '4d'; // Add alpha for fill (30% opacity)
+        ctx.fill();
+
+        // Draw outer stroke (darker border)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = color + 'cc'; // Add alpha for stroke (80% opacity)
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        // Draw center dot for precision
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = '#000000';
+        ctx.fill();
+
+        return canvas;
     }
 
     /**
