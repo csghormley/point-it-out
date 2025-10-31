@@ -1430,17 +1430,18 @@ export class MapManager {
         const centerY = size / 2;
         const radius = 42; // Main circle radius
 
-        // Draw outer stroke (darker border)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius + 3, 0, 2 * Math.PI);
-        ctx.fillStyle = color + 'cc'; // Add alpha for stroke
-        ctx.fill();
-
-        // Draw inner fill (lighter)
+        // Draw inner fill (lighter/more transparent)
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = color + '4d'; // Add alpha for fill (more transparent)
+        ctx.fillStyle = color + '4d'; // Add alpha for fill (30% opacity)
         ctx.fill();
+
+        // Draw outer stroke (darker border)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = color + 'cc'; // Add alpha for stroke (80% opacity)
+        ctx.lineWidth = 6;
+        ctx.stroke();
 
         // Draw center dot for precision
         ctx.beginPath();
