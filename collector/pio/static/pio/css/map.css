@@ -140,6 +140,11 @@ body {
 	width:100%;
 }
 
+/* Hide default cursor when using custom OpenLayers drawing cursor */
+.ol-viewport {
+	cursor: none !important;
+}
+
 #map_status {
   position: relative;
   bottom: 2rem;
