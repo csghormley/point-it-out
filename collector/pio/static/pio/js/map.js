@@ -1440,13 +1440,13 @@ export class MapManager {
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.strokeStyle = color + 'cc'; // Add alpha for stroke (80% opacity)
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         // Draw center dot for precision
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = '#000000';
+        ctx.arc(centerX, centerY, 2, 0, 2 * Math.PI);
+        ctx.fillStyle = '#00000099'; // 60% opacity
         ctx.fill();
 
         return canvas;
