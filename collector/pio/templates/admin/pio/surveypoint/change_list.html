@@ -5,18 +5,18 @@
     {{ block.super }}
 
     {% if geojson_export_url %}
-    <div style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 4px; padding: 12px; margin: 10px 0;">
-        <h3 style="margin: 0 0 8px 0; color: #2e7d32;">
+    <div style="background: #1a3a1a; border: 1px solid #66bb6a; border-radius: 4px; padding: 12px; margin: 10px 0;">
+        <h3 style="margin: 0 0 8px 0; color: #81c784;">
             <span style="font-size: 1.2em;">📥</span> Shareable GeoJSON Export
         </h3>
 
         {% if has_filters %}
-        <p style="margin: 0 0 8px 0; color: #555;">
-            <strong>Current filters applied:</strong> This URL will export data matching the filters you've set below.
+        <p style="margin: 0 0 8px 0; color: #b0b0b0;">
+            <strong>Current filters applied:</strong> Export data matching the filters you've set below.
         </p>
         {% else %}
-        <p style="margin: 0 0 8px 0; color: #555;">
-            <strong>No filters applied:</strong> This URL will export all survey points.
+        <p style="margin: 0 0 8px 0; color: #b0b0b0;">
+            <strong>No filters applied:</strong> Export all survey points.
         </p>
         {% endif %}
 
@@ -40,7 +40,7 @@
             </button>
         </div>
 
-        <p style="margin: 8px 0 0 0; font-size: 0.9em; color: #666;">
+        <p style="margin: 8px 0 0 0; font-size: 0.9em; color: #a0a0a0;">
             💡 <strong>Share this URL</strong> with team members (no admin access required). The URL includes current filters and can be used directly in GIS software like QGIS or ArcGIS.
         </p>
     </div>

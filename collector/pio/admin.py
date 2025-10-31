@@ -112,6 +112,8 @@ class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
     actions = ["export_as_csv", "download_as_geojson"]
     change_list_template = 'admin/pio/surveypoint/change_list.html'
 
+    show_facets = admin.ShowFacets.ALWAYS
+
     def changelist_view(self, request, extra_context=None):
         """Add shareable GeoJSON export URL to the context"""
         extra_context = extra_context or {}
