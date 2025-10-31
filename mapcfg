@@ -235,16 +235,16 @@ cmd_build() {
 # maintenance - Clean up Docker resources
 cmd_maintenance() {
     info "Running Docker system maintenance..."
-    maybe_sudo docker system prune --all --force
+    maybe_sudo docker system prune --filter "label=tag!=latest" --force
     success "Maintenance complete"
 }
 
 # check_services_running - Silent check if all required services are running
 check_services_running() {
     # Returns 0 if all services running, 1 if any missing
-    docker ps | grep -q "nginx" && \
-    docker ps | grep -q "postgis" && \
-    docker ps | grep -q "mapsurvey-app"
+    docker ps --format "{{.Names}}" | grep -q "nginx" && \
+    docker ps --format "{{.Names}}" | grep -q "postgis" && \
+    docker ps --format "{{.Names}}" | grep -q "django"
 }
 
 # wait_for_services - Wait for all services to be running
@@ -266,14 +266,14 @@ wait_for_services() {
     # Timeout - show which services are missing
     error "Services failed to start within ${timeout} seconds:"
     echo ""
-    if ! docker ps | grep -q "nginx"; then
+    if ! docker ps --format "{{.Names}}" | grep -q "nginx"; then
         echo -e "${RED}  ✗ nginx is not running${NC}"
     fi
-    if ! docker ps | grep -q "postgis"; then
+    if ! docker ps --format "{{.Names}}" | grep -q "postgis"; then
         echo -e "${RED}  ✗ postgis is not running${NC}"
     fi
-    if ! docker ps | grep -q "mapsurvey-app"; then
-        echo -e "${RED}  ✗ mapsurvey-app is not running${NC}"
+    if ! docker ps --format "{{.Names}}" | grep -q "django"; then
+        echo -e "${RED}  ✗ django is not running${NC}"
     fi
     echo ""
     return 1
@@ -286,22 +286,22 @@ cmd_status() {
     echo ""
     echo "Docker Container Status:"
 
-    if docker ps | grep -q "nginx"; then
+    if docker ps --format "{{.Names}}" | grep -q "nginx"; then
         success "nginx is running"
     else
         echo -e "${RED}✗ nginx is not running${NC}"
     fi
 
-    if docker ps | grep -q "postgis"; then
+    if docker ps --format "{{.Names}}" | grep -q "postgis"; then
         success "postgis is running"
     else
         echo -e "${RED}✗ postgis is not running${NC}"
     fi
 
-    if docker ps | grep -q "mapsurvey-app"; then
-        success "mapsurvey-app is running"
+    if docker ps --format "{{.Names}}" | grep -q "django"; then
+        success "django is running"
     else
-        echo -e "${RED}✗ mapsurvey-app is not running${NC}"
+        echo -e "${RED}✗ django is not running${NC}"
     fi
 
     running_count=$(docker ps | grep -v "^CONTAINER" | wc -l)
@@ -666,9 +666,9 @@ EOF
             cat <<EOF
 maintenance - Clean up Docker resources
 
-  Runs 'docker system prune --force' to remove unused containers, networks,
+  Runs 'docker system prune --force' with a filter to remove unused containers, networks,
   images, and build cache. Frees up disk space after builds and deployments.
-  Safe to run periodically to keep system clean.
+  Automatically run during the build process.
 EOF
             ;;
         version)
