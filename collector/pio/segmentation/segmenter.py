@@ -9,6 +9,7 @@ import logging
 import numpy as np
 from sklearn.cluster import DBSCAN
 from shapely.geometry import Point, LineString, Polygon, MultiPoint
+from shapely.ops import unary_union
 
 from .data import SurveyPointData
 
@@ -25,7 +26,8 @@ class GeometrySegmenter:
         min_cluster_points: int = 3,
         polygon_closure_threshold: float = 20.0,  # meters
         min_polygon_points: int = 4,
-        min_linestring_points: int = 2
+        min_linestring_points: int = 2,
+        linearity_threshold: float = 0.6  # threshold below which to create polygon
     ):
         """
         Initialize the segmenter with configuration parameters.
@@ -37,6 +39,7 @@ class GeometrySegmenter:
             polygon_closure_threshold: Max distance between first/last point for polygon
             min_polygon_points: Minimum points required for polygon
             min_linestring_points: Minimum points required for linestring
+            linearity_threshold: Linearity below which linestrings become polygons (0-1)
         """
         self.max_time_gap = timedelta(seconds=max_time_gap)
         # Convert meters to degrees (rough approximation at mid-latitudes)
@@ -46,6 +49,7 @@ class GeometrySegmenter:
         self.polygon_closure_threshold_deg = polygon_closure_threshold / 111000.0
         self.min_polygon_points = min_polygon_points
         self.min_linestring_points = min_linestring_points
+        self.linearity_threshold = linearity_threshold
 
     def segment_session(
         self,
@@ -159,7 +163,42 @@ class GeometrySegmenter:
                 clusters[label] = []
             clusters[label].append(points[idx])
 
-        return clusters
+        # Filter out clusters that are spatially disconnected
+        # (temporally adjacent but spatially distinct)
+        filtered_clusters = {}
+        for label, cluster_points in clusters.items():
+            if label == -1:  # Keep noise points as-is
+                filtered_clusters[label] = cluster_points
+                continue
+
+            # Check spatial compactness: ensure cluster diameter is reasonable
+            if len(cluster_points) >= 2:
+                coords_array = np.array([p.coords for p in cluster_points])
+                # Calculate centroid
+                centroid = np.mean(coords_array, axis=0)
+                # Calculate maximum distance from centroid
+                max_dist_from_centroid = max(
+                    np.linalg.norm(coord - centroid)
+                    for coord in coords_array
+                )
+
+                # If the cluster is too spread out (diameter > 3x max_distance),
+                # it's likely spatially disconnected points
+                if max_dist_from_centroid > (3 * self.max_distance_deg):
+                    # Mark as noise instead
+                    if -1 not in filtered_clusters:
+                        filtered_clusters[-1] = []
+                    filtered_clusters[-1].extend(cluster_points)
+                    logger.debug(
+                        f"Cluster {label} rejected due to spatial spread "
+                        f"({max_dist_from_centroid*111000:.1f}m from centroid)"
+                    )
+                else:
+                    filtered_clusters[label] = cluster_points
+            else:
+                filtered_clusters[label] = cluster_points
+
+        return filtered_clusters
 
     def _classify_and_create_geometry(
         self,
@@ -170,8 +209,9 @@ class GeometrySegmenter:
 
         Classification logic:
         1. If points form a closed loop (first ≈ last) and >= min_polygon_points → Polygon
-        2. If points follow a linear pattern → LineString
-        3. Otherwise → Individual points or MultiPoint
+        2. If linearity is low (< threshold) and enough points → Polygon via convex hull
+        3. If points follow a linear pattern → LineString
+        4. Otherwise → Individual points or MultiPoint
         """
         n_points = len(points)
 
@@ -206,6 +246,7 @@ class GeometrySegmenter:
                             'point_count': n_points,
                             'point_ids': [p.id for p in points],
                             'area': poly.area,
+                            'method': 'explicit_closure',
                             'timestamp_range': (
                                 points[0].datetime.isoformat(),
                                 points[-1].datetime.isoformat()
@@ -214,7 +255,41 @@ class GeometrySegmenter:
                 except Exception as e:
                     logger.warning(f"Failed to create polygon: {e}")
 
-        # Check for linestring
+        # Check linearity for potential polygon via convex hull
+        if n_points >= self.min_polygon_points:
+            linearity = self._calculate_linearity(shapely_points)
+
+            # If linearity is low, the points form a non-linear pattern
+            # Use convex hull to create a polygon
+            if linearity < self.linearity_threshold:
+                try:
+                    multi_point = MultiPoint(shapely_points)
+                    convex_hull = multi_point.convex_hull
+
+                    # Only use convex hull if it creates a valid polygon
+                    if isinstance(convex_hull, Polygon) and convex_hull.is_valid and convex_hull.area > 0:
+                        logger.info(
+                            f"Created polygon via convex hull (linearity={linearity:.3f}, "
+                            f"points={n_points})"
+                        )
+                        return {
+                            'type': 'Polygon',
+                            'geometry': convex_hull,
+                            'coordinates': list(convex_hull.exterior.coords),
+                            'point_count': n_points,
+                            'point_ids': [p.id for p in points],
+                            'area': convex_hull.area,
+                            'linearity': linearity,
+                            'method': 'convex_hull',
+                            'timestamp_range': (
+                                points[0].datetime.isoformat(),
+                                points[-1].datetime.isoformat()
+                            )
+                        }
+                except Exception as e:
+                    logger.warning(f"Failed to create convex hull polygon: {e}")
+
+        # Check for linestring (high linearity or not enough points for polygon)
         if n_points >= self.min_linestring_points:
             try:
                 line = LineString(coords)

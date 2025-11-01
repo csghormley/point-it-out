@@ -62,6 +62,12 @@ class Command(BaseCommand):
             default=100.0,
             help='Polygon closure threshold in meters (default: 100)'
         )
+        parser.add_argument(
+            '--linearity-threshold',
+            type=float,
+            default=0.6,
+            help='Linearity threshold below which to create polygons via convex hull (0-1, default: 0.6)'
+        )
 
         # Output options
         parser.add_argument(
@@ -85,7 +91,8 @@ class Command(BaseCommand):
             max_time_gap=options['max_time_gap'],
             max_distance=options['max_distance'],
             min_cluster_points=options['min_cluster_points'],
-            polygon_closure_threshold=options['polygon_threshold']
+            polygon_closure_threshold=options['polygon_threshold'],
+            linearity_threshold=options['linearity_threshold']
         )
 
         if options['all']:
@@ -232,7 +239,8 @@ class Command(BaseCommand):
             'max_time_gap': options['max_time_gap'],
             'max_distance': options['max_distance'],
             'min_cluster_points': options['min_cluster_points'],
-            'polygon_threshold': options['polygon_threshold']
+            'polygon_threshold': options['polygon_threshold'],
+            'linearity_threshold': options['linearity_threshold']
         }
         # Create a stable JSON representation and hash it
         params_str = json.dumps(params, sort_keys=True)
@@ -291,6 +299,8 @@ class Command(BaseCommand):
                     'point_count': geom_data['point_count'],
                     'point_ids': geom_data['point_ids'],
                     'area': geom_data['area'],
+                    'method': geom_data.get('method', 'explicit_closure'),
+                    'linearity': geom_data.get('linearity'),
                     'timestamp_start': geom_data['timestamp_range'][0],
                     'timestamp_end': geom_data['timestamp_range'][1],
                     'responseid': responseid,
