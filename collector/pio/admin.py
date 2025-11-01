@@ -151,9 +151,11 @@ class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
             except MapConfig.DoesNotExist:
                 pass
 
-        deleted = request.GET.get('deleted')
-        if deleted:
-            query_params['deleted'] = deleted
+        # Django admin uses 'deleted__exact' for boolean filters
+        deleted = request.GET.get('deleted__exact')
+        if deleted is not None:
+            # Convert '1' to 'true' and '0' to 'false' for the URL
+            query_params['deleted'] = 'true' if deleted == '1' else 'false'
 
         # Build the export URL
         base_url = reverse('export_surveypoints_geojson')
