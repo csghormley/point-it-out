@@ -114,6 +114,9 @@ class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
 
     show_facets = admin.ShowFacets.ALWAYS
 
+    def has_add_permission(self, request, obj=None):
+        return False
+    
     def changelist_view(self, request, extra_context=None):
         """Add shareable GeoJSON export URL to the context"""
         extra_context = extra_context or {}
