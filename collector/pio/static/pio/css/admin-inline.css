@@ -1,0 +1,80 @@
+/* Custom styling for MapLayer and MapBasemap TabularInlines in Django admin */
+
+/* Reduce z_order field width */
+.inline-group .tabular tr td.field-z_order,
+.inline-group .tabular tr th.column-z_order {
+    width: 40px;
+    max-width: 40px;
+}
+
+/* Reduce z_index field width for MapBasemap inline */
+.inline-group .tabular tr td.field-z_index,
+.inline-group .tabular tr th.column-z_index {
+    width: 40px;
+    max-width: 40px;
+}
+
+/* Give the delete checkbox column more space to prevent crowding */
+.inline-group .tabular tr td.delete,
+.inline-group .tabular tr th.delete {
+    width: 50px;
+    padding-left: 10px;
+}
+
+/* Style the related widget wrapper to put dropdown above buttons */
+.inline-group .tabular tr td.field-layer,
+.inline-group .tabular tr td.field-basemap {
+    min-width: 120px;
+    max-width: 200px;
+    width: 150px;
+}
+
+.inline-group .tabular .related-widget-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Make the select dropdown full width within its container */
+.inline-group .tabular .related-widget-wrapper select {
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+/* Put the action buttons in a horizontal row */
+.inline-group .tabular .related-widget-wrapper-link {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin-left: 0;
+}
+
+/* Style individual action buttons */
+.inline-group .tabular .related-widget-wrapper-link a {
+    display: inline-block;
+    text-align: center;
+    padding: 2px 6px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* Give more space to the JSON config field */
+.inline-group .tabular tr td.field-config {
+    min-width: 400px;
+}
+
+/* Make the JSON editor widget use full width of its container */
+.inline-group .tabular tr td.field-config .jsoneditor,
+.inline-group .tabular tr td.field-config .django-json-widget {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+/* Also ensure the textarea inside uses full width */
+.inline-group .tabular tr td.field-config .jsoneditor textarea,
+.inline-group .tabular tr td.field-config .django-json-widget textarea {
+    width: 100% !important;
+    box-sizing: border-box;
+}
