@@ -7,19 +7,46 @@ from djgeojson.fields import GeometryCollectionField
 # and all configuration settings
 def mapconfig_default():
     return dict(
+        # map positioning
         map_center = [-121.3, 44.1],
         extent = [-122, 43.4, -120.385, 44.824],
         boundary = [-123, 41.9, -119.385, 46.324],
-        src_proj = 'EPSG:4326', # wgs84
-        dest_proj = 'EPSG:3857', # web mercator
+
+        # projections
+        src_proj = 'EPSG:4326',  # wgs84
+        dest_proj = 'EPSG:3857',  # web mercator
+
+        # display settings
         display_units = 'ft',
-        api_url = '/api/surveypoints/',
-        zoom = 4,
+        initial_zoom = 4,
         max_zoom = 16,
         min_zoom = 4,
-        max_diameter = 16093.4, # meters; 10mi
-        min_diameter = 804.67,  # meters; 0.5mi
+        min_px_km = 10,
+
+        # survey point settings
+        api_url = '/api/surveypoints/',
+        max_diameter = 16093.4,  # meters; 10mi
+        min_diameter = 804.67,   # meters; 0.5mi
         edit_worktype = True,
+
+        # color scheme - Colorbrewer 8-class qualitative
+        point_colormap = [
+            '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
+            '#ff7f00', '#ffff33', '#a65628', '#f781bf'
+        ],
+
+        # UI controls
+        show_description = True,
+        show_diameter = False,
+        show_overview = True,
+        show_status = True,
+        show_zoom = False,
+
+        # Site metadata
+        site_description = "survey mapping application",
+        site_purpose = "survey spatial data collection",
+
+        # Debug
         verbose = False,
     )
 
@@ -28,21 +55,25 @@ def mapconfig_default():
 # and all configuration settings
 def maplayer_default():
     return dict(
-        max_zoom = 14,
-        min_zoom = 11,
+        # point styling
         point_color = "#555555",
         point_radius = 4,
-        line_width = 1.5,
+        max_zoom = 14,
+        min_zoom = 11,
+        # line/polygon styling
+        line_width = 2,
         stroke_color = "#b09592cc",
-        line_dash = [
-            5,
-            2,
-            2,
-            2
-        ],
+        line_dash = [5,2,2,2],
+        fill_color = "rgba(0, 0, 0, 0.1)",
+        # label styling
         font_size = "9px",
-        font_style = "italic",
+        font_style = "normal",
         font_face = "Arial, Helvetica, sans-serif",
+        font_stroke_width = 3,
+        font_color = "#000000",
+        font_stroke_color = "#FFFFFF33",
+        text_offset = [0, -15],
+        text_align = "center",
         label_format = "{name}"  # Format string with {property} placeholders
     )
 

@@ -93,8 +93,8 @@ export class MapManager {
             verbose: false,
             max_diameter: 16093.4, // meters; 10mi
             min_diameter: 804.67, // meters; 0.5mi
-            site_description: "region near the map center",
-            site_purpose: "wildfire resilience and vulnerability"
+            site_description: "survey mapping application",
+            site_purpose: "survey spatial data collection"
         };
 
         // Parse user configuration
@@ -471,13 +471,13 @@ export class MapManager {
                 }),
                 text: labelText ? new Text({
                     text: labelText,
-                    font: `${layerConfig.font_style || 'italic'} ${layerConfig.font_size || '9px'} ${layerConfig.font_face || 'Arial, Helvetica, sans-serif'}`,
+                    font: `${layerConfig.font_style || ''} ${layerConfig.font_size || '9px'} ${layerConfig.font_face || 'Arial, Helvetica, sans-serif'}`,
                     fill: new Fill({
                         color: layerConfig.font_color || '#000000'
                     }),
                     stroke: new Stroke({
                         color: layerConfig.font_stroke_color || '#FFFFFF33',
-                        width: 3
+                        width: layerConfig.font_stroke_width || 3
                     }),
                     offsetX: layerConfig.text_offset?.[0] || 0,
                     offsetY: layerConfig.text_offset?.[1] || -15,
