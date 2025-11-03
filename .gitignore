@@ -3,8 +3,6 @@
 *.zip
 *gz
 .venv/
-wait
-junk
 *.code-workspace
 .vscode
 .mapcfgrc
