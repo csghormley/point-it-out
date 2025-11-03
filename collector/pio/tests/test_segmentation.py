@@ -23,7 +23,7 @@ class TemporalSegmentationTest(TestCase):
 
     def test_single_temporal_segment(self):
         """Points within max_time_gap should form one temporal segment"""
-        segmenter = GeometrySegmenter(max_time_gap=180.0)
+        segmenter = GeometrySegmenter(max_time_gap=60.0, enable_temporal_segmentation=True)
 
         points = [
             SurveyPointData(
@@ -50,7 +50,7 @@ class TemporalSegmentationTest(TestCase):
 
     def test_multiple_temporal_segments(self):
         """Points with gaps > max_time_gap should form multiple segments"""
-        segmenter = GeometrySegmenter(max_time_gap=180.0)
+        segmenter = GeometrySegmenter(max_time_gap=60.0, enable_temporal_segmentation=True)
 
         points = [
             SurveyPointData(
@@ -83,7 +83,7 @@ class SpatialClusteringTest(TestCase):
 
     def test_dbscan_single_cluster(self):
         """Points within max_distance should form one cluster"""
-        segmenter = GeometrySegmenter(max_distance=500.0)
+        segmenter = GeometrySegmenter(max_distance=500.0, use_dbscan=True)
 
         points = [
             SurveyPointData(
@@ -111,7 +111,7 @@ class SpatialClusteringTest(TestCase):
 
     def test_radius_based_clustering_overlap(self):
         """Points with overlapping radii should cluster together"""
-        segmenter = GeometrySegmenter(use_radius_adjacency=True)
+        segmenter = GeometrySegmenter(use_dbscan=False)
 
         # Two points 200m apart with radii of 150m each
         # Distance < radius_A + radius_B (200 < 300), so they should cluster
@@ -138,7 +138,7 @@ class SpatialClusteringTest(TestCase):
 
     def test_radius_based_clustering_no_overlap(self):
         """Points without overlapping radii should not cluster"""
-        segmenter = GeometrySegmenter(use_radius_adjacency=True, min_cluster_points=2)
+        segmenter = GeometrySegmenter(use_dbscan=False, min_cluster_points=2)
 
         # Two points 500m apart with radii of 50m each
         # Distance > radius_A + radius_B (500 > 100), so they should not cluster
@@ -389,10 +389,11 @@ class IntegrationTest(TestCase):
     def test_segment_polygon_from_circular_path(self):
         """Should create polygon from circular walking path"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
+            max_time_gap=60.0,
             max_distance=500.0,
             linearity_threshold=0.6,
-            min_polygon_points=4
+            min_polygon_points=4,
+            enable_temporal_segmentation=True
         )
 
         import math
@@ -431,10 +432,11 @@ class IntegrationTest(TestCase):
     def test_segment_linestring_from_linear_path(self):
         """Should create linestring from linear walking path"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
+            max_time_gap=60.0,
             max_distance=500.0,
             linearity_threshold=0.6,
-            min_linestring_points=2
+            min_linestring_points=2,
+            enable_temporal_segmentation=True
         )
 
         # Create points in a straight line
@@ -469,10 +471,11 @@ class IntegrationTest(TestCase):
     def test_radius_mode_clusters_overlapping_points(self):
         """Radius mode should cluster points with overlapping uncertainty circles"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
-            use_radius_adjacency=True,
+            max_time_gap=60.0,
+            use_dbscan=False,
             linearity_threshold=0.6,
-            min_cluster_points=3
+            min_cluster_points=3,
+            enable_temporal_segmentation=True
         )
 
         # Create points 150m apart with 100m radii
