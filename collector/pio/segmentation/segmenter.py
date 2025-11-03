@@ -27,7 +27,8 @@ class GeometrySegmenter:
         polygon_closure_threshold: float = 20.0,  # meters
         min_polygon_points: int = 4,
         min_linestring_points: int = 2,
-        linearity_threshold: float = 0.6  # threshold below which to create polygon
+        linearity_threshold: float = 0.6,  # threshold below which to create polygon
+        use_radius_adjacency: bool = False  # use point radius for adjacency detection
     ):
         """
         Initialize the segmenter with configuration parameters.
@@ -40,6 +41,7 @@ class GeometrySegmenter:
             min_polygon_points: Minimum points required for polygon
             min_linestring_points: Minimum points required for linestring
             linearity_threshold: Linearity below which linestrings become polygons (0-1)
+            use_radius_adjacency: Use point radius for overlap-based adjacency detection
         """
         self.max_time_gap = timedelta(seconds=max_time_gap)
         # Convert meters to degrees (rough approximation at mid-latitudes)
@@ -50,6 +52,7 @@ class GeometrySegmenter:
         self.min_polygon_points = min_polygon_points
         self.min_linestring_points = min_linestring_points
         self.linearity_threshold = linearity_threshold
+        self.use_radius_adjacency = use_radius_adjacency
 
     def segment_session(
         self,
@@ -147,6 +150,20 @@ class GeometrySegmenter:
         self,
         points: List[SurveyPointData]
     ) -> Dict[int, List[SurveyPointData]]:
+        """
+        Perform spatial clustering on a segment.
+
+        Uses either radius-based adjacency or standard DBSCAN depending on mode.
+        """
+        if self.use_radius_adjacency:
+            return self._radius_based_clustering(points)
+        else:
+            return self._dbscan_clustering(points)
+
+    def _dbscan_clustering(
+        self,
+        points: List[SurveyPointData]
+    ) -> Dict[int, List[SurveyPointData]]:
         """Perform DBSCAN spatial clustering on a segment"""
         coords = np.array([p.coords for p in points])
 
@@ -197,6 +214,93 @@ class GeometrySegmenter:
                     filtered_clusters[label] = cluster_points
             else:
                 filtered_clusters[label] = cluster_points
+
+        return filtered_clusters
+
+    def _radius_based_clustering(
+        self,
+        points: List[SurveyPointData]
+    ) -> Dict[int, List[SurveyPointData]]:
+        """
+        Perform clustering based on overlapping point radii.
+
+        Two points are adjacent if distance(A, B) < radius(A) + radius(B).
+        Uses connected components to form clusters.
+        """
+        n = len(points)
+
+        # Build adjacency matrix
+        adjacency = np.zeros((n, n), dtype=bool)
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                point_a = points[i]
+                point_b = points[j]
+
+                # Calculate distance in degrees
+                dist_deg = np.linalg.norm(
+                    np.array(point_a.coords) - np.array(point_b.coords)
+                )
+
+                # Convert to meters (approximate)
+                dist_meters = dist_deg * 111000.0
+
+                # Get radii (default to 0 if not set)
+                radius_a = point_a.radius if point_a.radius is not None else 0.0
+                radius_b = point_b.radius if point_b.radius is not None else 0.0
+
+                # Check if circles overlap
+                if dist_meters < (radius_a + radius_b):
+                    adjacency[i, j] = True
+                    adjacency[j, i] = True
+
+        # Find connected components using union-find
+        parent = list(range(n))
+
+        def find(x):
+            if parent[x] != x:
+                parent[x] = find(parent[x])
+            return parent[x]
+
+        def union(x, y):
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        # Union adjacent points
+        for i in range(n):
+            for j in range(i + 1, n):
+                if adjacency[i, j]:
+                    union(i, j)
+
+        # Group points by cluster
+        clusters = {}
+        for idx in range(n):
+            cluster_id = find(idx)
+            if cluster_id not in clusters:
+                clusters[cluster_id] = []
+            clusters[cluster_id].append(points[idx])
+
+        # Renumber clusters to match DBSCAN convention
+        # Single-point clusters become noise (-1)
+        # Multi-point clusters get sequential IDs starting from 0
+        filtered_clusters = {}
+        next_cluster_id = 0
+
+        for cluster_id, cluster_points in clusters.items():
+            if len(cluster_points) < self.min_cluster_points:
+                # Mark as noise
+                if -1 not in filtered_clusters:
+                    filtered_clusters[-1] = []
+                filtered_clusters[-1].extend(cluster_points)
+            else:
+                filtered_clusters[next_cluster_id] = cluster_points
+                next_cluster_id += 1
+
+        logger.info(
+            f"Radius-based clustering: {len(filtered_clusters)} clusters "
+            f"from {n} points"
+        )
 
         return filtered_clusters
 

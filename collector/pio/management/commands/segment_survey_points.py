@@ -36,6 +36,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Process all response IDs'
         )
+        parser.add_argument(
+            '--input-file',
+            type=str,
+            help='Path to GeoJSON file with survey points (alternative to database query)'
+        )
 
         # Segmentation parameters
         parser.add_argument(
@@ -68,6 +73,11 @@ class Command(BaseCommand):
             default=0.6,
             help='Linearity threshold below which to create polygons via convex hull (0-1, default: 0.6)'
         )
+        parser.add_argument(
+            '--use-radius',
+            action='store_true',
+            help='Use point radius for adjacency detection (points are adjacent if their radii overlap)'
+        )
 
         # Output options
         parser.add_argument(
@@ -83,8 +93,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Validate input
-        if not options['responseid'] and not options['all']:
-            raise CommandError("Either --responseid or --all must be specified")
+        if options['input_file']:
+            # File input mode
+            if options['responseid'] or options['all']:
+                raise CommandError("Cannot use --input-file with --responseid or --all")
+        elif not options['responseid'] and not options['all']:
+            raise CommandError("Either --responseid, --all, or --input-file must be specified")
 
         # Initialize segmenter
         segmenter = GeometrySegmenter(
@@ -92,10 +106,39 @@ class Command(BaseCommand):
             max_distance=options['max_distance'],
             min_cluster_points=options['min_cluster_points'],
             polygon_closure_threshold=options['polygon_threshold'],
-            linearity_threshold=options['linearity_threshold']
+            linearity_threshold=options['linearity_threshold'],
+            use_radius_adjacency=options['use_radius']
         )
 
-        if options['all']:
+        if options['input_file']:
+            # Process GeoJSON file
+            points = self._load_points_from_file(options['input_file'])
+            if not points:
+                raise CommandError(f"No points found in file {options['input_file']}")
+
+            responseid = points[0].responseid if points else 'unknown'
+            self.stdout.write(f"Processing {len(points)} points from file...")
+
+            # Segment
+            results = segmenter.segment_session(points)
+
+            # Display
+            self.stdout.write(format_results(results))
+
+            # Export if requested
+            if options['output']:
+                export_geojson(results, options['output'])
+                self.stdout.write(
+                    self.style.SUCCESS(f"✓ Exported to {options['output']}")
+                )
+
+            # Note: --save-layers not supported for file input
+            if options['save_layers']:
+                self.stdout.write(
+                    self.style.WARNING("Note: --save-layers is only supported for database queries")
+                )
+
+        elif options['all']:
             # Process all response IDs
             responseids = SurveyPoint.objects.filter(
                 deleted=False
@@ -240,7 +283,8 @@ class Command(BaseCommand):
             'max_distance': options['max_distance'],
             'min_cluster_points': options['min_cluster_points'],
             'polygon_threshold': options['polygon_threshold'],
-            'linearity_threshold': options['linearity_threshold']
+            'linearity_threshold': options['linearity_threshold'],
+            'use_radius': options['use_radius']
         }
         # Create a stable JSON representation and hash it
         params_str = json.dumps(params, sort_keys=True)
@@ -347,3 +391,58 @@ class Command(BaseCommand):
         )
 
         return layer
+
+    def _load_points_from_file(self, filepath):
+        """Load survey points from a GeoJSON file"""
+        import os
+        from datetime import datetime
+
+        if not os.path.exists(filepath):
+            raise CommandError(f"File not found: {filepath}")
+
+        try:
+            with open(filepath, 'r') as f:
+                geojson_data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise CommandError(f"Invalid JSON in file: {e}")
+
+        if geojson_data.get('type') != 'FeatureCollection':
+            raise CommandError("GeoJSON must be a FeatureCollection")
+
+        features = geojson_data.get('features', [])
+        if not features:
+            raise CommandError("No features found in GeoJSON")
+
+        # Convert features to SurveyPointData objects
+        points = []
+        for feature in features:
+            if feature.get('geometry', {}).get('type') != 'Point':
+                continue  # Skip non-point features
+
+            coords = feature['geometry']['coordinates']
+            props = feature.get('properties', {})
+
+            # Parse timestamp - handle both timestamp and timestamp_add fields
+            timestamp = props.get('timestamp_add') or props.get('timestamp')
+            if not timestamp:
+                self.stdout.write(
+                    self.style.WARNING(f"Skipping feature {props.get('id')}: missing timestamp")
+                )
+                continue
+
+            # Create SurveyPointData
+            point = SurveyPointData(
+                id=props.get('id', len(points)),
+                x=coords[0],
+                y=coords[1],
+                timestamp=timestamp,
+                responseid=props.get('responseid', 'unknown'),
+                projectid=props.get('projectid', 0),
+                description=props.get('description'),
+                radius=props.get('radius'),
+                resolution=props.get('resolution')
+            )
+            points.append(point)
+
+        self.stdout.write(f"Loaded {len(points)} points from {filepath}")
+        return points
