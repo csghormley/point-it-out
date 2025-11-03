@@ -21,27 +21,29 @@ class GeometrySegmenter:
 
     def __init__(
         self,
-        max_time_gap: float = 180.0,  # seconds
+        max_time_gap: float = 60.0,  # seconds gap to create a new temporal segment
         max_distance: float = 50.0,    # meters (approximate for EPSG:4326)
         min_cluster_points: int = 3,
         polygon_closure_threshold: float = 20.0,  # meters
         min_polygon_points: int = 4,
         min_linestring_points: int = 2,
         linearity_threshold: float = 0.6,  # threshold below which to create polygon
-        use_radius_adjacency: bool = False  # use point radius for adjacency detection
+        use_dbscan: bool = False,  # use DBSCAN fixed-distance clustering (default: False, uses radius-based)
+        enable_temporal_segmentation: bool = False  # opt-in for temporal segmentation
     ):
         """
         Initialize the segmenter with configuration parameters.
 
         Args:
-            max_time_gap: Maximum time gap (seconds) to split temporal segments
-            max_distance: Maximum distance for DBSCAN clustering (approx meters)
+            max_time_gap: Maximum time gap (seconds) to split temporal segments (only used if enable_temporal_segmentation=True)
+            max_distance: Maximum distance for DBSCAN clustering (only used if use_dbscan=True)
             min_cluster_points: Minimum points to form a cluster
-            polygon_closure_threshold: Max distance between first/last point for polygon
+            polygon_closure_threshold: Max distance between first/last point for polygon (only used if use_dbscan=True)
             min_polygon_points: Minimum points required for polygon
             min_linestring_points: Minimum points required for linestring
             linearity_threshold: Linearity below which linestrings become polygons (0-1)
-            use_radius_adjacency: Use point radius for overlap-based adjacency detection
+            use_dbscan: Use DBSCAN fixed-distance clustering instead of radius-based adjacency (default: False)
+            enable_temporal_segmentation: Enable temporal segmentation (default: False, process all points together)
         """
         self.max_time_gap = timedelta(seconds=max_time_gap)
         # Convert meters to degrees (rough approximation at mid-latitudes)
@@ -52,7 +54,8 @@ class GeometrySegmenter:
         self.min_polygon_points = min_polygon_points
         self.min_linestring_points = min_linestring_points
         self.linearity_threshold = linearity_threshold
-        self.use_radius_adjacency = use_radius_adjacency
+        self.use_dbscan = use_dbscan
+        self.enable_temporal_segmentation = enable_temporal_segmentation
 
     def segment_session(
         self,
@@ -75,9 +78,14 @@ class GeometrySegmenter:
         # Step 1: Sort by timestamp
         sorted_points = sorted(points, key=lambda p: p.datetime)
 
-        # Step 2: Temporal segmentation
-        temporal_segments = self._temporal_segmentation(sorted_points)
-        logger.info(f"Created {len(temporal_segments)} temporal segments")
+        # Step 2: Temporal segmentation (opt-in)
+        if self.enable_temporal_segmentation:
+            temporal_segments = self._temporal_segmentation(sorted_points)
+            logger.info(f"Created {len(temporal_segments)} temporal segments")
+        else:
+            # Process all points as a single segment
+            temporal_segments = [sorted_points]
+            logger.info("Temporal segmentation disabled - processing all points together")
 
         # Calculate statistics for temporal segments
         temporal_segment_stats = []
@@ -155,10 +163,10 @@ class GeometrySegmenter:
 
         Uses either radius-based adjacency or standard DBSCAN depending on mode.
         """
-        if self.use_radius_adjacency:
-            return self._radius_based_clustering(points)
-        else:
+        if self.use_dbscan:
             return self._dbscan_clustering(points)
+        else:
+            return self._radius_based_clustering(points)
 
     def _dbscan_clustering(
         self,

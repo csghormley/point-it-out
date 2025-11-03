@@ -44,16 +44,21 @@ class Command(BaseCommand):
 
         # Segmentation parameters
         parser.add_argument(
+            '--temporal',
+            action='store_true',
+            help='Enable temporal segmentation (split points by time gaps)'
+        )
+        parser.add_argument(
             '--max-time-gap',
             type=float,
-            default=180.0,
-            help='Maximum time gap in seconds (default: 180)'
+            default=60.0,
+            help='Maximum time gap in seconds (default: 60, only used with --temporal)'
         )
         parser.add_argument(
             '--max-distance',
             type=float,
             default=150.0,
-            help='Maximum distance in meters (default: 150)'
+            help='Maximum distance in meters for DBSCAN clustering (default: 150, only used with --dbscan)'
         )
         parser.add_argument(
             '--min-cluster-points',
@@ -65,7 +70,7 @@ class Command(BaseCommand):
             '--polygon-threshold',
             type=float,
             default=100.0,
-            help='Polygon closure threshold in meters (default: 100)'
+            help='Polygon closure threshold in meters (default: 100, only used with --dbscan)'
         )
         parser.add_argument(
             '--linearity-threshold',
@@ -74,9 +79,9 @@ class Command(BaseCommand):
             help='Linearity threshold below which to create polygons via convex hull (0-1, default: 0.6)'
         )
         parser.add_argument(
-            '--use-radius',
+            '--dbscan',
             action='store_true',
-            help='Use point radius for adjacency detection (points are adjacent if their radii overlap)'
+            help='Use DBSCAN fixed-distance clustering instead of radius-based adjacency (default: radius-based)'
         )
 
         # Output options
@@ -100,6 +105,24 @@ class Command(BaseCommand):
         elif not options['responseid'] and not options['all']:
             raise CommandError("Either --responseid, --all, or --input-file must be specified")
 
+        # Validate options
+        if not options['dbscan']:
+            # Warn if DBSCAN-specific parameters are specified without --dbscan
+            if options['max_distance'] != 150.0:
+                self.stdout.write(
+                    self.style.WARNING(
+                        "Warning: --max-distance is only used with --dbscan flag. "
+                        "Using radius-based adjacency by default."
+                    )
+                )
+            if options['polygon_threshold'] != 100.0:
+                self.stdout.write(
+                    self.style.WARNING(
+                        "Warning: --polygon-threshold is only used with --dbscan flag. "
+                        "Using radius-based adjacency by default."
+                    )
+                )
+
         # Initialize segmenter
         segmenter = GeometrySegmenter(
             max_time_gap=options['max_time_gap'],
@@ -107,7 +130,8 @@ class Command(BaseCommand):
             min_cluster_points=options['min_cluster_points'],
             polygon_closure_threshold=options['polygon_threshold'],
             linearity_threshold=options['linearity_threshold'],
-            use_radius_adjacency=options['use_radius']
+            use_dbscan=options['dbscan'],
+            enable_temporal_segmentation=options['temporal']
         )
 
         if options['input_file']:
@@ -279,12 +303,13 @@ class Command(BaseCommand):
     def _generate_params_hash(self, options):
         """Generate a hash of segmentation parameters to prevent duplicates"""
         params = {
+            'temporal': options['temporal'],
             'max_time_gap': options['max_time_gap'],
             'max_distance': options['max_distance'],
             'min_cluster_points': options['min_cluster_points'],
             'polygon_threshold': options['polygon_threshold'],
             'linearity_threshold': options['linearity_threshold'],
-            'use_radius': options['use_radius']
+            'dbscan': options['dbscan']
         }
         # Create a stable JSON representation and hash it
         params_str = json.dumps(params, sort_keys=True)

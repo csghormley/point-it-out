@@ -29,9 +29,41 @@ from pio.segmentation import GeometrySegmenter, SurveyPointData
 class TemporalSegmentationTest(unittest.TestCase):
     """Tests for temporal segmentation based on time gaps"""
 
+    def test_temporal_segmentation_disabled_by_default(self):
+        """By default, temporal segmentation should be disabled"""
+        segmenter = GeometrySegmenter(max_time_gap=60.0)
+
+        # Create points with large time gap (5 minutes)
+        points = [
+            SurveyPointData(
+                id=1, x=-121.5, y=46.15,
+                timestamp="2025-11-01T12:00:00+00:00",
+                responseid="test", projectid=1
+            ),
+            SurveyPointData(
+                id=2, x=-121.5, y=46.16,
+                timestamp="2025-11-01T12:05:00+00:00",  # 5 min gap
+                responseid="test", projectid=1
+            ),
+            SurveyPointData(
+                id=3, x=-121.5, y=46.17,
+                timestamp="2025-11-01T12:10:00+00:00",  # 5 min gap
+                responseid="test", projectid=1
+            ),
+        ]
+
+        # Should process all as single segment despite time gaps
+        segments = segmenter._temporal_segmentation(points)
+
+        # When disabled, segment_session treats all points as one segment
+        results = segmenter.segment_session(points)
+        # Should create one temporal segment containing all points
+        self.assertEqual(len(results['temporal_segments']), 1)
+        self.assertEqual(results['temporal_segments'][0]['point_count'], 3)
+
     def test_single_temporal_segment(self):
         """Points within max_time_gap should form one temporal segment"""
-        segmenter = GeometrySegmenter(max_time_gap=180.0)
+        segmenter = GeometrySegmenter(max_time_gap=60.0, enable_temporal_segmentation=True)
 
         points = [
             SurveyPointData(
@@ -58,7 +90,7 @@ class TemporalSegmentationTest(unittest.TestCase):
 
     def test_multiple_temporal_segments(self):
         """Points with gaps > max_time_gap should form multiple segments"""
-        segmenter = GeometrySegmenter(max_time_gap=180.0)
+        segmenter = GeometrySegmenter(max_time_gap=60.0, enable_temporal_segmentation=True)
 
         points = [
             SurveyPointData(
@@ -91,7 +123,7 @@ class SpatialClusteringTest(unittest.TestCase):
 
     def test_dbscan_single_cluster(self):
         """Points within max_distance should form one cluster"""
-        segmenter = GeometrySegmenter(max_distance=500.0)
+        segmenter = GeometrySegmenter(max_distance=500.0, use_dbscan=True)
 
         points = [
             SurveyPointData(
@@ -119,7 +151,7 @@ class SpatialClusteringTest(unittest.TestCase):
 
     def test_radius_based_clustering_overlap(self):
         """Points with overlapping radii should cluster together"""
-        segmenter = GeometrySegmenter(use_radius_adjacency=True, min_cluster_points=3)
+        segmenter = GeometrySegmenter(use_dbscan=False, min_cluster_points=3)
 
         # Three points with overlapping radii of 150m each
         # Distance < radius_A + radius_B (200 < 300), so they should cluster
@@ -152,7 +184,7 @@ class SpatialClusteringTest(unittest.TestCase):
 
     def test_radius_based_clustering_no_overlap(self):
         """Points without overlapping radii should not cluster"""
-        segmenter = GeometrySegmenter(use_radius_adjacency=True, min_cluster_points=2)
+        segmenter = GeometrySegmenter(use_dbscan=False, min_cluster_points=2)
 
         # Two points 500m apart with radii of 50m each
         # Distance > radius_A + radius_B (500 > 100), so they should not cluster
@@ -292,10 +324,11 @@ class IntegrationTest(unittest.TestCase):
     def test_segment_polygon_from_circular_path(self):
         """Should create polygon from circular walking path"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
+            max_time_gap=60.0,
             max_distance=500.0,
             linearity_threshold=0.6,
-            min_polygon_points=4
+            min_polygon_points=4,
+            enable_temporal_segmentation=True
         )
 
         # Create 8 points in a circle (simulating someone walking around an area)
@@ -332,10 +365,11 @@ class IntegrationTest(unittest.TestCase):
     def test_segment_linestring_from_linear_path(self):
         """Should create linestring from linear walking path"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
+            max_time_gap=60.0,
             max_distance=500.0,
             linearity_threshold=0.6,
-            min_linestring_points=2
+            min_linestring_points=2,
+            enable_temporal_segmentation=True
         )
 
         # Create points in a straight line
@@ -370,10 +404,11 @@ class IntegrationTest(unittest.TestCase):
     def test_radius_mode_clusters_overlapping_points(self):
         """Radius mode should cluster points with overlapping uncertainty circles"""
         segmenter = GeometrySegmenter(
-            max_time_gap=180.0,
-            use_radius_adjacency=True,
+            max_time_gap=60.0,
+            use_dbscan=False,
             linearity_threshold=0.6,
-            min_cluster_points=3
+            min_cluster_points=3,
+            enable_temporal_segmentation=True
         )
 
         # Create points 150m apart with 100m radii
