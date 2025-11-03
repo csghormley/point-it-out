@@ -1,0 +1,1 @@
+Example sudoers file to install in /etc/sudoers.d with visudo
