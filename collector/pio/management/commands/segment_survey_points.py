@@ -420,7 +420,6 @@ class Command(BaseCommand):
     def _load_points_from_file(self, filepath):
         """Load survey points from a GeoJSON file"""
         import os
-        from datetime import datetime
 
         if not os.path.exists(filepath):
             raise CommandError(f"File not found: {filepath}")

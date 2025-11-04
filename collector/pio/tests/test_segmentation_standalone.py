@@ -12,9 +12,7 @@ Tests cover:
 - Linearity calculation
 """
 
-import json
 import math
-import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
@@ -53,7 +51,7 @@ class TemporalSegmentationTest(unittest.TestCase):
         ]
 
         # Should process all as single segment despite time gaps
-        segments = segmenter._temporal_segmentation(points)
+        segmenter._temporal_segmentation(points)
 
         # When disabled, segment_session treats all points as one segment
         results = segmenter.segment_session(points)

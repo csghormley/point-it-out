@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.contrib.gis.db import models
-from djgeojson.fields import GeometryCollectionField
 
 # supply a default configuration dict for MapConfig.config
 # see also map.js for internal defaults this would override,

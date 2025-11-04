@@ -9,7 +9,6 @@ import logging
 import numpy as np
 from sklearn.cluster import DBSCAN
 from shapely.geometry import Point, LineString, Polygon, MultiPoint
-from shapely.ops import unary_union
 
 from .data import SurveyPointData
 
