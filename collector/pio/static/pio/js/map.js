@@ -1732,9 +1732,15 @@ export class MapManager {
             }
         })
         .then(response => {
-            if (this.config.verbose) console.log(`deleteData: Point ${id} deleted from response ${this.responseid}`);
-            this.points_source.removeFeature(feature);
-            this.countPoints();
+            if (response.ok) {
+                if (this.config.verbose)
+                    console.log(`deleteData: Point ${id} deleted from response ${this.responseid}`);
+                this.points_source.removeFeature(feature);
+                this.countPoints();
+            } else {
+                if (this.config.verbose)
+                    console.log(`deleteData: HTTP error ${response.status}`);
+            }
         })
         .catch(error => {
             if (this.config.verbose) console.log(`deleteData: Problem deleting the point ${id}`);
