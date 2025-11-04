@@ -919,7 +919,7 @@ export class MapManager {
         // ** start ** permalink management
         // keep URL updated with permalink
         let shouldUpdate = true;
-        const view = map.getView();
+        const view = this.map.getView();
         const updatePermalink = function () {
             if (!shouldUpdate) {
                 // do not update the URL when the view was changed in the 'popstate' handler
@@ -945,7 +945,7 @@ export class MapManager {
             window.history.pushState(state, 'map', hash);
         };
 
-        map.on('moveend', updatePermalink);
+        this.map.on('moveend', updatePermalink);
 
         // restore the view state when navigating through the history, see
         // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
@@ -953,9 +953,9 @@ export class MapManager {
             if (event.state === null) {
                 return;
             }
-            map.getView().setCenter(event.state.center);
-            map.getView().setZoom(event.state.zoom);
-            map.getView().setRotation(event.state.rotation);
+            this.map.getView().setCenter(event.state.center);
+            this.map.getView().setZoom(event.state.zoom);
+            this.map.getView().setRotation(event.state.rotation);
             shouldUpdate = false;
         });
         // ** end ** permalink management
