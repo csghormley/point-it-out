@@ -916,6 +916,50 @@ export class MapManager {
             mapViewport.style.cursor = hit ? 'context-menu' : '';
         });
 
+        // ** start ** permalink management
+        // keep URL updated with permalink
+        let shouldUpdate = true;
+        const view = map.getView();
+        const updatePermalink = function () {
+            if (!shouldUpdate) {
+                // do not update the URL when the view was changed in the 'popstate' handler
+                shouldUpdate = true;
+                return;
+            }
+
+            const center = view.getCenter();
+            const hash =
+                  '#map=' +
+                  view.getZoom().toFixed(2) +
+                  '/' +
+                  center[0].toFixed(2) +
+                  '/' +
+                  center[1].toFixed(2) +
+                  '/' +
+                  view.getRotation();
+            const state = {
+                zoom: view.getZoom(),
+                center: view.getCenter(),
+                rotation: view.getRotation(),
+            };
+            window.history.pushState(state, 'map', hash);
+        };
+
+        map.on('moveend', updatePermalink);
+
+        // restore the view state when navigating through the history, see
+        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
+        window.addEventListener('popstate', function (event) {
+            if (event.state === null) {
+                return;
+            }
+            map.getView().setCenter(event.state.center);
+            map.getView().setZoom(event.state.zoom);
+            map.getView().setRotation(event.state.rotation);
+            shouldUpdate = false;
+        });
+        // ** end ** permalink management
+        
         // Global keydown events
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape') {
