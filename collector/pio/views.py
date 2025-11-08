@@ -14,7 +14,7 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 ##from .serializers import GeoFeatureModelSerializer
 
 from .models import FeatureLayer, MapLayer, MapConfig, BaseMap, MapBasemap, SurveyPoint, VisitorBehavior
-from .permissions import FeatureLayerPermission, MapLayerPermission, SurveyPointPermission, VisitorBehaviorPermission
+from .permissions import MapLayerPermission, SurveyPointPermission, VisitorBehaviorPermission
 from .throttles import (
     SurveyPointAnonThrottle,
     SurveyPointAuthThrottle,
@@ -411,7 +411,6 @@ def export_surveypoints_geojson(request):
     - deleted: Include deleted points (default: false)
     """
     from django.http import JsonResponse
-    from django.contrib.gis.geos import GEOSGeometry
     import json
 
     # Start with base queryset

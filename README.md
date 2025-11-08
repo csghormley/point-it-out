@@ -61,10 +61,10 @@ The application consists of:
 
 * `collector/` - Django project directory
 * `docker-stack/` - Docker Compose configuration and build scripts
-* `docs/` - Sphinx documentation (RST format)
+* `docs/` - Sphinx documentation
 * `nginx/` - Nginx configuration examples
 * `postgis_data/pgdata/` - PostgreSQL data directory
-* `systemd/` - Systemd service unit files
+* `etc/` - Example system configuration files
 * `mapcfg` - Unified management script
 * `.mapcfgrc.example` - Configuration template
 

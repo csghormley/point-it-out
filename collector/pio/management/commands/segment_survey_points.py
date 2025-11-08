@@ -15,6 +15,7 @@ from django.utils.text import slugify
 from pio.models import SurveyPoint, FeatureLayer
 from pio.segmentation import GeometrySegmenter, SurveyPointData, format_results, export_geojson
 
+
 class Command(BaseCommand):
     help = 'Segment survey points into polygons, linestrings, and individual points'
 
@@ -35,19 +36,29 @@ class Command(BaseCommand):
             action='store_true',
             help='Process all response IDs'
         )
+        parser.add_argument(
+            '--input-file',
+            type=str,
+            help='Path to GeoJSON file with survey points (alternative to database query)'
+        )
 
         # Segmentation parameters
         parser.add_argument(
+            '--temporal',
+            action='store_true',
+            help='Enable temporal segmentation (split points by time gaps)'
+        )
+        parser.add_argument(
             '--max-time-gap',
             type=float,
-            default=180.0,
-            help='Maximum time gap in seconds (default: 180)'
+            default=60.0,
+            help='Maximum time gap in seconds (default: 60, only used with --temporal)'
         )
         parser.add_argument(
             '--max-distance',
             type=float,
             default=150.0,
-            help='Maximum distance in meters (default: 150)'
+            help='Maximum distance in meters for DBSCAN clustering (default: 150, only used with --dbscan)'
         )
         parser.add_argument(
             '--min-cluster-points',
@@ -59,7 +70,18 @@ class Command(BaseCommand):
             '--polygon-threshold',
             type=float,
             default=100.0,
-            help='Polygon closure threshold in meters (default: 100)'
+            help='Polygon closure threshold in meters (default: 100, only used with --dbscan)'
+        )
+        parser.add_argument(
+            '--linearity-threshold',
+            type=float,
+            default=0.6,
+            help='Linearity threshold below which to create polygons via convex hull (0-1, default: 0.6)'
+        )
+        parser.add_argument(
+            '--dbscan',
+            action='store_true',
+            help='Use DBSCAN fixed-distance clustering instead of radius-based adjacency (default: radius-based)'
         )
 
         # Output options
@@ -76,18 +98,71 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Validate input
-        if not options['responseid'] and not options['all']:
-            raise CommandError("Either --responseid or --all must be specified")
+        if options['input_file']:
+            # File input mode
+            if options['responseid'] or options['all']:
+                raise CommandError("Cannot use --input-file with --responseid or --all")
+        elif not options['responseid'] and not options['all']:
+            raise CommandError("Either --responseid, --all, or --input-file must be specified")
+
+        # Validate options
+        if not options['dbscan']:
+            # Warn if DBSCAN-specific parameters are specified without --dbscan
+            if options['max_distance'] != 150.0:
+                self.stdout.write(
+                    self.style.WARNING(
+                        "Warning: --max-distance is only used with --dbscan flag. "
+                        "Using radius-based adjacency by default."
+                    )
+                )
+            if options['polygon_threshold'] != 100.0:
+                self.stdout.write(
+                    self.style.WARNING(
+                        "Warning: --polygon-threshold is only used with --dbscan flag. "
+                        "Using radius-based adjacency by default."
+                    )
+                )
 
         # Initialize segmenter
         segmenter = GeometrySegmenter(
             max_time_gap=options['max_time_gap'],
             max_distance=options['max_distance'],
             min_cluster_points=options['min_cluster_points'],
-            polygon_closure_threshold=options['polygon_threshold']
+            polygon_closure_threshold=options['polygon_threshold'],
+            linearity_threshold=options['linearity_threshold'],
+            use_dbscan=options['dbscan'],
+            enable_temporal_segmentation=options['temporal']
         )
 
-        if options['all']:
+        if options['input_file']:
+            # Process GeoJSON file
+            points = self._load_points_from_file(options['input_file'])
+            if not points:
+                raise CommandError(f"No points found in file {options['input_file']}")
+
+            responseid = points[0].responseid if points else 'unknown'
+            self.stdout.write(f"Processing {len(points)} points from file...")
+
+            # Segment
+            results = segmenter.segment_session(points)
+
+            # Display
+            self.stdout.write(format_results(results))
+
+            # Export if requested
+            if options['output']:
+                export_geojson(results, options['output'])
+                self.stdout.write(
+                    self.style.SUCCESS(f"✓ Exported to {options['output']}")
+                )
+
+            # Note: --save-layers not supported for file input
+            if options['save_layers']:
+                self.stdout.write(
+                    self.style.WARNING("Note: --save-layers is only supported for database queries")
+                )
+
+        elif options['all']:
             # Process all response IDs
             responseids = SurveyPoint.objects.filter(
                 deleted=False
@@ -228,10 +303,13 @@ class Command(BaseCommand):
     def _generate_params_hash(self, options):
         """Generate a hash of segmentation parameters to prevent duplicates"""
         params = {
+            'temporal': options['temporal'],
             'max_time_gap': options['max_time_gap'],
             'max_distance': options['max_distance'],
             'min_cluster_points': options['min_cluster_points'],
-            'polygon_threshold': options['polygon_threshold']
+            'polygon_threshold': options['polygon_threshold'],
+            'linearity_threshold': options['linearity_threshold'],
+            'dbscan': options['dbscan']
         }
         # Create a stable JSON representation and hash it
         params_str = json.dumps(params, sort_keys=True)
@@ -290,6 +368,8 @@ class Command(BaseCommand):
                     'point_count': geom_data['point_count'],
                     'point_ids': geom_data['point_ids'],
                     'area': geom_data['area'],
+                    'method': geom_data.get('method', 'explicit_closure'),
+                    'linearity': geom_data.get('linearity'),
                     'timestamp_start': geom_data['timestamp_range'][0],
                     'timestamp_end': geom_data['timestamp_range'][1],
                     'responseid': responseid,
@@ -336,3 +416,57 @@ class Command(BaseCommand):
         )
 
         return layer
+
+    def _load_points_from_file(self, filepath):
+        """Load survey points from a GeoJSON file"""
+        import os
+
+        if not os.path.exists(filepath):
+            raise CommandError(f"File not found: {filepath}")
+
+        try:
+            with open(filepath, 'r') as f:
+                geojson_data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise CommandError(f"Invalid JSON in file: {e}")
+
+        if geojson_data.get('type') != 'FeatureCollection':
+            raise CommandError("GeoJSON must be a FeatureCollection")
+
+        features = geojson_data.get('features', [])
+        if not features:
+            raise CommandError("No features found in GeoJSON")
+
+        # Convert features to SurveyPointData objects
+        points = []
+        for feature in features:
+            if feature.get('geometry', {}).get('type') != 'Point':
+                continue  # Skip non-point features
+
+            coords = feature['geometry']['coordinates']
+            props = feature.get('properties', {})
+
+            # Parse timestamp - handle both timestamp and timestamp_add fields
+            timestamp = props.get('timestamp_add') or props.get('timestamp')
+            if not timestamp:
+                self.stdout.write(
+                    self.style.WARNING(f"Skipping feature {props.get('id')}: missing timestamp")
+                )
+                continue
+
+            # Create SurveyPointData
+            point = SurveyPointData(
+                id=props.get('id', len(points)),
+                x=coords[0],
+                y=coords[1],
+                timestamp=timestamp,
+                responseid=props.get('responseid', 'unknown'),
+                projectid=props.get('projectid', 0),
+                description=props.get('description'),
+                radius=props.get('radius'),
+                resolution=props.get('resolution')
+            )
+            points.append(point)
+
+        self.stdout.write(f"Loaded {len(points)} points from {filepath}")
+        return points

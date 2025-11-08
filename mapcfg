@@ -235,7 +235,7 @@ cmd_build() {
 # maintenance - Clean up Docker resources
 cmd_maintenance() {
     info "Running Docker system maintenance..."
-    maybe_sudo docker system prune --filter "label=tag!=latest" --force
+    maybe_sudo docker system prune --filter "until=24h" --all --force
     success "Maintenance complete"
 }
 
