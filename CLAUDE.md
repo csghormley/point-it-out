@@ -20,24 +20,22 @@ Quick reference for common tasks below.
 - **Development server**: `cd collector && python manage.py runserver`
 - **Django shell**: `cd collector && python manage.py shell`
 - **Create migrations**: `cd collector && python manage.py makemigrations`
-- **Apply migrations**: `./scripts/migrate.sh` (preferred - handles build and deployment)
+- **Apply migrations**: `./mapcfg migrate` (preferred - handles build and deployment)
 - **Collect static files**: `cd collector && python manage.py collectstatic`
-- **Django checks**: `cd collector && python manage.py check`
+- **Django checks**: `./mapcfg check`
 
 ### Docker Operations
-- **Build and restart services**: `./checkbuildrun.sh`
-- **Build Docker images**:
-  - Django: `cd docker-stack && ./build-django.sh`
-  - Nginx: `cd docker-stack && ./build-nginx.sh`
-  - Dependencies: `cd docker-stack && ./build-deps.sh`
-- **Manual Docker Compose**: `cd docker-stack && docker compose -f docker-compose.yml up`
-- **Database backup**: `./scripts/backup-db.sh`
+- **Build and restart services**: `./mapcfg build`
+- **Start services**: `./mapcfg start`
+- **Stop services**: `./mapcfg stop`
+- **Restart services**: `./mapcfg restart`
+- **View logs**: `./mapcfg logs [service]`
+- **Database backup**: `./mapcfg backup`
 
 ### Environment Setup
 ```bash
-python -m venv env
-source env/bin/activate  # or `. env/bin/activate`
-pip install -r requirements.txt
+./mapcfg bootstrap
+# This installs uv, creates a virtual environment, and runs uv sync
 ```
 
 ### Git Hooks
@@ -99,7 +97,7 @@ MapConfig (map configurations)
 ### Django Settings
 - **Main settings**: `collector/collector/settings.py`
 - **Local settings**: `collector/collector/localsettings.py` (git-ignored)
-- **Dependencies**: `requirements.txt`
+- **Dependencies**: `pyproject.toml` and `uv.lock`
 
 ### Docker Configuration
 - **Compose file**: `docker-stack/docker-compose.yml`
@@ -115,10 +113,10 @@ MapConfig (map configurations)
 
 ### Making Model Changes
 1. Modify models in `collector/pio/models.py`
-2. Run `./scripts/migrate.sh` (handles makemigrations, build, deploy, and migrate)
+2. Run `./mapcfg migrate` (handles makemigrations, build, deploy, and migrate)
 3. Alternatively, manual process:
    - `cd collector && python manage.py makemigrations`
-   - `./checkbuildrun.sh` (rebuild and restart services)
+   - `./mapcfg run` (rebuild and restart services)
    - `docker compose -f docker-stack/docker-compose.yml exec django ./manage.py migrate`
 
 ### Frontend Development
