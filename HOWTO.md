@@ -4,23 +4,11 @@
 
 To view the full documentation:
 
-**Using uv (recommended):**
-
 ```bash
 cd docs
 uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
-make html
-```
-
-**Using pip:**
-
-```bash
-cd docs
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
 make html
 ```
 

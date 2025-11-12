@@ -29,15 +29,11 @@ The segmentation code is integrated into the Django application at ``collector/p
 Installation
 ------------
 
-Dependencies are included in the main ``requirements.txt`` and ``pyproject.toml``:
+Dependencies are included in ``pyproject.toml``:
 
 .. code-block:: bash
 
-    # Using uv (recommended)
     uv sync
-
-    # Or using pip
-    pip install -r requirements.txt
 
 Required packages:
 
