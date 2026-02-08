@@ -88,8 +88,23 @@ def demo(request):
 
 @staff_member_required
 def version(request):
-    context = {}
-    return render(request, "pio/version.txt", context)
+    import django, sys
+    from pathlib import Path
+    from osgeo import gdal
+
+    git_version_file = Path(__file__).parent / 'templates' / 'pio' / 'version.txt'
+    try:
+        git_info = git_version_file.read_text().strip()
+    except FileNotFoundError:
+        git_info = '(development build)'
+
+    context = {
+        'git_info': git_info,
+        'django_version': f'{django.VERSION[0]}.{django.VERSION[1]}.{django.VERSION[2]}',
+        'gdal_version': gdal.VersionInfo('RELEASE_NAME'),
+        'python_version': sys.version.split()[0],
+    }
+    return render(request, "pio/version.html", context)
 
 
 class MapLayerSerializer(serializers.ModelSerializer):

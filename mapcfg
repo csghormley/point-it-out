@@ -225,9 +225,9 @@ cmd_build() {
     info "Collecting static files..."
     ./collector/manage.py collectstatic --noinput
 
-    # Update version
+    # Update version (git info only - Django/GDAL/Python versions are computed at runtime)
     info "Generating version.txt..."
-    cmd_version > "$WORKDIR/collector/pio/templates/pio/version.txt"
+    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1 > "$WORKDIR/collector/pio/templates/pio/version.txt"
     success "Version file updated"
 
 
