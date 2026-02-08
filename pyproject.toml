@@ -7,7 +7,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "wheel",
-    "Django==6",
+    "Django>=6.0.2,<7",
     "django-environ",
     "GEOS",
     "PROJ",
