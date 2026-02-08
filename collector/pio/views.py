@@ -88,7 +88,8 @@ def demo(request):
 
 @staff_member_required
 def version(request):
-    import django, sys
+    import django
+    import sys
     from pathlib import Path
     from osgeo import gdal
 
