@@ -201,7 +201,16 @@ cmd_check() {
 
 # version - Update version.txt from git
 cmd_version() {
+    activate_venv
     git log --pretty=format:"%h %ad | %s [%an]" --date=short -1
+    echo ""
+    python -c "
+import django, sys
+from osgeo import gdal
+print(f'Django {django.VERSION[0]}.{django.VERSION[1]}.{django.VERSION[2]}')
+print(f'GDAL {gdal.VersionInfo(\"RELEASE_NAME\")}')
+print(f'Python {sys.version.split()[0]}')
+"
 }
 
 # build - Build Docker images

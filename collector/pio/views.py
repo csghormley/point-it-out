@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.gis.geoip2 import GeoIP2
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -85,6 +86,7 @@ def demo(request):
     context = {}
     return render(request, "pio/demo.html", context)
 
+@staff_member_required
 def version(request):
     context = {}
     return render(request, "pio/version.txt", context)
