@@ -18,6 +18,7 @@ dependencies = [
     "GDAL==3.8.4 ; sys_platform == 'linux'",
     # Two-factor authentication
     "phonenumbers",
+    "pyopenssl>=26.0.0",
     "webauthn",
     "django-formtools",
     "cffi",
@@ -25,7 +26,7 @@ dependencies = [
     "django-debug-toolbar",
     # Security
     "django-csp>=4.0",
-    "django-allauth[mfa]",
+    "django-allauth[mfa]>=65.14.1",
     # Django extensions and REST framework
     "django-extensions",
     "djangorestframework",
@@ -37,6 +38,7 @@ dependencies = [
     "gunicorn",
     # Additional utilities
     "tzdata",
+    "aiohttp>=3.13.3",
     "geoip2",
     "django-json-widget",
     # Segmentation dependencies
