@@ -7,10 +7,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "wheel",
-    "Django==6",
+    "Django>=6.0.3,<7",
     "django-environ",
-    "GEOS",
-    "PROJ",
     "django-geojson",
     # Platform-specific psycopg variants
     "psycopg[binary]>=3.0 ; sys_platform == 'darwin' or sys_platform == 'win32'",
