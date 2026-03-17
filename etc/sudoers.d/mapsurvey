@@ -1,0 +1,6 @@
+Cmd_Alias DEPLOYMENT = /opt/mapsurvey/mapcfg run, \
+	/usr/bin/systemctl restart docker.mapsurvey.service, \
+	/usr/bin/git fetch, \
+	/usr/bin/git pull
+
+%deploy ALL=(root) NOPASSWD: DEPLOYMENT

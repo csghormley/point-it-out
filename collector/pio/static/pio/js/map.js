@@ -80,7 +80,6 @@ export class MapManager {
             // Colorbrewer 8-class qualitative scheme
             point_colormap: ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf'],
             edit_worktype: false,
-            max_res: 800,
             initial_zoom: 4,
             min_zoom: 4,
             max_zoom: 16,
@@ -94,9 +93,8 @@ export class MapManager {
             verbose: false,
             max_diameter: 16093.4, // meters; 10mi
             min_diameter: 804.67, // meters; 0.5mi
-            site_description: "region near the map center",
-            site_purpose: "wildfire resilience and vulnerability",
-            layers: []
+            site_description: "survey mapping application",
+            site_purpose: "survey spatial data collection"
         };
 
         // Parse user configuration
@@ -299,14 +297,16 @@ export class MapManager {
             source: this.points_source,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
-            style: this.mapMarkerStyleFunction.bind(this)
+            style: this.mapMarkerStyleFunction.bind(this),
+            zIndex: 1000  // Survey points render on top of feature layers
         });
 
         this.stored_vector_layer = new VectorLayer({
             source: this.stored_vector_source,
             updateWhileAnimating: true,
             updateWhileInteracting: true,
-            style: new Style({})
+            style: new Style({}),
+            zIndex: 900  // Stored points render below active survey points
         });
 
         // Add configured GeoJSON layers if specified
@@ -471,13 +471,13 @@ export class MapManager {
                 }),
                 text: labelText ? new Text({
                     text: labelText,
-                    font: `${layerConfig.font_style || 'italic'} ${layerConfig.font_size || '9px'} ${layerConfig.font_face || 'Arial, Helvetica, sans-serif'}`,
+                    font: `${layerConfig.font_style || ''} ${layerConfig.font_size || '9px'} ${layerConfig.font_face || 'Arial, Helvetica, sans-serif'}`,
                     fill: new Fill({
                         color: layerConfig.font_color || '#000000'
                     }),
                     stroke: new Stroke({
                         color: layerConfig.font_stroke_color || '#FFFFFF33',
-                        width: 3
+                        width: layerConfig.font_stroke_width || 3
                     }),
                     offsetX: layerConfig.text_offset?.[0] || 0,
                     offsetY: layerConfig.text_offset?.[1] || -15,
@@ -741,7 +741,8 @@ export class MapManager {
                     color: '#EF535099',
                     width: 4
                 })
-            })
+            }),
+            zIndex: 1100  // Study area boundary renders on top of everything
         });
     }
 
@@ -914,6 +915,7 @@ export class MapManager {
             const hit = this.map.forEachFeatureAtPixel(pixel, () => true);
             mapViewport.style.cursor = hit ? 'context-menu' : '';
         });
+
 
         // Global keydown events
         document.addEventListener('keydown', event => {
@@ -1163,11 +1165,12 @@ export class MapManager {
         // Everything is OK
         else {
             // Show a context-sensitive mouse pointer
-            // the cursors are images so they won't match a custom colormap
             const colormap = this.getConfig('point_colormap');
             const colorid = (this.projectid-1) % colormap.length;
+            const color = colormap[colorid];
 
-            const icon_url = `${this.img_url}circle_st1_${colorid}.png`;
+            // Create dynamic cursor icon using the colormap color
+            const cursorIcon = this.createCursorIcon(color);
 
             pointerStyle.setImage(new Icon({
                 anchor: [0.5, 0.5],
@@ -1175,7 +1178,8 @@ export class MapManager {
                 offset: [0, 0],
                 opacity: 1,
                 scale: this.getMapScaleFactor(),
-                src: icon_url
+                img: cursorIcon,
+                imgSize: [107, 107]
             }));
         }
 
@@ -1409,6 +1413,44 @@ export class MapManager {
                 feature.setStyle(this.mapMarkerStyleFunction.bind(this));
             }
         });
+    }
+
+    /**
+     * Create a dynamic cursor icon with the specified color
+     * @param {string} color - Hex color code (e.g., '#e41a1c')
+     * @returns {HTMLCanvasElement} Canvas element with the cursor icon
+     */
+    createCursorIcon(color) {
+        const size = 107;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = 42; // Main circle radius
+
+        // Draw inner fill (lighter/more transparent)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = color + '4d'; // Add alpha for fill (30% opacity)
+        ctx.fill();
+
+        // Draw outer stroke (darker border)
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = color + 'cc'; // Add alpha for stroke (80% opacity)
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw center dot for precision
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 2, 0, 2 * Math.PI);
+        ctx.fillStyle = '#00000099'; // 60% opacity
+        ctx.fill();
+
+        return canvas;
     }
 
     /**
@@ -1647,9 +1689,15 @@ export class MapManager {
             }
         })
         .then(response => {
-            if (this.config.verbose) console.log(`deleteData: Point ${id} deleted from response ${this.responseid}`);
-            this.points_source.removeFeature(feature);
-            this.countPoints();
+            if (response.ok) {
+                if (this.config.verbose)
+                    console.log(`deleteData: Point ${id} deleted from response ${this.responseid}`);
+                this.points_source.removeFeature(feature);
+                this.countPoints();
+            } else {
+                if (this.config.verbose)
+                    console.log(`deleteData: HTTP error ${response.status}`);
+            }
         })
         .catch(error => {
             if (this.config.verbose) console.log(`deleteData: Problem deleting the point ${id}`);

@@ -107,9 +107,71 @@ class DownloadAsGeoJsonMixin:
 class SurveyPointAdmin(LeafletGeoAdmin, ExportCsvMixin, DownloadAsGeoJsonMixin):
     fields = ['surveyid', 'mapconfig', 'description', 'responseid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'geom', 'deleted']
     readonly_fields = ['surveyid', 'projectid', 'ipaddress', 'timestamp', 'timestamp_add', 'timestamp_edit', 'radius', 'resolution', 'responseid', 'mapconfig',]
-    list_filter = ['surveyid', 'deleted', 'responseid', 'ipaddress', 'radius', ]
-    search_fields = ['surveyid', 'ipaddress', 'radius', 'responseid', 'geom']
+    list_filter = ['surveyid', 'mapconfig__name', 'deleted', 'responseid', 'ipaddress', 'radius', ]
+    search_fields = ['surveyid', 'mapconfig__name', 'ipaddress', 'radius', 'responseid', 'geom']
     actions = ["export_as_csv", "download_as_geojson"]
+    change_list_template = 'admin/pio/surveypoint/change_list.html'
+
+    show_facets = admin.ShowFacets.ALWAYS
+
+    def has_add_permission(self, request, obj=None):
+        return False
+    
+    def changelist_view(self, request, extra_context=None):
+        """Add shareable GeoJSON export URL to the context"""
+        extra_context = extra_context or {}
+
+        # Build the export URL with current filters
+        from django.urls import reverse
+        from urllib.parse import urlencode
+
+        # Get query parameters from the changelist
+        query_params = {}
+
+        # Extract filter parameters
+        responseid = request.GET.get('responseid')
+        if responseid:
+            query_params['responseid'] = responseid
+
+        projectid = request.GET.get('projectid')
+        if projectid:
+            query_params['projectid'] = projectid
+
+        surveyid = request.GET.get('surveyid')
+        if surveyid:
+            query_params['surveyid'] = surveyid
+
+        mapconfig = request.GET.get('mapconfig__name')
+        if mapconfig:
+            # For related field filters, we need to lookup the ID
+            from pio.models import MapConfig
+            try:
+                mc = MapConfig.objects.get(name=mapconfig)
+                query_params['mapconfig'] = mc.id
+            except MapConfig.DoesNotExist:
+                pass
+
+        # Django admin uses 'deleted__exact' for boolean filters
+        deleted = request.GET.get('deleted__exact')
+        if deleted is not None:
+            # Convert '1' to 'true' and '0' to 'false' for the URL
+            query_params['deleted'] = 'true' if deleted == '1' else 'false'
+
+        # Build the export URL
+        base_url = reverse('export_surveypoints_geojson')
+        if query_params:
+            export_url = f"{base_url}?{urlencode(query_params)}"
+        else:
+            export_url = base_url
+
+        # Make it an absolute URL for easy sharing
+        export_url_absolute = request.build_absolute_uri(export_url)
+
+        extra_context['geojson_export_url'] = export_url
+        extra_context['geojson_export_url_absolute'] = export_url_absolute
+        extra_context['has_filters'] = bool(query_params)
+
+        return super().changelist_view(request, extra_context=extra_context)
 
 class MapLayerInline(admin.TabularInline):
     model = MapLayer
@@ -119,6 +181,7 @@ class MapLayerInline(admin.TabularInline):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
@@ -146,6 +209,7 @@ class MapBasemapInline(admin.TabularInline):
 
 @admin.register(MapConfig)
 class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'config',]
     list_display = ('name', 'map_link',)
     prepopulated_fields = {"slug": ("name",)}
@@ -157,6 +221,7 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
@@ -166,6 +231,7 @@ class MapConfigAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(FeatureLayer)
 class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'geojson',]
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ['id',]
@@ -174,6 +240,7 @@ class FeatureLayerAdmin(admin.ModelAdmin, ExportCsvMixin):
 
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget(options={'mode': 'text'},
+                                               width='100%',
                                                height='300px')}
     }
 
@@ -189,6 +256,7 @@ class VisitorBehaviorAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(ResponseSummary)
 class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['surveyid', 'responseid', 'ts_start', 'ts_end', 'duration', 'ipaddr', 'recordct',]
     list_display = fields
     readonly_fields = fields # this is a view - read only
@@ -199,6 +267,7 @@ class ResponseSummaryAdmin(admin.ModelAdmin, ExportCsvMixin):
 
 @admin.register(BaseMap)
 class BaseMapAdmin(admin.ModelAdmin, ExportCsvMixin):
+    save_as = True
     fields = ['id', 'name', 'slug', 'tile_url', 'attribution']
     list_display = ('name', 'slug', 'tile_url')
     prepopulated_fields = {"slug": ("name",)}

@@ -13,7 +13,3 @@ echo Building a docker image for the current Django project...
 docker build . -f docker-stack/img-django-app/Dockerfile -t \
     $IMAGE_NAME:$(git rev-parse --short HEAD)
 docker tag $IMAGE_NAME:$(git rev-parse --short HEAD) $IMAGE_NAME:latest
-
-# collect static files (they don't live inside the image)
-echo remember to collect static files!
-echo env/bin/python ../collector/manage.py collectstatic

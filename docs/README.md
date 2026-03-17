@@ -6,8 +6,6 @@ This directory contains the Sphinx documentation for MapSurvey.
 
 ### Prerequisites
 
-**Option 1: Using uv (recommended)**
-
 ```bash
 # Install uv if not already installed
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -17,16 +15,6 @@ cd docs
 uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
-```
-
-**Option 2: Using pip**
-
-```bash
-# Create virtual environment
-cd docs
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
 ```
 
 ### Build HTML
@@ -65,17 +53,8 @@ make clean
 
 For development with auto-rebuild:
 
-**Using uv:**
-
 ```bash
 uv pip install sphinx-autobuild
-sphinx-autobuild source build/html
-```
-
-**Using pip:**
-
-```bash
-pip install sphinx-autobuild
 sphinx-autobuild source build/html
 ```
 

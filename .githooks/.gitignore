@@ -1,0 +1,2 @@
+# Don't ignore anything in .githooks - we want these version controlled
+!*

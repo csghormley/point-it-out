@@ -4,12 +4,9 @@ Django settings for collector project.
 import environ
 import os
 from pathlib import Path
-from .localsettings import DEBUG, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, DB_SERVER
+from .localsettings import * # for platform flexibility
 
 from csp.constants import SELF, NONCE, UNSAFE_HASHES, UNSAFE_INLINE
-
-# these settings are only needed on Macs
-#from .localsettings import GDAL_LIBRARY_PATH, GEOS_LIBRARY_PATH
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,18 +16,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # https://django-environ.readthedocs.io/en/latest/tips.html
 # (using Docker secrets with _FILE appended to the variable name
 
-# Take environment variables from .env file (use this as backup in case we're not running in docker compose/stack)
-# Normally, the primary source should be variables fed in through the compose.yml file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
 env = environ.FileAwareEnv(
     # set casting, default value
     DEBUG=(bool, False),
-    APP_DB_PASSWORD=(str, 'secret'),
+    DB_SERVER=(str, 'localhost'),
+    DB_PORT=(int, 5432),
+    DB_PASSWORD=(str, 'secret'),
     ROOT_DB_PASSWORD=(str, 'secret'),
     EMAIL_HOST_PASSWORD=(str, 'none'), # use this as a sentinel to trigger lookup in localsettings
     SECRET_KEY=(str, 'secret'),
 )
+
+# Take environment variables from .env file
+# use this as backup in case we're not running in docker compose/stack
+# Normally, the primary source should be variables fed in through the compose.yml file
+# see .env.dist for an example
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # this should be imported from an unversioned local file
@@ -54,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth email URLs
+    'django.contrib.flatpages',  # For static content pages
     'django.contrib.gis',
     'djgeojson',
     'django_json_widget',
@@ -73,6 +76,9 @@ INSTALLED_APPS = [
     'pio',
 ]
 
+# Sites framework configuration for allauth
+SITE_ID = 1
+
 MIDDLEWARE = [
     'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -85,6 +91,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'allauth.account.middleware.AccountMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 ROOT_URLCONF = 'collector.urls'
@@ -97,6 +104,9 @@ TWO_FACTOR_REMEMBER_COOKIE_AGE = 86400*14
 # ALLAUTH settings
 ACCOUNT_CHANGE_EMAIL=True
 ACCOUNT_CONFIRM_EMAIL_ON_GET=True
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/admin/'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/admin/'
+ACCOUNT_SIGNUP_FORM_HONEYPOT_FIELD = "address"
 
 MFA_SUPPORTED_TYPES = ["totp", "webauthn", "recovery_codes"]
 MFA_PASSKEY_LOGIN_ENABLED = True
@@ -229,33 +239,21 @@ DATABASES = {
         'NAME': 'mapbe',
         'USER': 'geodjango',
         'OPTIONS': {
-            'options': '-c search_path=geodjango,public'
+            'options': '-c search_path=geodjango,public',
+            'sslmode': 'require',
         },
 
+        'HOST': env("DB_SERVER"),
+        'PORT': env("DB_PORT"),
+
         # trim the \n from the end of password, if present
-        'PASSWORD': env("APP_DB_PASSWORD").replace('\n', ''),
-        'HOST': DB_SERVER,
-        'PORT': 5432,
+        'PASSWORD': env("DB_PASSWORD").replace('\n', ''),
     },
 }
 
 SERIALIZATION_MODULES = {
     'geojson' : 'djgeojson.serializers'
 }
-
-"""
-    'admin': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'mapbe',
-        'USER': 'postgres',
-
-        # trim the \n from the end of password, if present
-        'PASSWORD': env("ROOT_DB_PASSWORD").replace('\n', ''),
-        'HOST': DB_SERVER,
-        'PORT': DB_PORT,
-    },
-"""
-
 
 # declare this explicitly so we can enable ManifestStaticFiles
 STORAGES = {

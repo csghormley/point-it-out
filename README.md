@@ -61,10 +61,10 @@ The application consists of:
 
 * `collector/` - Django project directory
 * `docker-stack/` - Docker Compose configuration and build scripts
-* `docs/` - Sphinx documentation (RST format)
+* `docs/` - Sphinx documentation
 * `nginx/` - Nginx configuration examples
 * `postgis_data/pgdata/` - PostgreSQL data directory
-* `systemd/` - Systemd service unit files
+* `etc/` - Example system configuration files
 * `mapcfg` - Unified management script
 * `.mapcfgrc.example` - Configuration template
 
@@ -123,7 +123,7 @@ cd docker-stack && docker compose -f docker-compose.yml up
 
 Database bootstrapping
 Django dependency issues
- * libgdal on the Docker container has to match the Python gdal library called out in requirements.txt
+ * libgdal on the Docker container has to match the Python gdal library version in pyproject.toml
 
 ## Resources
 
@@ -132,13 +132,9 @@ Stackoverflow usually has the answer
 See Docker.com for docker-compose.yml file directives and options.
 Djangoproject.com
 
-Activate the venv:
+Set up the environment:
 
-    % source mapbe/bin/activate
-
-Install the requirements in the venv:
-
-    % pip install -r requirements.txt
+    % ./mapcfg bootstrap
 
 Run the test server:
 

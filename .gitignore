@@ -2,9 +2,7 @@
 *.pyc
 *.zip
 *gz
-env
-wait
-junk
+.venv/
 *.code-workspace
 .vscode
 .mapcfgrc

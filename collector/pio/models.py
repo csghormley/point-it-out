@@ -1,24 +1,52 @@
 from django.core.exceptions import ValidationError
 from django.contrib.gis.db import models
-from djgeojson.fields import GeometryCollectionField
 
 # supply a default configuration dict for MapConfig.config
 # see also map.js for internal defaults this would override,
 # and all configuration settings
 def mapconfig_default():
     return dict(
+        # map positioning
         map_center = [-121.3, 44.1],
         extent = [-122, 43.4, -120.385, 44.824],
         boundary = [-123, 41.9, -119.385, 46.324],
-        src_proj = 'EPSG:4326', # wgs84
-        dest_proj = 'EPSG:3857', # web mercator
-        api_url = '/api/surveypoints/',
-        zoom = 4,
+
+        # projections
+        src_proj = 'EPSG:4326',  # wgs84
+        dest_proj = 'EPSG:3857',  # web mercator
+
+        # display settings
+        display_units = 'ft',
+        initial_zoom = 4,
         max_zoom = 16,
         min_zoom = 4,
-        max_res = 170,
+        min_px_km = 10,
+
+        # survey point settings
+        api_url = '/api/surveypoints/',
+        max_diameter = 16093.4,  # meters; 10mi
+        min_diameter = 804.67,   # meters; 0.5mi
         edit_worktype = True,
-        verbose = False
+
+        # color scheme - Colorbrewer 8-class qualitative
+        point_colormap = [
+            '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
+            '#ff7f00', '#ffff33', '#a65628', '#f781bf'
+        ],
+
+        # UI controls
+        show_description = True,
+        show_diameter = False,
+        show_overview = True,
+        show_status = True,
+        show_zoom = False,
+
+        # Site metadata
+        site_description = "survey mapping application",
+        site_purpose = "survey spatial data collection",
+
+        # Debug
+        verbose = False,
     )
 
 # supply a default configuration dict for MapLayer.config
@@ -26,21 +54,25 @@ def mapconfig_default():
 # and all configuration settings
 def maplayer_default():
     return dict(
-        max_zoom = 14,
-        min_zoom = 11,
+        # point styling
         point_color = "#555555",
         point_radius = 4,
-        line_width = 1.5,
+        max_zoom = 14,
+        min_zoom = 11,
+        # line/polygon styling
+        line_width = 2,
         stroke_color = "#b09592cc",
-        line_dash = [
-            5,
-            2,
-            2,
-            2
-        ],
+        line_dash = [5,2,2,2],
+        fill_color = "rgba(0, 0, 0, 0.1)",
+        # label styling
         font_size = "9px",
-        font_style = "italic",
+        font_style = "normal",
         font_face = "Arial, Helvetica, sans-serif",
+        font_stroke_width = 3,
+        font_color = "#000000",
+        font_stroke_color = "#FFFFFF33",
+        text_offset = [0, -15],
+        text_align = "center",
         label_format = "{name}"  # Format string with {property} placeholders
     )
 
@@ -65,6 +97,7 @@ class FeatureLayer(models.Model):
             raise ValidationError("FeatureCollection must have features array")
 
     class Meta:
+        verbose_name = "Feature layer"
         verbose_name_plural = "Feature layers"
 
 # basemap tile sources - reusable across MapConfigs
@@ -80,6 +113,7 @@ class BaseMap(models.Model):
         return self.name
 
     class Meta:
+        verbose_name = "Basemap"
         verbose_name_plural = "Basemaps"
 
 # links a BaseMap to a MapConfig with zoom levels and styling
@@ -92,8 +126,8 @@ class MapBasemap(models.Model):
         help_text="Maximum zoom level (0-23)")
     opacity = models.FloatField(default=1.0,
         help_text="Opacity 0.0-1.0")
-    z_index = models.IntegerField(default=0,
-        help_text="Rendering order (lower values render first/bottom)")
+    z_index = models.IntegerField(default=-10,
+        help_text="Rendering order for basemaps (must be ≤ 0, lower values render first/bottom). Leave gaps between values (e.g., -10, -20, -30) for easier reordering.")
 
     class Meta:
         ordering = ['z_index']
@@ -111,6 +145,10 @@ class MapBasemap(models.Model):
         # Validate opacity
         if self.opacity < 0.0 or self.opacity > 1.0:
             raise ValidationError("opacity must be between 0.0 and 1.0")
+
+        # Validate z_index (basemaps must be at or below 0)
+        if self.z_index > 0:
+            raise ValidationError("z_index for basemaps must be ≤ 0 (basemaps render below feature layers)")
 
         # Ensure z_index is unique within the map
         if self.mapconfig_id:
@@ -131,8 +169,8 @@ class MapLayer(models.Model):
     mapconfig = models.ForeignKey("MapConfig", on_delete=models.CASCADE)
     layer = models.ForeignKey("FeatureLayer", on_delete=models.CASCADE)
     config = models.JSONField(default=maplayer_default)
-    z_order = models.IntegerField(default=1,
-                                  help_text="Lower values render first (bottom)")
+    z_order = models.IntegerField(default=10,
+                                  help_text="Rendering order for feature layers (positive values, higher renders on top). Leave gaps between values (e.g., 10, 20, 30) for easier reordering. Survey points render at z=1000.")
 
     class Meta:
         unique_together = [('mapconfig', 'layer'), ('mapconfig', 'z_order')]
@@ -195,6 +233,7 @@ class MapConfig(models.Model):
 
     class Meta:
         ordering = ['slug']
+        verbose_name = "Map setup"
         verbose_name_plural = "Map setups"
 
 

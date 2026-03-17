@@ -20,9 +20,7 @@ Basic Setup
 
 2. **Set up Python environment**::
 
-    python -m venv env
-    source env/bin/activate  # or `. env/bin/activate`
-    pip install -r requirements.txt
+    ./mapcfg bootstrap
 
 3. **Configure database**
 
@@ -61,17 +59,9 @@ Building Documentation
 To build this documentation locally::
 
     cd docs
-
-    # Using uv (recommended)
     uv venv
     source .venv/bin/activate
     uv pip install -r requirements.txt
-    make html
-
-    # Or using pip
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -r requirements.txt
     make html
 
 Open ``build/html/index.html`` in your browser.

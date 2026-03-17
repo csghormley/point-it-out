@@ -5,15 +5,17 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/node/bin
+Environment=GIT_REMOTE=origin
+Environment=GIT_BRANCH=main
 Type=oneshot
 User=deploy
 Group=deploy
 WorkingDirectory=/opt/mapsurvey
 ExecStartPre=/bin/bash -c 'git fetch origin'
-ExecStart=/bin/bash -c 'git fetch origin && git diff HEAD origin/dev --quiet && echo "No changes" || (echo "Changes detected" && git pull origin dev && sudo /opt/mapsurvey/checkbuildrun.sh)'
+ExecStart=/bin/bash -c 'git fetch ${GIT_REMOTE} && git diff HEAD ${GIT_REMOTE}/${GIT_BRANCH} --quiet && echo "No changes" || (echo "Changes detected" && git pull ${GIT_REMOTE} ${GIT_BRANCH} && sudo /opt/mapsurvey/mapcfg run)'
 #ExecStartPost=/bin/systemctl reload nginx
-Environment=NODE_ENV=production
-Environment=PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/node/bin
 
 # Logging
 StandardOutput=journal

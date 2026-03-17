@@ -13,12 +13,17 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# create a fresh virtual environment in 'venv',
-# and install the required packages
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN . /opt/venv/bin/activate
-COPY ./requirements.txt .
+# copy uv binary from official image,
+# for faster dependency installation
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN pip install -r requirements.txt && \
-    pip install --upgrade pip
+# copy dependency files
+COPY ./pyproject.toml .
+COPY ./uv.lock .
+COPY ./README.md .
+
+# create a fresh virtual environment and install dependencies with uv
+# Use UV_PROJECT_ENVIRONMENT to force uv to install into /opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN uv sync --frozen

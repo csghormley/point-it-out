@@ -23,7 +23,7 @@ Django Development
 
 - **Apply migrations**::
 
-    ./scripts/migrate.sh
+    ./mapcfg migrate
 
   (preferred - handles build and deployment)
 
@@ -33,18 +33,18 @@ Django Development
 
 - **Django checks**::
 
-    cd collector && python manage.py check
+    ./mapcfg check
 
 Docker Operations
 ~~~~~~~~~~~~~~~~~
 
 - **Build and restart services**::
 
-    ./checkbuildrun.sh
+    ./mapcfg run
 
 - **Build, restart services, and backup database**::
 
-    ./checkbuildrun.sh backup
+    ./mapcfg run backup
 
 - **Manual Docker Compose**::
 
@@ -52,20 +52,47 @@ Docker Operations
 
 - **Database backup**::
 
-    ./scripts/backup-db.sh postgis17 mapbe
+    ./mapcfg backup
 
   Optional remote backup with SSH::
 
-    ./scripts/backup-db.sh postgis17 mapbe server.example.com 22
+    ./mapcfg backup user@server.example.com 22
 
 Environment Setup
 ~~~~~~~~~~~~~~~~~
 
+Python Virtual Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 ::
 
-    python -m venv env
-    source env/bin/activate  # or `. env/bin/activate`
-    pip install -r requirements.txt
+    ./mapcfg bootstrap
+
+This installs uv, creates a virtual environment, and runs ``uv sync`` to install dependencies from ``pyproject.toml``.
+
+Git Hooks
+^^^^^^^^^
+
+The repository includes a pre-commit hook that runs ``./mapcfg check`` before allowing commits.
+
+Install the hooks (one-time setup)::
+
+    ./.githooks/install-hooks.sh
+
+This creates symlinks from ``.git/hooks/`` to ``.githooks/`` so the versioned hooks are used automatically.
+
+The pre-commit hook ensures:
+
+- Django system checks pass
+- Templates are valid
+- Ruff linting passes
+- Docker Compose configuration is valid
+
+To bypass the hook temporarily (not recommended)::
+
+    git commit --no-verify -m "message"
+
+See ``.githooks/README.md`` for more information about managing git hooks.
 
 Architecture Overview
 ---------------------
@@ -120,13 +147,13 @@ Django Settings
 
 - **Main settings**: ``collector/collector/settings.py``
 - **Local settings**: ``collector/collector/localsettings.py`` (git-ignored)
-- **Dependencies**: ``requirements.txt``
+- **Dependencies**: ``pyproject.toml`` and ``uv.lock``
 
 Docker Configuration
 ~~~~~~~~~~~~~~~~~~~~
 
 - **Compose file**: ``docker-stack/docker-compose.yml``
-- **Secrets directory**: ``docker-stack/secrets/``
+- **Secrets directory**: ``docker-stack/secrets/`` (see `Environment Variables (via Docker Secrets)`_ for details)
 
 Map Configuration
 ~~~~~~~~~~~~~~~~~
@@ -143,11 +170,11 @@ Making Model Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 1. Modify models in ``collector/pio/models.py``
-2. Run ``./scripts/migrate.sh`` (handles makemigrations, build, deploy, and migrate)
+2. Run ``./mapcfg migrate`` (handles makemigrations, build, deploy, and migrate)
 3. Alternatively, manual process:
 
    - ``cd collector && python manage.py makemigrations``
-   - ``./checkbuildrun.sh`` (rebuild and restart services)
+   - ``./mapcfg run`` (rebuild and restart services)
    - ``docker compose -f docker-stack/docker-compose.yml exec django ./manage.py migrate``
 
 Frontend Development
@@ -204,6 +231,10 @@ Database Security
 
 Environment Variables (via Docker Secrets)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The application uses `docker-environ <https://django-environ.readthedocs.io/>`_ with ``FileAwareEnv`` to automatically read `Docker secrets <https://docs.docker.com/compose/use-secrets/>`_ from files. Environment variables with a ``_FILE`` suffix (e.g., ``SECRET_KEY_FILE``) are automatically resolved by reading the file at the specified path.
+
+Available secret files:
 
 - ``SECRET_KEY_FILE``: Django secret key
 - ``APP_DB_PASSWORD_FILE``: Application database password

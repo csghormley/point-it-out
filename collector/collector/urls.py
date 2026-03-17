@@ -25,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include("pio.urls")),
+    path('', include('django.contrib.flatpages.urls')),  # Catchall for flatpages
 ]

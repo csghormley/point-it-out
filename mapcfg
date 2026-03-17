@@ -60,7 +60,7 @@ fi
 : "${DB_NAME:=mapbe}"
 : "${SSH_SERVER:=}"
 : "${SSH_PORT:=22}"
-: "${SSH_KEY_PATH:=~/.ssh/id_rsa_backup}"
+: "${SSH_KEY_PATH:=$HOME/.ssh/id_rsa_backup}"
 : "${BACKUP_DIR:=postgis_data/pgdata}"
 : "${SYSTEMD_SERVICE:=docker.mapsurvey.service}"
 
@@ -103,9 +103,9 @@ ensure_root() {
 
 # Activate virtual environment
 activate_venv() {
-    if [ -f "$WORKDIR/env/bin/activate" ]; then
+    if [ -f "$WORKDIR/.venv/bin/activate" ]; then
         # shellcheck disable=SC1091
-        . "$WORKDIR/env/bin/activate"
+        . "$WORKDIR/.venv/bin/activate"
     else
         error "Virtual environment not found. Run './mapcfg bootstrap' first."
     fi
@@ -122,22 +122,26 @@ cmd_bootstrap() {
     if ! command -v python3 &> /dev/null; then
         info "Installing Python 3..."
         maybe_sudo apt-get update
-        maybe_sudo apt-get install -y python3-venv python-is-python3
+        maybe_sudo apt-get install -y python3 python-is-python3
     fi
 
-    if [ ! -d "$WORKDIR/env" ]; then
-        info "Creating virtual environment..."
-        python3 -m venv "$WORKDIR/env"
+    # Check if uv is installed
+    if ! command -v uv &> /dev/null; then
+        info "Installing uv..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        # Add uv to PATH for current session
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+
+    if [ ! -d "$WORKDIR/.venv" ]; then
+        info "Creating virtual environment with uv..."
+        uv venv "$WORKDIR/.venv"
     else
         info "Virtual environment already exists"
     fi
 
-    info "Activating virtual environment..."
-    # shellcheck disable=SC1091
-    . "$WORKDIR/env/bin/activate"
-
-    info "Installing Python dependencies..."
-    pip install -r "$WORKDIR/requirements.txt"
+    info "Installing Python dependencies with uv..."
+    uv sync
 
     success "Bootstrap complete!"
 }
@@ -146,6 +150,18 @@ cmd_bootstrap() {
 cmd_check() {
     info "Running validation checks..."
     activate_venv
+
+    # Verify venv path matches current directory
+    if [ -f "$WORKDIR/.venv/bin/activate" ]; then
+        venv_path=$(grep "^VIRTUAL_ENV=" "$WORKDIR/.venv/bin/activate" | cut -d"'" -f2)
+        expected_path="$WORKDIR/.venv"
+        if [ "$venv_path" != "$expected_path" ]; then
+            error "Virtual environment path mismatch!"
+            error "Expected: $expected_path"
+            error "Found:    $venv_path"
+            error "Run './mapcfg bootstrap' to recreate the virtual environment"
+        fi
+    fi
 
     # Django check
     if ./collector/manage.py check; then
@@ -169,14 +185,23 @@ cmd_check() {
         success "Ruff check passed"
     fi
 
+    # Docker Compose configuration validation
+    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+        if docker compose -f docker-stack/docker-compose.yml config > /dev/null 2>&1; then
+            success "Docker Compose config validation passed"
+        else
+            error "Docker Compose config validation failed"
+        fi
+    else
+        info "Docker Compose not available, skipping config validation"
+    fi
+
     success "All checks passed!"
 }
 
 # version - Update version.txt from git
 cmd_version() {
-    info "Generating version.txt..."
-    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1 > "$WORKDIR/collector/pio/templates/pio/version.txt"
-    success "Version file updated"
+    git log --pretty=format:"%h %ad | %s [%an]" --date=short -1
 }
 
 # build - Build Docker images
@@ -192,7 +217,10 @@ cmd_build() {
     ./collector/manage.py collectstatic --noinput
 
     # Update version
-    cmd_version
+    info "Generating version.txt..."
+    cmd_version > "$WORKDIR/collector/pio/templates/pio/version.txt"
+    success "Version file updated"
+
 
     # Build Docker images in order
     info "Building Docker images..."
@@ -207,8 +235,48 @@ cmd_build() {
 # maintenance - Clean up Docker resources
 cmd_maintenance() {
     info "Running Docker system maintenance..."
-    maybe_sudo docker system prune --force
+    maybe_sudo docker system prune --filter "until=24h" --all --force
     success "Maintenance complete"
+}
+
+# check_services_running - Silent check if all required services are running
+check_services_running() {
+    # Returns 0 if all services running, 1 if any missing
+    docker ps --format "{{.Names}}" | grep -q "nginx" && \
+    docker ps --format "{{.Names}}" | grep -q "postgis" && \
+    docker ps --format "{{.Names}}" | grep -q "django"
+}
+
+# wait_for_services - Wait for all services to be running
+wait_for_services() {
+    local timeout=10
+    local count=0
+
+    info "Waiting for services to start..."
+
+    while [ $count -lt $timeout ]; do
+        if check_services_running; then
+            success "All services are running"
+            return 0
+        fi
+        sleep 1
+        count=$((count + 1))
+    done
+
+    # Timeout - show which services are missing
+    error "Services failed to start within ${timeout} seconds:"
+    echo ""
+    if ! docker ps --format "{{.Names}}" | grep -q "nginx"; then
+        echo -e "${RED}  ✗ nginx is not running${NC}"
+    fi
+    if ! docker ps --format "{{.Names}}" | grep -q "postgis"; then
+        echo -e "${RED}  ✗ postgis is not running${NC}"
+    fi
+    if ! docker ps --format "{{.Names}}" | grep -q "django"; then
+        echo -e "${RED}  ✗ django is not running${NC}"
+    fi
+    echo ""
+    return 1
 }
 
 # status - Check system status
@@ -218,22 +286,22 @@ cmd_status() {
     echo ""
     echo "Docker Container Status:"
 
-    if docker ps | grep -q "nginx"; then
+    if docker ps --format "{{.Names}}" | grep -q "nginx"; then
         success "nginx is running"
     else
         echo -e "${RED}✗ nginx is not running${NC}"
     fi
 
-    if docker ps | grep -q "postgis"; then
+    if docker ps --format "{{.Names}}" | grep -q "postgis"; then
         success "postgis is running"
     else
         echo -e "${RED}✗ postgis is not running${NC}"
     fi
 
-    if docker ps | grep -q "mapsurvey-app"; then
-        success "mapsurvey-app is running"
+    if docker ps --format "{{.Names}}" | grep -q "django"; then
+        success "django is running"
     else
-        echo -e "${RED}✗ mapsurvey-app is not running${NC}"
+        echo -e "${RED}✗ django is not running${NC}"
     fi
 
     running_count=$(docker ps | grep -v "^CONTAINER" | wc -l)
@@ -405,6 +473,7 @@ EOF
     ln -sf "$BACKUP_FILE" "$BACKUP_DIR/$DB_NAME-backup-latest.sql.gz"
 
     # Ship database backup to remote server if configured
+    local remote_backup_success=false
     if [ -n "$server" ]; then
         info "Shipping database backup to $ssh_user@$server..."
 
@@ -412,19 +481,23 @@ EOF
         local FULL_BACKUP_PATH="$(cd "$(dirname "$BACKUP_DIR")" && pwd)/$(basename "$BACKUP_DIR")"
         local HOSTNAME=$(hostname)
 
+        # Expand tilde in SSH_KEY_PATH
+        local SSH_KEY_PATH_EXPANDED="${SSH_KEY_PATH/#~/$HOME}"
+
         # Build rsync command with SSH options
         local RSYNC_CMD="rsync -avz"
 
-        if [ -f "$SSH_KEY_PATH" ]; then
-            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port -i $SSH_KEY_PATH\""
+        if [ -f "$SSH_KEY_PATH_EXPANDED" ]; then
+            RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port -i $SSH_KEY_PATH_EXPANDED\""
         else
             RSYNC_CMD="$RSYNC_CMD -e \"ssh -p$port\""
-            echo -e "${YELLOW}WARNING: SSH key not found at $SSH_KEY_PATH, attempting passwordless SSH${NC}" >&2
+            echo -e "${YELLOW}WARNING: SSH key not found at $SSH_KEY_PATH_EXPANDED, attempting passwordless SSH${NC}" >&2
         fi
 
         # Use eval to properly handle the quoted ssh command
         if eval "$RSYNC_CMD \"$FULL_BACKUP_PATH/$BACKUP_FILE\" \"$ssh_user@$server:db_backups/$HOSTNAME/\""; then
             success "Remote backup successful"
+            remote_backup_success=true
         else
             echo -e "${YELLOW}WARNING: Remote backup failed, but local backup is available${NC}" >&2
         fi
@@ -434,10 +507,12 @@ EOF
 
     success "Backup complete!"
     info "Local backup: $BACKUP_DIR/$BACKUP_FILE"
-    [ -n "$server" ] && info "Remote backup: $ssh_user@$server:db_backups/$(hostname)/$BACKUP_FILE"
+    if [ "$remote_backup_success" = true ]; then
+        info "Remote backup: $ssh_user@$server:db_backups/$(hostname)/$BACKUP_FILE"
+    fi
 }
 
-# run - Build and deploy (equivalent to checkbuildrun.sh)
+# run - Build and deploy
 cmd_run() {
     local do_backup=false
 
@@ -455,8 +530,10 @@ cmd_run() {
     info "Restarting Docker service..."
     maybe_sudo systemctl restart "$SYSTEMD_SERVICE"
 
-    # Wait for services
-    sleep 1
+    # Wait for all services to be running
+    if ! wait_for_services; then
+        exit 1
+    fi
 
     # Backup if requested
     if [ "$do_backup" = true ]; then
@@ -538,9 +615,10 @@ EOF
             cat <<EOF
 check - Run validation checks
 
-  Runs Django system checks, template validation, and Ruff linting to verify
-  code quality and configuration. All checks must pass before building.
-  Useful to run before commits to catch issues early.
+  Runs Django system checks, template validation, Ruff linting, and Docker
+  Compose configuration validation to verify code quality and configuration.
+  All checks must pass before building. Useful to run before commits to
+  catch issues early.
 EOF
             ;;
         build)
@@ -592,9 +670,9 @@ EOF
             cat <<EOF
 maintenance - Clean up Docker resources
 
-  Runs 'docker system prune --force' to remove unused containers, networks,
+  Runs 'docker system prune --force' with a filter to remove unused containers, networks,
   images, and build cache. Frees up disk space after builds and deployments.
-  Safe to run periodically to keep system clean.
+  Automatically run during the build process.
 EOF
             ;;
         version)

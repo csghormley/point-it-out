@@ -32,9 +32,9 @@ bootstrap
 
 **Actions:**
 
-- Installs Python 3 and venv (if not present)
-- Creates virtual environment in ``env/``
-- Installs Python dependencies from ``requirements.txt``
+- Installs Python 3 and uv (if not present)
+- Creates virtual environment in ``.venv/``
+- Installs Python dependencies via ``uv sync`` from ``pyproject.toml``
 
 **When to use:** Run once during initial project setup
 
@@ -107,7 +107,6 @@ run
 
 **When to use:** After code changes requiring deployment
 
-**Note:** Equivalent to the legacy ``checkbuildrun.sh`` script
 
 migrate
 ~~~~~~~
@@ -128,8 +127,6 @@ migrate
 4. Applies migrations to database
 
 **When to use:** After making model changes
-
-**Note:** Equivalent to the legacy ``scripts/migrate.sh`` script
 
 backup
 ~~~~~~
@@ -315,47 +312,6 @@ Check System Health
 
    ./mapcfg status
 
-Migration from Legacy Scripts
-------------------------------
-
-The ``mapcfg`` script consolidates functionality from multiple legacy scripts:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 30 30 40
-
-   * - Legacy Script
-     - mapcfg Command
-     - Notes
-   * - ``scripts/bootstrap.sh``
-     - ``./mapcfg bootstrap``
-     - Identical functionality
-   * - ``checkbuildrun.sh``
-     - ``./mapcfg run``
-     - Same workflow, cleaner interface
-   * - ``scripts/migrate.sh``
-     - ``./mapcfg migrate``
-     - Same workflow, cleaner interface
-   * - ``scripts/build.sh``
-     - ``./mapcfg build``
-     - Called internally by ``run``
-   * - ``scripts/check.sh``
-     - ``./mapcfg check``
-     - Called internally by ``build``
-   * - ``scripts/backup-db.sh``
-     - ``./mapcfg backup``
-     - Simplified argument handling
-   * - ``scripts/status.sh``
-     - ``./mapcfg status``
-     - Same functionality
-   * - ``scripts/maintenance.sh``
-     - ``./mapcfg maintenance``
-     - Called internally by ``run``
-   * - ``scripts/version.sh``
-     - ``./mapcfg version``
-     - Called internally by ``build``
-
-**Legacy scripts remain available** and continue to work. The ``mapcfg`` script provides a unified interface but does not replace the underlying scripts.
 
 Error Handling
 --------------

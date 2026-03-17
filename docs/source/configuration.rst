@@ -157,6 +157,67 @@ Key Configuration Options
    * - ``display_units``
      - String
      - ``"m"`` for metric or ``"ft"`` for US units
+   * - ``point_colormap``
+     - Array
+     - Color palette for survey points (see below)
+
+Survey Point Color Mapping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``point_colormap`` option defines a color palette used for styling survey points based on their project ID. Each project automatically gets a different color from the palette.
+
+**Default Value (ColorBrewer 8-class qualitative scheme)**::
+
+    {
+      "point_colormap": [
+        "#e41a1c",
+        "#377eb8",
+        "#4daf4a",
+        "#984ea3",
+        "#ff7f00",
+        "#ffff33",
+        "#a65628",
+        "#f781bf"
+      ]
+    }
+
+**How It Works:**
+
+- Survey points are colored based on their ``projectid``
+- Colors cycle through the palette: project 1 gets color 0, project 2 gets color 1, etc.
+- When there are more projects than colors, the palette wraps around
+- Both the point markers and the drawing cursor use these colors
+- Each color is rendered with two opacity levels:
+
+  - Stroke (border): 80% opacity (``#color + 'cc'``)
+  - Fill (interior): 30% opacity (``#color + '4d'``)
+
+**Custom Color Palette Example**::
+
+    {
+      "point_colormap": [
+        "#d62728",
+        "#ff7f0e",
+        "#2ca02c",
+        "#1f77b4",
+        "#9467bd",
+        "#8c564b"
+      ]
+    }
+
+**Use Cases:**
+
+- Distinguish between different projects in the same survey
+- Apply organization branding colors
+- Improve accessibility with high-contrast color schemes
+- Match existing GIS or mapping standards
+
+**Notes:**
+
+- Use hex color codes (``#RRGGBB``) without alpha channel
+- Alpha transparency is added automatically by the application
+- The palette should have at least 2-3 colors for visual distinction
+- The default 8-color palette works well for most use cases
 
 Step 3: Create MapLayers
 -------------------------
