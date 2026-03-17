@@ -6,7 +6,9 @@ description = "Django-based spatial data entry platform for collecting and visua
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "wheel",
+    "wheel>=0.46.2",
+    # dependabot patch for django
+    "sqlparse>=0.5.4",
     "Django>=6.0.3,<7",
     "django-environ",
     "django-geojson",
@@ -18,7 +20,10 @@ dependencies = [
     "GDAL==3.8.4 ; sys_platform == 'linux'",
     # Two-factor authentication
     "phonenumbers",
+    # dependabot patches for webauthn
     "pyopenssl>=26.0.0",
+    "cbor2>=5.8.0",
+    "cryptography>=46.0.5",
     "webauthn",
     "django-formtools",
     "cffi",
@@ -38,7 +43,9 @@ dependencies = [
     "gunicorn",
     # Additional utilities
     "tzdata",
+    # dependabot patches for geoip2
     "aiohttp>=3.13.3",
+    "urllib3>=2.6.3",
     "geoip2",
     "django-json-widget",
     # Segmentation dependencies
