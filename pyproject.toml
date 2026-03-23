@@ -22,7 +22,8 @@ dependencies = [
     "phonenumbers",
     # dependabot patches for webauthn
     "pyopenssl>=26.0.0",
-    "cbor2>=5.8.0",
+    # and CVE-2026-26209
+    "cbor2>=5.9.0",
     "cryptography>=46.0.5",
     "webauthn",
     "django-formtools",
