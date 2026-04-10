@@ -9,7 +9,7 @@ dependencies = [
     "wheel>=0.46.2",
     # dependabot patch for django
     "sqlparse>=0.5.4",
-    "Django>=6.0.3,<7",
+    "Django>=6.0.4,<7",
     "django-environ",
     "django-geojson",
     # Platform-specific psycopg variants
@@ -24,7 +24,7 @@ dependencies = [
     "pyopenssl>=26.0.0",
     # and CVE-2026-26209
     "cbor2>=5.9.0",
-    "cryptography>=46.0.5",
+    "cryptography>=46.0.7",
     "webauthn",
     "django-formtools",
     "cffi",
@@ -45,7 +45,8 @@ dependencies = [
     # Additional utilities
     "tzdata",
     # dependabot patches for geoip2
-    "aiohttp>=3.13.3",
+    "aiohttp>=3.13.4",
+    "requests>=2.33.0",
     "urllib3>=2.6.3",
     "geoip2",
     "django-json-widget",
