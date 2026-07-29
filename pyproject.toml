@@ -9,14 +9,14 @@ dependencies = [
     "wheel>=0.46.2",
     # dependabot patch for django
     "sqlparse>=0.5.4",
-    "Django>=6.0.4,<7",
+    "Django>=6.0.7,<7",
     "django-environ",
     "django-geojson",
     # Platform-specific psycopg variants
     "psycopg[binary]>=3.0 ; sys_platform == 'darwin' or sys_platform == 'win32'",
     "psycopg>=3.0 ; sys_platform == 'linux'",
     # Platform-specific GDAL versions
-    "GDAL==3.11.4 ; sys_platform == 'darwin' or sys_platform == 'win32'",
+    "GDAL==3.13.1 ; sys_platform == 'darwin' or sys_platform == 'win32'",
     "GDAL==3.8.4 ; sys_platform == 'linux'",
     # Two-factor authentication
     "phonenumbers",
@@ -45,9 +45,10 @@ dependencies = [
     # Additional utilities
     "tzdata",
     # dependabot patches for geoip2
-    "aiohttp>=3.13.4",
+    "aiohttp>=3.14.1",
+    "idna>=3.15",
     "requests>=2.33.0",
-    "urllib3>=2.6.3",
+    "urllib3>=2.7.0",
     "geoip2",
     "django-json-widget",
     # Segmentation dependencies
