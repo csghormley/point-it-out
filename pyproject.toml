@@ -17,14 +17,15 @@ dependencies = [
     "psycopg>=3.0 ; sys_platform == 'linux'",
     # Platform-specific GDAL versions
     "GDAL==3.13.1 ; sys_platform == 'darwin' or sys_platform == 'win32'",
-    "GDAL==3.8.4 ; sys_platform == 'linux'",
+    #"GDAL==3.8.4 ; sys_platform == 'linux'",
+    "GDAL==3.13.1 ; sys_platform == 'linux'",
     # Two-factor authentication
     "phonenumbers",
     # dependabot patches for webauthn
     "pyopenssl>=26.0.0",
     # and CVE-2026-26209
     "cbor2>=5.9.0",
-    "cryptography>=46.0.7",
+    "cryptography>=48.0.1",
     "webauthn",
     "django-formtools",
     "cffi",
