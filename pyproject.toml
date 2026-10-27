@@ -1,11 +1,12 @@
 [project]
 name = "mapsurvey"
 license = "MIT"
-version = "0.1.0"
+version = "0.1.1"
 description = "Django-based spatial data entry platform for collecting and visualizing geographic point data"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "certifi>=2026.10.18",  # dependabot patch for requests, cancel eMudhra intermediate CA cert issue
     "wheel>=0.46.2",
     # dependabot patch for django
     "sqlparse>=0.6.0",
