@@ -18,8 +18,8 @@ dependencies = [
     "psycopg>=3.0 ; sys_platform == 'linux'",
     # Platform-specific GDAL versions
     "GDAL==3.13.1 ; sys_platform == 'darwin' or sys_platform == 'win32'",
-    #"GDAL==3.8.4 ; sys_platform == 'linux'",
-    "GDAL==3.13.1 ; sys_platform == 'linux'",
+    # linux pin must match libgdal in docker-stack/img-django-deps/Dockerfile
+    "GDAL==3.13.3 ; sys_platform == 'linux'",
     # Two-factor authentication
     "phonenumbers",
     # dependabot patches for webauthn

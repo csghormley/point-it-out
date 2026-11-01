@@ -691,7 +691,19 @@ wheels = [
 name = "gdal"
 version = "3.13.1"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'darwin' or sys_platform == 'win32'",
+]
 sdist = { url = "https://files.pythonhosted.org/packages/92/55/0ae08a59293443bbbb8b692d1f4b6d9ca54562c359a48d0426684ac9ea06/gdal-3.13.1.tar.gz", hash = "sha256:94bb64d729ce73ceb75a314a15cba92696cdd854d99b6bf6b88a7b551227db74", size = 940649, upload-time = "2026-06-05T10:50:14.929Z" }
+
+[[package]]
+name = "gdal"
+version = "3.13.3"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "sys_platform == 'linux'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/64/78639efe3f1df027f0028e1faf9719dae609b9fd02d4ffd6c2dd7a9a9757/gdal-3.13.3.tar.gz", hash = "sha256:af547af72d2a153d658c1deb2fe595eccb38c18f3d9d298882fbdeee9806a6d2", size = 940613, upload-time = "2026-08-18T09:32:21.609Z" }
 
 [[package]]
 name = "geoip2"
@@ -760,7 +772,8 @@ dependencies = [
     { name = "django-leaflet" },
     { name = "djangorestframework" },
     { name = "djangorestframework-gis" },
-    { name = "gdal", marker = "sys_platform == 'darwin' or sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "gdal", version = "3.13.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin' or sys_platform == 'win32'" },
+    { name = "gdal", version = "3.13.3", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'linux'" },
     { name = "geoip2" },
     { name = "gunicorn" },
     { name = "idna" },
@@ -807,7 +820,7 @@ requires-dist = [
     { name = "djangorestframework", specifier = ">=3.18.2" },
     { name = "djangorestframework-gis", specifier = "==1.3.0" },
     { name = "gdal", marker = "sys_platform == 'darwin' or sys_platform == 'win32'", specifier = "==3.13.1" },
-    { name = "gdal", marker = "sys_platform == 'linux'", specifier = "==3.13.1" },
+    { name = "gdal", marker = "sys_platform == 'linux'", specifier = "==3.13.3" },
     { name = "geoip2" },
     { name = "gunicorn" },
     { name = "idna", specifier = ">=3.15" },
